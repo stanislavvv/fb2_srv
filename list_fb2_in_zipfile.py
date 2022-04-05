@@ -5,6 +5,7 @@ import os
 import sys
 import zipfile
 import xmltodict
+from bs4 import BeautifulSoup
 
 # True for debug json output
 DEBUG = False
@@ -17,7 +18,23 @@ READ_SIZE = 10240
 
 # show headers for pipe-separated output
 def show_headers():
-    print("filename|genre|author_first|author_middle|author_last|author_id|book_title|lang|annotation_text")
+    print("filename|genre|authors|sequence_name|sequence_num|book_title|lang|annotation_text")
+
+
+# return empty string if None, else return content
+def strnull(s):
+    if s is None:
+        return ""
+    return str(s)
+
+
+# return string or first element of list
+def strlist(s):
+    if isinstance(s, str):
+        return s
+    if isinstance(s, list):
+        return strnull(s[0])
+    return strnull(str(s))
 
 
 # pass over nested dict and return all values as single text string
@@ -42,36 +59,83 @@ def get_genre(genr):
     g = []
     if isinstance(genr, dict):
         for k, v in genr.items():
-            if type(v) is str:
+            if type(v) is str and not v.isdigit() and v != "":
                 g.append(v)
             elif isinstance(v, dict):
                 for k, v2 in v.items():
-                    g.append(v2)
+                    if not v2.isdigit() and v2 != "":
+                        g.append(v2)
             elif isinstance(v, list):
                 for v2 in v:
-                    g.append(v2)
+                    if not v2.isdigit() and v2 != "":
+                        g.append(v2)
         genre = ",".join(g)
     elif isinstance(genr, list):
         for i in genr:
-            if type(i) is str:
+            if type(i) is str and not i.isdigit() and i != "":
                 g.append(i)
             elif isinstance(i, dict):
                 for k, v in i.items():
-                    g.append(v)
+                    if not v.isdigit() and v != "":
+                        g.append(v)
             elif isinstance(i, list):
                 for v in i:
-                    g.append(v)
+                    if not v.isdigit() and v != "":
+                        g.append(v)
         genre = ",".join(g)
     else:
         genre = str(genr)
     return genre
 
 
+# return comma-separated string of authors from input struct
+def get_authors(author):
+    ret = ""  # default
+    g = []
+    if isinstance(author, list):
+        for i in author:
+            a_tmp = []
+            if 'first-name' in i:
+                a_tmp.append(strlist(i['first-name']))
+            if 'middle-name' in i:
+                a_tmp.append(strlist(i['middle-name']))
+            if 'last-name' in i:
+                a_tmp.append(strlist(i['last-name']))
+            g.append(" ".join(a_tmp))
+        ret = ",".join(g)
+    else:
+        a_tmp = []
+        if 'first-name' in author:
+            a_tmp.append(strlist(author['first-name']))
+        if 'middle-name' in author:
+            a_tmp.append(strlist(author['middle-name']))
+        if 'last-name' in author:
+            a_tmp.append(strlist(author['last-name']))
+        ret = " ".join(a_tmp)
+    return ret
+
+
+def get_sequence(seq):
+    if isinstance(seq, str):
+        return seq, ""
+    name = ""
+    num = ""
+    if isinstance(seq, dict):
+        if '@name' in seq:
+            name = seq['@name']
+        if '@number' in seq:
+            num = seq['@number']
+        return name, num
+    return str(seq), "---"
+
+
 # get filename in zip, print some data
 def fb2parse(filename):
     fb2 = z.open(filename)
-    doc = fb2.read()
-    data = xmltodict.parse(doc, xml_attribs=False)
+    bs = BeautifulSoup(fb2.read(READ_SIZE), 'xml')
+    doc = bs.prettify()
+    # data = xmltodict.parse(doc, xml_attribs=False)
+    data = xmltodict.parse(doc)
     info = data['FictionBook']['description']['title-info']
     if DEBUG:
         print(json.dumps(info, indent=2))  # debug
@@ -79,19 +143,13 @@ def fb2parse(filename):
         genre = get_genre(info['genre'])
     else:
         genre = ""
-    author_first = ''
-    author_middle = ''
-    author_last = ''
-    author_id = ''
+    author = ''
     if 'author' in info and info['author'] is not None:
-        if 'first-name' in info['author']:
-            author_first = info['author']['first-name']
-        if 'middle-name' in info['author']:
-            author_middle = info['author']['middle-name']
-        if 'last-name' in info['author']:
-            author_last = info['author']['last-name']
-        if 'id' in info['author']:
-            author_id = info['author']['id']
+        author = get_authors(info['author'])
+    sequence_name = ''
+    sequence_num = ''
+    if 'sequence' in info and info['sequence'] is not None:
+        sequence_name, sequence_num = get_sequence(info['sequence'])
     book_title = ''
     if 'book-title' in info and info['book-title'] is not None:
         book_title = info['book-title']
@@ -104,10 +162,9 @@ def fb2parse(filename):
     out = [
         filename,
         genre,
-        str(author_first),
-        str(author_middle),
-        str(author_last),
-        str(author_id),
+        author.strip(),
+        sequence_name,
+        sequence_num,
         str(book_title),
         str(lang),
         annotext.replace('\n', " ")
