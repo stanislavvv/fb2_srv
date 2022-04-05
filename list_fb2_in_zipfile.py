@@ -13,12 +13,12 @@ DEBUG = False
 if DEBUG:
     import json  # debug
 
-READ_SIZE = 10240
+READ_SIZE = 40960  # description in 20kb...
 
 
 # show headers for pipe-separated output
 def show_headers():
-    print("filename|genre|authors|sequence_name|sequence_num|book_title|lang|annotation_text")
+    print("zip|filename|genre|authors|sequence_name|sequence_num|book_title|lang|annotation_text")
 
 
 # return empty string if None, else return content
@@ -160,6 +160,7 @@ def fb2parse(filename):
     if 'annotation' in info:
         annotext = recursive_text(info['annotation'])
     out = [
+        str(z.filename),
         filename,
         genre,
         author.strip(),
