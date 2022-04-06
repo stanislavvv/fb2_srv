@@ -8,6 +8,7 @@ import xmltodict
 from bs4 import BeautifulSoup
 
 # True for debug json output
+#DEBUG = True
 DEBUG = False
 
 if DEBUG:
@@ -31,7 +32,7 @@ def strnull(s):
 # return string or first element of list
 def strlist(s):
     if isinstance(s, str):
-        return s
+        return strnull(s)
     if isinstance(s, list):
         return strnull(s[0])
     return strnull(str(s))
@@ -95,22 +96,22 @@ def get_authors(author):
     if isinstance(author, list):
         for i in author:
             a_tmp = []
-            if 'first-name' in i:
-                a_tmp.append(strlist(i['first-name']))
-            if 'middle-name' in i:
-                a_tmp.append(strlist(i['middle-name']))
-            if 'last-name' in i:
+            if 'last-name' in i and i['last-name'] is not None:
                 a_tmp.append(strlist(i['last-name']))
+            if 'first-name' in i and i['first-name'] is not None:
+                a_tmp.append(strlist(i['first-name']))
+            if 'middle-name' in i and i['middle-name'] is not None:
+                a_tmp.append(strlist(i['middle-name']))
             g.append(" ".join(a_tmp))
         ret = ",".join(g)
     else:
         a_tmp = []
-        if 'first-name' in author:
-            a_tmp.append(strlist(author['first-name']))
-        if 'middle-name' in author:
-            a_tmp.append(strlist(author['middle-name']))
-        if 'last-name' in author:
+        if 'last-name' in author and author['last-name'] is not None:
             a_tmp.append(strlist(author['last-name']))
+        if 'first-name' in author and author['first-name'] is not None:
+            a_tmp.append(strlist(author['first-name']))
+        if 'middle-name' in author and author['middle-name'] is not None:
+            a_tmp.append(strlist(author['middle-name']))
         ret = " ".join(a_tmp)
     return ret
 
@@ -128,6 +129,16 @@ def get_sequence(seq):
         return name, num
     return str(seq), "---"
 
+def get_lang(lng):
+    ret = ""
+    rets = {}
+    if isinstance(lng, list):
+        for i in lng:
+            rets[i] = 1
+        ret = ",".join(rets)
+    else:
+        ret = str(lng)
+    return ret
 
 # get filename in zip, print some data
 def fb2parse(filename):
@@ -155,7 +166,7 @@ def fb2parse(filename):
         book_title = info['book-title']
     lang = ''
     if 'lang' in info and info['lang'] is not None:
-        lang = info['lang']
+        lang = get_lang(info['lang'])
     annotext = ''
     if 'annotation' in info:
         annotext = recursive_text(info['annotation'])
@@ -168,7 +179,7 @@ def fb2parse(filename):
         sequence_num,
         str(book_title),
         str(lang),
-        annotext.replace('\n', " ")
+        str(annotext.replace('\n', " ").replace('|', " "))
     ]
     # print(json.dumps(out, indent=2))  # debug
     print('|'.join(out))
@@ -176,7 +187,7 @@ def fb2parse(filename):
 
 # main proc
 def iterate_zip(z):
-    show_headers()
+    # show_headers()
     for filename in z.namelist():
         if not os.path.isdir(filename):
             try:
