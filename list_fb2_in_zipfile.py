@@ -19,7 +19,7 @@ READ_SIZE = 40960  # description in 20kb...
 
 # show headers for pipe-separated output
 def show_headers():
-    print("zip|filename|genre|authors|sequence_name|sequence_num|book_title|lang|annotation_text")
+    print("zip|filename|genre|authors|sequence|book_title|lang|annotation_text")
 
 
 # return empty string if None, else return content
@@ -119,15 +119,38 @@ def get_authors(author):
 def get_sequence(seq):
     if isinstance(seq, str):
         return seq, ""
-    name = ""
-    num = ""
     if isinstance(seq, dict):
+        name = None
+        num = None
         if '@name' in seq:
             name = seq['@name']
         if '@number' in seq:
             num = seq['@number']
-        return name, num
-    return str(seq), "---"
+        if name is not None and num is not None:
+            return "%s:%s"%(name,num)
+        elif name is not None:
+            return "%s" % name
+        elif num is not None:
+            return ":%s" % num
+        return ""
+    elif isinstance(seq, list):
+        ret = []
+        for s in seq:
+            name = None
+            num = None
+            if '@name' in s:
+                name = s['@name']
+            if '@number' in s:
+                num = s['@number']
+            if name is not None and num is not None:
+                ret.append("%s:%s"%(name,num))
+            elif name is not None:
+                ret.append("%s" % name)
+            elif num is not None:
+                ret.append(":%s" % num)
+        return ",".join(ret)
+    return str(seq)
+
 
 def get_lang(lng):
     ret = ""
@@ -157,10 +180,9 @@ def fb2parse(filename):
     author = ''
     if 'author' in info and info['author'] is not None:
         author = get_authors(info['author'])
-    sequence_name = ''
-    sequence_num = ''
+    sequence = ''
     if 'sequence' in info and info['sequence'] is not None:
-        sequence_name, sequence_num = get_sequence(info['sequence'])
+        sequence = get_sequence(info['sequence'])
     book_title = ''
     if 'book-title' in info and info['book-title'] is not None:
         book_title = info['book-title']
@@ -175,8 +197,7 @@ def fb2parse(filename):
         filename,
         genre,
         author.strip(),
-        sequence_name,
-        sequence_num,
+        sequence,
         str(book_title),
         str(lang),
         str(annotext.replace('\n', " ").replace('|', " "))
@@ -190,10 +211,10 @@ def iterate_zip(z):
     # show_headers()
     for filename in z.namelist():
         if not os.path.isdir(filename):
-            try:
+            #try:
                 fb2parse(filename)
-            except Exception as e:
-                print("ERR: " + str(z.filename) + "/" + str(filename) + ": " + str(e), file=sys.stderr)
+            #except Exception as e:
+            #    print("ERR: " + str(z.filename) + "/" + str(filename) + ": " + str(e), file=sys.stderr)
 
 
 if __name__ == '__main__':

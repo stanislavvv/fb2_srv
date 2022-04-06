@@ -10,17 +10,23 @@ import codecs
 # table in database:
 """
 CREATE TABLE "books" (
-    "zipfile"   TEXT NOT NULL,
-    "filename"  TEXT NOT NULL,
-    "genres"    TEXT,
-    "authors"   TEXT,
-    "sequence_name" TEXT,
-    "sequence_num"  TEXT,
-    "book_title"    TEXT,
-    "lang"  TEXT,
-    "annotation"    TEXT,
-    PRIMARY KEY("authors","book_title","filename")
-)
+	"zipfile"	TEXT NOT NULL,
+	"filename"	TEXT NOT NULL,
+	"genres"	TEXT,
+	"authors"	TEXT,
+	"sequence"	TEXT,
+	"book_title"	TEXT,
+	"lang"	TEXT,
+	"annotation"	INTEGER,
+	PRIMARY KEY("zipfile","filename","authors","book_title")
+);
+CREATE INDEX "search" ON "books" (
+	"genres",
+	"authors",
+	"sequence",
+	"book_title",
+	"annotation"
+);
 """
 DB = "../fb_data.sqlite"
 
@@ -72,7 +78,7 @@ def iterate_list(blist):
     con = sqlite3.connect(DB)
     cur = con.cursor()
     cur.execute("DELETE FROM books WHERE zipfile = ?", [zipfile])
-    con.commit()
+    #con.commit()
     while True:
         insdata = []
         line = data.readline()
@@ -82,11 +88,9 @@ def iterate_list(blist):
             break
         insdatat = line.strip('\n').split('|')
         insdata = insdatat[:9]
-        if len(insdata) != len(insdatat):
+        if len(insdata) != len(insdatat):  # something strange in description
             insdata[8] = "".join(insdatat[8:])
-            print("vvvvvvvvvvvvvvvvvvvvvvv")
-            listdiff(insdatat, insdata)
-            print("^^^^^^^^^^^^^^^^^^^^^^^")
+        # print(insdata)  # debug
         cur.execute("INSERT INTO books VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", (insdata))
     con.commit()
     con.close()
