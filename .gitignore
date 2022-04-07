@@ -4,3 +4,4 @@ run_sqlite.sh
 genres_unknown
 tmp
 __pycache__
+data

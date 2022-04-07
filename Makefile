@@ -9,3 +9,5 @@ clean:
 	find . -name '*.pyc' -delete
 	find . -name '__pycache__' -delete
 
+flakeall:
+	find . -name '*.py' -print0 | xargs -0 -n 100 flake8
