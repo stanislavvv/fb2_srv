@@ -10,25 +10,33 @@ import codecs
 # table in database:
 """
 CREATE TABLE "books" (
-	"zipfile"	TEXT NOT NULL,
-	"filename"	TEXT NOT NULL,
-	"genres"	TEXT,
-	"authors"	TEXT,
-	"sequence"	TEXT,
-	"book_title"	TEXT,
-	"lang"	TEXT,
-	"annotation"	INTEGER,
-	PRIMARY KEY("zipfile","filename","authors","book_title")
+        "zipfile"       TEXT NOT NULL,
+        "filename"      TEXT NOT NULL,
+        "genres"        TEXT,
+        "authors"       TEXT,
+        "sequence"      TEXT,
+        "book_title"    TEXT,
+        "lang"  TEXT,
+        "annotation"    INTEGER,
+        PRIMARY KEY("zipfile","filename","authors","book_title")
 );
 CREATE INDEX "search" ON "books" (
-	"genres",
-	"authors",
-	"sequence",
-	"book_title",
-	"annotation"
+        "genres",
+        "authors",
+        "sequence",
+        "book_title",
+        "annotation"
 );
 """
-DB = "../fb_data.sqlite"
+# global vars
+
+# path to sqlite db file
+DB = "fb_data.sqlite"
+
+# genres (see get_genres())
+genres = {}
+
+# /global vars
 
 
 # quote string for sql
@@ -52,6 +60,26 @@ def rchop(s, suffix):
     if suffix and s.endswith(suffix):
         return s[:-len(suffix)]
     return s
+
+
+# init genres dict
+def get_genres():
+    data = open('genres.list', 'r')
+    while True:
+        line = data.readline()
+        if not line:
+            break
+        f = line.strip('\n').split('|')
+        genres[f[0]] = f[1]
+    data.close()
+
+
+# print unknown genres
+def check_genres(g):
+    gg = g.split(',')
+    for i in gg:
+        if i not in genres and i != "":
+            print(i)
 
 
 # DEBUG:
@@ -78,7 +106,7 @@ def iterate_list(blist):
     con = sqlite3.connect(DB)
     cur = con.cursor()
     cur.execute("DELETE FROM books WHERE zipfile = ?", [zipfile])
-    #con.commit()
+    # con.commit()
     while True:
         insdata = []
         line = data.readline()
@@ -87,11 +115,12 @@ def iterate_list(blist):
         if not line:
             break
         insdatat = line.strip('\n').split('|')
-        insdata = insdatat[:9]
+        insdata = insdatat[:8]
+        check_genres(insdata[2])
         if len(insdata) != len(insdatat):  # something strange in description
-            insdata[8] = "".join(insdatat[8:])
+            insdata[7] = "".join(insdatat[7:])
         # print(insdata)  # debug
-        cur.execute("INSERT INTO books VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", (insdata))
+        cur.execute("INSERT INTO books VALUES (?, ?, ?, ?, ?, ?, ?, ?)", (insdata))
     con.commit()
     con.close()
     data.close()
@@ -99,4 +128,5 @@ def iterate_list(blist):
 
 if __name__ == '__main__':
     booklist = sys.argv[1]
+    get_genres()
     iterate_list(booklist)

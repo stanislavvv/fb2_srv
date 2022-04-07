@@ -193,7 +193,7 @@ def fb2parse(filename):
     if 'annotation' in info:
         annotext = recursive_text(info['annotation'])
     out = [
-        str(z.filename),
+        str(os.path.basename(z.filename)),
         filename,
         genre,
         author.strip(),
