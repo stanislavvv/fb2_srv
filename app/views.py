@@ -3,6 +3,7 @@
 # from flask import request, redirect, Blueprint, Response, url_for
 from flask import redirect, Blueprint, Response, url_for
 from .opds_seq import main_opds, get_sequences, get_books_in_seq
+from .opds_auth import get_authors_list
 api = Blueprint("api", __name__)
 
 
@@ -43,4 +44,23 @@ def opds_by_seq(seq=None):
 @api.route("/opds/sequencebooks/<seq>", methods=['GET'])
 def opds_books_in_seq(seq=None):
     xml = get_books_in_seq(seq)
+    return Response(xml, mimetype='text/xml')
+
+
+@api.route("/opds/authorsindex", methods=['GET'])
+@api.route("/opds/authorsindex/", methods=['GET'])
+def opds_by_authors_root():
+    xml = get_authors_list(None)
+    return Response(xml, mimetype='text/xml')
+
+
+@api.route("/opds/authorsindex/<auth>", methods=['GET'])
+@api.route("/opds/authors/<auth>", methods=['GET'])
+def opds_by_authors(auth=None):
+    xml = get_authors_list(auth)
+    return Response(xml, mimetype='text/xml')
+
+@api.route("/opds/author/<auth>", methods=['GET'])
+def opds_by_author(auth=None):
+    xml = get_author(auth)
     return Response(xml, mimetype='text/xml')
