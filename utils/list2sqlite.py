@@ -14,38 +14,36 @@ import hashlib
 # book_id = md5("zipfile/filename")
 """
 CREATE TABLE "books" (
-	"zipfile"	TEXT NOT NULL,
-	"filename"	TEXT NOT NULL,
-	"genres"	TEXT,
-	"authors"	TEXT COLLATE NOCASE,
-	"author_ids"	TEXT,
-	"sequence"	TEXT,
-	"sequence_names"	TEXT COLLATE NOCASE,
-	"sequence_ids"	TEXT,
-	"book_title"	TEXT COLLATE NOCASE,
-	"book_id"	TEXT,
-	"lang"	TEXT,
-	"annotation"	TEXT COLLATE NOCASE,
-	PRIMARY KEY("zipfile","filename","authors","book_title")
+    "zipfile"   TEXT NOT NULL,
+    "filename"  TEXT NOT NULL,
+    "genres"    TEXT,
+    "authors"   TEXT COLLATE NOCASE,
+    "author_ids"    TEXT,
+    "sequence"  TEXT,
+    "sequence_names"    TEXT COLLATE NOCASE,
+    "sequence_ids"  TEXT,
+    "book_title"    TEXT COLLATE NOCASE,
+    "book_id"   TEXT,
+    "lang"  TEXT,
+    "annotation"    TEXT COLLATE NOCASE,
+    PRIMARY KEY("zipfile","filename","authors","book_title")
 )
 CREATE TABLE "authors" (
-	"id"	TEXT UNIQUE,
-	"name"	TEXT COLLATE NOCASE,
-	"info"	TEXT,
-	PRIMARY KEY("id")
+    "id"    TEXT UNIQUE,
+    "name"  TEXT COLLATE NOCASE,
+    "info"  TEXT,
+    PRIMARY KEY("id")
 );
 CREATE TABLE "sequences" (
-	"id"	TEXT UNIQUE,
-	"name"	TEXT,
-	"info"	TEXT,
-	PRIMARY KEY("id")
+    "id"    TEXT UNIQUE,
+    "name"  TEXT COLLATE NOCASE,
+    "info"  TEXT,
+    PRIMARY KEY("id")
 );
-CREATE INDEX "search" ON "books" (
-        "genres",
-        "authors",
-        "sequence_names",
-        "book_title",
-        "annotation"
+CREATE TABLE "genres" (
+    "id"    TEXT UNIQUE,
+    "description"   TEXT COLLATE NOCASE,
+    PRIMARY KEY("id")
 );
 """
 # global vars
@@ -57,7 +55,7 @@ DB = "fb_data.sqlite"
 genres = {}
 
 # fix some wrong genres
-genres_replace = {}
+genres_replacements = {}
 
 # /global vars
 
@@ -107,7 +105,7 @@ def get_genres_replace():
             break
         f = line.strip('\n').split('|')
         if len(f) > 1:
-            genres[f[0]] = f[1]
+            genres_replacements[f[0]] = f[1]
     data.close()
 
 
@@ -136,14 +134,14 @@ def listdiff(l1, l2):
         print(s2)
 
 
-def genres_replace(genres):
-    gg = genres.split(",")
+def genres_replace(genrs):
+    gg = genrs.split(",")
     ret = []
     for i in gg:
         if i not in genres and i != "":
-            if i in genres_replace:
-                if genres_replace[i] is not None and genres_replace[i] != "":
-                    ret.append(genres_replace[i])
+            if i in genres_replacements:
+                if genres_replacements[i] is not None and genres_replacements[i] != "":
+                    ret.append(genres_replacements[i])
             else:
                 ret.append('other')
         else:
@@ -153,26 +151,41 @@ def genres_replace(genres):
 
 def author2db(cur, authors):
     for author in authors.split(","):
-        author_id = hashlib.md5(author.encode('utf-8')).hexdigest()
-        REQ = 'SELECT count(*) FROM authors WHERE id = "%s"' % author_id
-        cur.execute(REQ)
-        rows = cur.fetchall()
-        cnt = rows[0][0]
-        if cnt == 0:
-            author_data = [author_id, author, ""]
-            cur.execute("INSERT INTO authors VALUES (?, ?, ?)", (author_data))
+        if author is not None and author != "":
+            author_id = hashlib.md5(author.encode('utf-8')).hexdigest()
+            REQ = 'SELECT count(*) FROM authors WHERE id = "%s"' % author_id
+            cur.execute(REQ)
+            rows = cur.fetchall()
+            cnt = rows[0][0]
+            if cnt == 0:
+                author_data = [author_id, author, ""]
+                cur.execute("INSERT INTO authors VALUES (?, ?, ?)", (author_data))
 
 
 def seq2db(cur, seqs):
     for seq in seqs.split(","):
-        seq_id = hashlib.md5(seq.encode('utf-8')).hexdigest()
-        REQ = 'SELECT count(*) FROM authors WHERE id = "%s"' % seq_id
-        cur.execute(REQ)
-        rows = cur.fetchall()
-        cnt = rows[0][0]
-        if cnt == 0:
-            seq_data = [seq_id, seq, ""]
-            cur.execute("INSERT INTO authors VALUES (?, ?, ?)", (seq_data))
+        if seq is not None and seq != "":
+            seq_id = hashlib.md5(seq.encode('utf-8')).hexdigest()
+            REQ = 'SELECT count(*) FROM sequences WHERE id = "%s"' % seq_id
+            cur.execute(REQ)
+            rows = cur.fetchall()
+            cnt = rows[0][0]
+            if cnt == 0:
+                seq_data = [seq_id, seq, ""]
+                cur.execute("INSERT INTO sequences VALUES (?, ?, ?)", (seq_data))
+
+
+def genres2db(cur, genrs):
+    for genre_id in genrs.split(","):
+        if genre_id is not None and genre_id != "":
+            genre = genres[genre_id]
+            REQ = 'SELECT count(*) FROM genres WHERE id = "%s"' % genre_id
+            cur.execute(REQ)
+            rows = cur.fetchall()
+            cnt = rows[0][0]
+            if cnt == 0:
+                genre_data = [genre_id, genre]
+                cur.execute("INSERT INTO genres VALUES (?, ?)", (genre_data))
 
 
 # main function
@@ -194,6 +207,7 @@ def iterate_list(blist):
         insdata = insdatat[:12]
         insdata[2] = genres_replace(insdata[2])
         check_genres(insdata[:3])
+        genres2db(cur, insdata[2])
         author2db(cur, insdata[3])
         seq2db(cur, insdata[6])
         if len(insdata) != len(insdatat):  # something strange in description

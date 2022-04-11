@@ -53,19 +53,19 @@ def main_opds():
                 }
             ],
             "entry": [
-                # {
-                    # "updated": dtiso,
-                    # "id": "tag:root:authors",
-                    # "title": "По авторам",
-                    # "content": {
-                        # "@type": "text",
-                        # "#text": "Поиск книг по авторам"
-                    # },
-                    # "link": {
-                        # "@href": "/opds/authorsindex",
-                        # "@type": "application/atom+xml;profile=opds-catalog"
-                    # }
-                # },
+                {
+                    "updated": dtiso,
+                    "id": "tag:root:authors",
+                    "title": "По авторам",
+                    "content": {
+                        "@type": "text",
+                        "#text": "Поиск книг по авторам"
+                    },
+                    "link": {
+                        "@href": "/opds/authorsindex",
+                        "@type": "application/atom+xml;profile=opds-catalog"
+                    }
+                },
                 {
                     "updated": dtiso,
                     "id": "tag:root:sequences",
@@ -101,7 +101,7 @@ def main_opds():
 def any2alphabet(field, sq3_rows, num):
     alphabet = {}
     for i in sq3_rows:
-        s = i[field].upper()
+        s = i[field]
         alphabet[s[:num]] = 1
     return sorted(list(alphabet))
 
@@ -148,84 +148,119 @@ def get_sequences(seq_root):
             ret["feed"]["entry"].append(
                 {
                     "updated": dtiso,
-                    "id": "tag:sequences:" + ch,
+                    "id": "tag:sequences:" + urllib.parse.quote(ch),
                     "title": ch,
                     "content": {
                         "@type": "text",
                         "#text": "книги на '" + ch + "'"
                     },
                     "link": {
-                        "@href": "/opds/sequences/" + ch,
+                        "@href": "/opds/sequences/" + urllib.parse.quote(ch),
                         "@type": "application/atom+xml;profile=opds-catalog"
                     }
                 }
             )
         conn.close()
     elif len(seq_root) < 2:
-        REQ1 = 'SELECT sequence_names as seq FROM books WHERE sequence_names like "'
-        REQ2 = '%" OR sequence_names like ",'
+        REQ1 = 'SELECT sequence_names as seq FROM books WHERE UPPER(sequence_names) like "'
+        REQ2 = '%" OR sequence_names like "%,'
         REQ3 = '%" GROUP BY seq ORDER BY seq;'
         REQ = REQ1 + seq_root + REQ2 + seq_root + REQ3
         conn = get_db_connection()
         rows = conn.execute(REQ).fetchall()
-        ret["feed"]["id"] = "tag:root:sequences:" + seq_root
+        ret["feed"]["id"] = "tag:root:sequences:" + urllib.parse.quote_plus(seq_root, encoding='utf-8')
         for ch in any2alphabet("seq", rows, 3):
             ret["feed"]["entry"].append(
                 {
                     "updated": dtiso,
-                    "id": "tag:sequences:" + ch,
+                    "id": "tag:sequences:" + urllib.parse.quote_plus(ch, encoding='utf-8'),
                     "title": ch,
                     "content": {
                         "@type": "text",
                         "#text": "книги на '" + ch + "'"
                     },
                     "link": {
-                        "@href": "/opds/sequences/" + ch,
+                        "@href": "/opds/sequences/" + urllib.parse.quote_plus(ch, encoding='utf-8'),
                         "@type": "application/atom+xml;profile=opds-catalog"
                     }
                 }
             )
         conn.close()
     else:
-        print(type(seq_root), seq_root)
-        REQ1 = 'SELECT sequence_names as seq FROM books WHERE sequence_names like "'
-        REQ2 = '%" OR sequence_names like ",'
-        REQ3 = '%" GROUP BY seq ORDER BY seq;'
+        REQ1 = 'SELECT id, name FROM sequences WHERE name like "'
+        REQ2 = '%" OR name like ",'
+        REQ3 = '%" GROUP BY name ORDER BY name;'
         REQ = REQ1 + seq_root + REQ2 + seq_root + REQ3
-        ret["feed"]["id"] = "tag:root:sequences:" + seq_root
+        ret["feed"]["id"] = "tag:root:sequences:" + urllib.parse.quote_plus(seq_root, encoding='utf-8')
         conn = get_db_connection()
         rows = conn.execute(REQ).fetchall()
         for row in rows:
-            seqs = row["seq"]
-            for seqname in seqs.split(","):
-                ret["feed"]["entry"].append(
-                    {
-                        "updated": dtiso,
-                        "id": "tag:sequence:" + urllib.parse.quote_plus(seqname),
-                        "title": seqname,
-                        "content": {
-                            "@type": "text",
-                            "#text": "книги на '" + seqname + "'"
-                        },
-                        "link": {
-                            "@href": "/opds/sequencebooks/" + urllib.parse.quote_plus(seqname),
-                            "@type": "application/atom+xml;profile=opds-catalog"
-                        }
+            seq_name = row["name"]
+            seq_id = row["id"]
+            ret["feed"]["entry"].append(
+                {
+                    "updated": dtiso,
+                    "id": "tag:sequence:" + urllib.parse.quote_plus(seq_name, encoding='utf-8'),
+                    "title": seq_name,
+                    "content": {
+                        "@type": "text",
+                        "#text": "книги на '" + seq_name + "'"
+                    },
+                    "link": {
+                        "@href": "/opds/sequencebooks/" + seq_id,
+                        "@type": "application/atom+xml;profile=opds-catalog"
                     }
-                )
+                }
+            )
         conn.close()
     return xmltodict.unparse(ret, pretty=True)
 
 
-def get_books_in_seq(seq):
+def get_authors(ids):
+    ret = {}
+    selector = []
+    for i in ids.split(","):
+        selector.append("'" + i + "'")
+    REQ = "SELECT id, name FROM authors WHERE id IN (" + ",".join(selector) + ");"
+    conn = get_db_connection()
+    rows = conn.execute(REQ).fetchall()
+    for row in rows:
+        (author_id, name) = (row[0], row[1])
+        ret[author_id] = name
+    conn.close()
+    return ret
+
+
+def get_genres_names(genres_ids):
+    ret = {}
+    selector = []
+    for i in genres_ids.split(","):
+        selector.append("'" + i + "'")
+    REQ = "SELECT id, description FROM genres WHERE id IN (" + ",".join(selector) + ");"
+    conn = get_db_connection()
+    rows = conn.execute(REQ).fetchall()
+    for row in rows:
+        (genre_id, description) = (row[0], row[1])
+        ret[genre_id] = description
+    conn.close()
+    return ret
+
+
+def get_books_in_seq(seq_id):
     dtiso = get_dtiso()
+    REQ = 'SELECT id, name FROM sequences WHERE id = "' + seq_id + '"'
+    conn = get_db_connection()
+    rows = conn.execute(REQ).fetchall()
+    if len(rows) == 0:
+        return ""
+    seq = rows[0][1]
     ret = {
         "feed": {
             "@xmlns": "http://www.w3.org/2005/Atom",
             "@xmlns:dc": "http://purl.org/dc/terms/",
             "@xmlns:os": "http://a9.com/-/spec/opensearch/1.1/",
             "@xmlns:opds": "http://opds-spec.org/2010/catalog",
-            "id": "tag:sequence:" + urllib.parse.quote_plus(seq) + ":",
+            "id": "tag:sequence:" + urllib.parse.quote_plus(seq_id) + ":",
             "title": "Books in series: '" + seq + "'",
             "updated": dtiso,
             "icon": "/favicon.ico",
@@ -249,37 +284,36 @@ def get_books_in_seq(seq):
             "entry": []
         }
     }
-    REQ = '''
-        SELECT zipfile, filename, genres, authors, sequence, book_title, lang, annotation
-        FROM books
-        WHERE
-        sequence = "%s"
-        OR sequence like "\%,%s"
-        OR sequence like "%s,\%"
-        OR sequence like "\%,%s,\%"
-        GROUP BY authors, book_title ORDER BY author, book_title
-        ''' % (seq, seq, seq, seq)
+    REQ1 = 'SELECT zipfile, filename, genres, author_ids, book_title, lang, annotation FROM books WHERE sequence_ids = "'
+    REQ2 = '" OR sequence_ids like "%,'
+    REQ3 = '" OR sequence_ids like "'
+    REQ4 = ',%" OR sequence_ids like "%,'
+    REQ5 = '%" GROUP BY authors, book_title ORDER BY authors, book_title'
+    REQ = REQ1 + seq_id + REQ2 + seq_id + REQ3 + seq_id + REQ4 + seq_id + REQ5
     conn = get_db_connection()
     rows = conn.execute(REQ).fetchall()
+    print(REQ)
     for row in rows:
+        print(row)
         zipfile = row["zipfile"]
         filename = row["filename"]
         genres = row["genres"]
-        authors = row["authors"]
         author_ids = row["author_ids"]
-        sequence = row["sequence"]
         book_title = row["book_title"]
         lang = row["lang"]
         annotation = row["annotation"]
         print(zipfile, filename)
 
-        # for over authors
-        author = [
-            {
-                "name": authors # ,
-                # "uri": "/a/" + author_id
-            }
-        ]
+        authors = []
+        authors_data = get_authors(author_ids)
+        for k, v in authors_data.items():
+            authors.append(
+                {
+                    "uri": "/opds/a/" + k,
+                    "name": v
+                }
+            )
+
         links = [
                     # {  # ToDo for over authors
                     # "@href": "/opds/author/" + author_id,
@@ -306,16 +340,16 @@ def get_books_in_seq(seq):
                         "@type": "text/html"
                     }
         ]
-        category = [  # жанры
-            {
-                "@label": "Любовное фэнтези, любовно-фантастические романы ",
-                "@term": "Любовное фэнтези, любовно-фантастические романы "
-            },
-            {
-                "@label": "Самиздат, сетевая литература",
-                "@term": "Самиздат, сетевая литература"
-            }
-        ],
+
+        category = []
+        category_data = get_genres_names(genres)
+        for k, v in category_data.items():
+            category.append(
+                {
+                    "@label": v,
+                    "@term": v
+                }
+            )
         annotext = """
         <p class=\"book\"> %s </p>\n<br/>Format: fb2<br/>Lang: ru<br/>
         Size: %s<br/>Sequence: %s"<br/>
@@ -325,7 +359,7 @@ def get_books_in_seq(seq):
                 "updated": dtiso,
                 "id": "tag:book:" + hashlib.md5(book_title.encode('utf-8')).hexdigest(),
                 "title": book_title,
-                "author": author,
+                "author": authors,
                 "link": links,
                 "category": category,
                 "dc:language": lang,

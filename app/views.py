@@ -2,7 +2,7 @@
 
 # from flask import request, redirect, Blueprint, Response, url_for
 from flask import redirect, Blueprint, Response, url_for
-from .tools import main_opds, get_sequences
+from .opds_seq import main_opds, get_sequences, get_books_in_seq
 api = Blueprint("api", __name__)
 
 
@@ -34,13 +34,13 @@ def opds_by_seq_root():
 
 
 @api.route("/opds/sequencesindex/<seq>", methods=['GET'])
+@api.route("/opds/sequences/<seq>", methods=['GET'])
 def opds_by_seq(seq=None):
     xml = get_sequences(seq)
     return Response(xml, mimetype='text/xml')
 
 
 @api.route("/opds/sequencebooks/<seq>", methods=['GET'])
-def get_books_in_seq(seq=None):
-    xml = get_sequences(seq)
+def opds_books_in_seq(seq=None):
+    xml = get_books_in_seq(seq)
     return Response(xml, mimetype='text/xml')
-

@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 
 from flask import Flask
-# from flask import g
-
 from .config import config, SELECTED_CONFIG
 from .views import api
 
