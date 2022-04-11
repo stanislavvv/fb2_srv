@@ -5,10 +5,11 @@ import os
 import sys
 import zipfile
 import xmltodict
+import hashlib
 from bs4 import BeautifulSoup
 
 # True for debug json output
-#DEBUG = True
+# DEBUG = True
 DEBUG = False
 
 if DEBUG:
@@ -19,7 +20,7 @@ READ_SIZE = 40960  # description in 20kb...
 
 # show headers for pipe-separated output
 def show_headers():
-    print("zip|filename|genre|authors|sequence|book_title|lang|annotation_text")
+    print("zip|filename|genre|authors|author_ids|sequence|sequence_names|sequence_ids|book_title|book_id|lang|annotation_text")
 
 
 # return empty string if None, else return content
@@ -116,6 +117,35 @@ def get_authors(author):
     return ret
 
 
+# return comma-separated string of authors from input struct
+def get_author_ids(author):
+    ret = ""  # default
+    g = []
+    if isinstance(author, list):
+        for i in author:
+            a_tmp = []
+            if 'last-name' in i and i['last-name'] is not None:
+                a_tmp.append(strlist(i['last-name']))
+            if 'first-name' in i and i['first-name'] is not None:
+                a_tmp.append(strlist(i['first-name']))
+            if 'middle-name' in i and i['middle-name'] is not None:
+                a_tmp.append(strlist(i['middle-name']))
+            a_tmp2 = " ".join(a_tmp)
+            g.append(hashlib.md5(a_tmp2.encode('utf-8')).hexdigest())
+        ret = ",".join(g)
+    else:
+        a_tmp = []
+        if 'last-name' in author and author['last-name'] is not None:
+            a_tmp.append(strlist(author['last-name']))
+        if 'first-name' in author and author['first-name'] is not None:
+            a_tmp.append(strlist(author['first-name']))
+        if 'middle-name' in author and author['middle-name'] is not None:
+            a_tmp.append(strlist(author['middle-name']))
+        r = " ".join(a_tmp)
+        ret = hashlib.md5(r.encode('utf-8')).hexdigest()
+    return ret
+
+
 def get_sequence(seq):
     if isinstance(seq, str):
         return seq, ""
@@ -127,7 +157,7 @@ def get_sequence(seq):
         if '@number' in seq:
             num = seq['@number']
         if name is not None and num is not None:
-            return "%s:%s"%(name,num)
+            return "%s:%s" % (name, num)
         elif name is not None:
             return "%s" % name
         elif num is not None:
@@ -143,7 +173,7 @@ def get_sequence(seq):
             if '@number' in s:
                 num = s['@number']
             if name is not None and num is not None:
-                ret.append("%s:%s"%(name,num))
+                ret.append("%s:%s" % (name, num))
             elif name is not None:
                 ret.append("%s" % name)
             elif num is not None:
@@ -151,6 +181,49 @@ def get_sequence(seq):
         return ",".join(ret)
     return str(seq)
 
+
+def get_sequence_names(seq):
+    if isinstance(seq, str):
+        return seq, ""
+    if isinstance(seq, dict):
+        name = None
+        if '@name' in seq:
+            name = seq['@name']
+            r = "%s" % name
+            return r
+        return ""
+    elif isinstance(seq, list):
+        ret = []
+        for s in seq:
+            name = None
+            if '@name' in s:
+                name = s['@name']
+                r = "%s" % name
+                ret.append(r)
+        return ",".join(ret)
+    return str(seq)
+
+
+def get_sequence_ids(seq):
+    if isinstance(seq, str):
+        return seq, ""
+    if isinstance(seq, dict):
+        name = None
+        if '@name' in seq:
+            name = seq['@name']
+            r = "%s" % name
+            return hashlib.md5(r.encode('utf-8')).hexdigest()
+        return ""
+    elif isinstance(seq, list):
+        ret = []
+        for s in seq:
+            name = None
+            if '@name' in s:
+                name = s['@name']
+                r = "%s" % name
+                ret.append(hashlib.md5(r.encode('utf-8')).hexdigest())
+        return ",".join(ret)
+    return str(seq)
 
 def get_lang(lng):
     ret = ""
@@ -162,6 +235,7 @@ def get_lang(lng):
     else:
         ret = str(lng)
     return ret
+
 
 # get filename in zip, print some data
 def fb2parse(filename):
@@ -180,9 +254,18 @@ def fb2parse(filename):
     author = ''
     if 'author' in info and info['author'] is not None:
         author = get_authors(info['author'])
+    author_ids = ''
+    if 'author' in info and info['author'] is not None:
+        author_ids = get_author_ids(info['author'])
     sequence = ''
     if 'sequence' in info and info['sequence'] is not None:
         sequence = get_sequence(info['sequence'])
+    sequence_names = ''
+    if 'sequence' in info and info['sequence'] is not None:
+        sequence_names = get_sequence_names(info['sequence'])
+    sequence_ids = ''
+    if 'sequence' in info and info['sequence'] is not None:
+        sequence_ids = get_sequence_ids(info['sequence'])
     book_title = ''
     if 'book-title' in info and info['book-title'] is not None:
         book_title = info['book-title']
@@ -192,13 +275,19 @@ def fb2parse(filename):
     annotext = ''
     if 'annotation' in info:
         annotext = recursive_text(info['annotation'])
+    book_path = str(os.path.basename(z.filename)) + "/" + filename
+    book_id = hashlib.md5(book_path.encode('utf-8')).hexdigest()
     out = [
         str(os.path.basename(z.filename)),
         filename,
         genre,
         author.strip(),
+        author_ids,
         sequence,
+        sequence_names,
+        sequence_ids,
         str(book_title),
+        book_id,
         str(lang),
         str(annotext.replace('\n', " ").replace('|', " "))
     ]

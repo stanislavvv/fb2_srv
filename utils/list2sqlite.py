@@ -8,14 +8,21 @@ import codecs
 
 
 # table in database:
+# author_ids = ",".join([md5(author1), md5(author2), ...])
+# sequence_ids = ",",join([md5(seq1)], ...)
+# book_id = md5("zipfile/filename")
 """
 CREATE TABLE "books" (
         "zipfile"       TEXT NOT NULL,
         "filename"      TEXT NOT NULL,
         "genres"        TEXT,
         "authors"       TEXT,
+        "author_ids"    TEXT,
         "sequence"      TEXT,
+        "sequence_names" TEXT,
+        "sequence_ids"  TEXT,
         "book_title"    TEXT,
+        "book_id"       TEXT,
         "lang"  TEXT,
         "annotation"    INTEGER,
         PRIMARY KEY("zipfile","filename","authors","book_title")
@@ -23,7 +30,7 @@ CREATE TABLE "books" (
 CREATE INDEX "search" ON "books" (
         "genres",
         "authors",
-        "sequence",
+        "sequence_names",
         "book_title",
         "annotation"
 );
@@ -70,7 +77,8 @@ def get_genres():
         if not line:
             break
         f = line.strip('\n').split('|')
-        genres[f[0]] = f[1]
+        if len(f) > 1:
+            genres[f[0]] = f[1]
     data.close()
 
 
@@ -115,12 +123,12 @@ def iterate_list(blist):
         if not line:
             break
         insdatat = line.strip('\n').split('|')
-        insdata = insdatat[:8]
+        insdata = insdatat[:11]
         check_genres(insdata[2])
         if len(insdata) != len(insdatat):  # something strange in description
-            insdata[7] = "".join(insdatat[7:])
+            insdata[11] = "".join(insdatat[11:])
         # print(insdata)  # debug
-        cur.execute("INSERT INTO books VALUES (?, ?, ?, ?, ?, ?, ?, ?)", (insdata))
+        cur.execute("INSERT INTO books VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (insdata))
     con.commit()
     con.close()
     data.close()

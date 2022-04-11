@@ -14,6 +14,7 @@ class DevelopmentConfig(Config):
     DEBUG = True
     DBSQLITE = "fb_data.sqlite"
     ZIPS = "data"
+    TITLE = "Home opds directory"
 
 
 class TestConfig(Config):
@@ -21,12 +22,14 @@ class TestConfig(Config):
     DEBUG = False
     DBSQLITE = "fb_data.sqlite"
     ZIPS = "data"
+    TITLE = "Home opds directory"
 
 
 class ProductionConfig(Config):
     DEBUG = False
     DBSQLITE = "fb_data.sqlite"
     ZIPS = "data"
+    TITLE = "Home opds directory"
 
 
 config = {"development": DevelopmentConfig, "test": TestConfig, "prod": ProductionConfig}
