@@ -259,7 +259,6 @@ def get_books_in_seq(seq):
         OR sequence like "\%,%s,\%"
         GROUP BY authors, book_title ORDER BY author, book_title
         ''' % (seq, seq, seq, seq)
-    print(REQ)
     conn = get_db_connection()
     rows = conn.execute(REQ).fetchall()
     for row in rows:
@@ -267,6 +266,7 @@ def get_books_in_seq(seq):
         filename = row["filename"]
         genres = row["genres"]
         authors = row["authors"]
+        author_ids = row["author_ids"]
         sequence = row["sequence"]
         book_title = row["book_title"]
         lang = row["lang"]

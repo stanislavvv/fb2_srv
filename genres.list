@@ -82,27 +82,19 @@ foreign_adventure|Иностранная приключенческая лите
 foreign_antique|Средневековая классическая проза
 foreign_business|Иностранная литература по бизнесу
 foreign_children|Зарубежная литература для детей
-foreign_comp
 foreign_contemporary|Иностранная современная проза
-foreign_contemporary_lit
-foreign_desc
 foreign_detective|Иностранный детектив
 foreign_dramaturgy|Иностранная драматургия
 foreign_edu|Иностранная образовательная литература
 foreign_fantasy|Иностранное фэнтези
 foreign_home|foreign_home???
-foreign_humor
-foreign_language
 foreign_love|Иностранные любовные романы
-foreign_novel
-foreign_other
-foreign_poetry
+foreign_poetry|Зарубежная поэзия
 foreign_prose|Зарубежная классическая проза
 foreign_psychology|Иностранная литература по психологии и психотерапии
 foreign_publicism|Иностранная публицистика
 foreign_religion|Иностранная религиозная литература
 foreign_sf|Иностранная фантастика
-geography_book
 geo_guides|Путеводители, карты, атласы
 global_economy|Глобальная экономика
 gothic_novel|Готический роман
@@ -126,8 +118,6 @@ humor_prose|Юмористическая проза
 humor_satire|Сатира
 humor_verse|Юмористические стихи, басни
 humor|Юмор
-industries
-job_hunting
 limerick|Частушки, прибаутки, потешки
 literature_18|Классическая проза XVII-XVIII веков
 literature_19|Классическая проза ХIX века
@@ -135,25 +125,18 @@ literature_20|Классическая проза ХX века
 love_contemporary|Современные любовные романы
 love_detective|Остросюжетные любовные романы
 love_erotica|Эротическая литература
-love_fantasy
 love_hard|Порно
 love_history|Исторические любовные романы
 love_sf|Любовное фэнтези, любовно-фантастические романы
 love_short|Короткие любовные романы
 love|Любовные романы
 lyrics|Лирика
-magician_book
-management
-marketing
 military_history|Военная история
 military_special|Военное дело
 military_weapon|Военное дело, военная техника и вооружение
 modern_tale|Современная сказка
-music_dancing
 music|Музыка
-narrative
 network_literature|Самиздат, сетевая литература
-newspapers
 nonf_biography|Биографии и Мемуары
 nonf_criticism|Критика
 nonfiction|Документальная литература
@@ -164,10 +147,7 @@ org_behavior|Маркетинг, PR
 other|Неотсортированное
 painting|Живопись, альбомы, иллюстрированные каталоги
 palindromes|Визуальная и экспериментальная поэзия, верлибры, палиндромы
-paper_work
-pedagogy_book
 periodic|Журналы, газеты
-personal_finance
 poem|Поэма, эпическая поэзия
 poetry_classical|Классическая поэзия
 poetry_east|Поэзия Востока
@@ -178,7 +158,7 @@ poetry_rus_classical|Классическая русская поэзия
 poetry_rus_modern|Современная русская поэзия
 poetry|Поэзия
 popadancy|Попаданцы
-popadanec
+popadanec|Попаданцы
 popular_business|Карьера, кадры
 prose_abs|Фантасмагория, абсурдистская проза
 prose_classic|Классическая проза
@@ -193,14 +173,6 @@ prose_rus_classic|Русская классическая проза
 prose_su_classics|Советская классическая проза
 prose|Проза
 proverbs|Пословицы, поговорки
-psy_alassic
-psy_childs
-psy_generic
-psy_personal
-psy_sex_and_family
-psy_social
-psy_theraphy
-real_estate
 ref_dict|Словари
 ref_encyc|Энциклопедии
 reference|Справочная литература
@@ -216,7 +188,6 @@ religion_judaism|Иудаизм
 religion_orthodoxy|Православие
 religion_paganism|Язычество
 religion_protestantism|Протестантизм
-religion_rel
 religion_self|Самосовершенствование
 religion|Религия, религиозная литература
 russian_contemporary
@@ -276,12 +247,7 @@ sf_space|Космическая фантастика
 sf_stimpank|Стимпанк
 sf_technofantasy|Технофэнтези
 sf|Научная Фантастика
-short_story
-sketch
-small_business
-sociology_book
 song_poetry|Песенная поэзия
-stock
 story|Малые литературные формы прозы: рассказы, эссе, новеллы, феерия
 tale_chivalry|Рыцарский роман
 tbg_computers|Учебные пособия, самоучители
@@ -293,8 +259,4 @@ thriller|Триллер
 tragedy|Трагедия
 travel_notes|География, путевые заметки
 unfinished|Незавершенное
-unrecognised
-upbringing_book
-vampire_book
 vaudeville|Мистерия, буффонада, водевиль
-visual_arts
