@@ -8,11 +8,11 @@ from app import create_app
 def usage():
     print("Usage: managedb.py <command>")
     print("Commands:")
-    print(" dropdb  -- remove database from disk", " NOT IMPLEMENTED")
-    print(" cleandb -- clean database tables content", " NOT IMPLEMENTED")
-    print(" newdb   -- [re]create database from scratch", " NOT IMPLEMENTED")
-    print(" fillnew -- add new data to database", " NOT IMPLEMENTED")
-    print(" fillall -- clean and refill data to database", " NOT IMPLEMENTED")
+    print(" dropdb    -- remove database from disk", " NOT IMPLEMENTED")
+    print(" cleandb   -- clean database tables content", " NOT IMPLEMENTED")
+    print(" newdb     -- [re]create database from scratch", " NOT IMPLEMENTED")
+    print(" fillnew   -- add new data to database", " NOT IMPLEMENTED")
+    print(" refillall -- clean and refill data to database", " NOT IMPLEMENTED")
 
 
 if __name__ == "__main__":
