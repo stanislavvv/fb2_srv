@@ -4,7 +4,7 @@ import xmltodict
 import datetime
 import sqlite3
 import urllib.parse
-import hashlib
+# import hashlib
 from flask import current_app
 
 
@@ -284,7 +284,8 @@ def get_books_in_seq(seq_id):
             "entry": []
         }
     }
-    REQ1 = 'SELECT zipfile, filename, genres, author_ids, book_title, lang, annotation FROM books WHERE sequence_ids = "'
+    REQ1 = 'SELECT zipfile, filename, genres, author_ids, book_id, book_title, lang, annotation'
+    REQ1 = REQ1 + ' FROM books WHERE sequence_ids = "'  # fix E501 line too long
     REQ2 = '" OR sequence_ids like "%,'
     REQ3 = '" OR sequence_ids like "'
     REQ4 = ',%" OR sequence_ids like "%,'
@@ -294,15 +295,14 @@ def get_books_in_seq(seq_id):
     rows = conn.execute(REQ).fetchall()
     print(REQ)
     for row in rows:
-        print(row)
         zipfile = row["zipfile"]
         filename = row["filename"]
         genres = row["genres"]
         author_ids = row["author_ids"]
         book_title = row["book_title"]
+        book_id = row["book_id"]
         lang = row["lang"]
         annotation = row["annotation"]
-        print(zipfile, filename)
 
         authors = []
         authors_data = get_authors(author_ids)
@@ -357,13 +357,13 @@ def get_books_in_seq(seq_id):
         ret["feed"]["entry"].append(
             {
                 "updated": dtiso,
-                "id": "tag:book:" + hashlib.md5(book_title.encode('utf-8')).hexdigest(),
+                "id": "tag:book:" + book_id,
                 "title": book_title,
                 "author": authors,
                 "link": links,
                 "category": category,
                 "dc:language": lang,
-                "dc:format": "fb2+zip",
+                "dc:format": "fb2",
                 "content": {
                     "@type": "text/html",
                     "#text": annotext
