@@ -6,7 +6,7 @@ import urllib.parse
 # import hashlib
 # from flask import current_app
 from .opds_internals import get_db_connection, get_dtiso, any2alphabet, get_authors, get_genres_names
-from .opds_internals import get_auth_seqs, sizeof_fmt
+from .opds_internals import get_auth_seqs, get_seqs, sizeof_fmt
 
 ret_hdr_author = {
         "feed": {
@@ -140,15 +140,15 @@ def get_author_list(auth_id):
                         #     "@type": "text/html"
                         # },
                         {
-                            "@href": "/opds/authorsequences/218498",
+                            "@href": "/opds/author/" + auth_id + "/sequences",
                             "@rel": "http://www.feedbooks.com/opds/facet",
-                            "@title": "Author books by sequences",
+                            "@title": "Books of author by sequences",
                             "@type": "application/atom+xml;profile=opds-catalog"
                         },
                         {
-                            "@href": "/opds/authorsequenceless/218498",
+                            "@href": "/opds/author/" + auth_id + "/sequenceless",
                             "@rel": "http://www.feedbooks.com/opds/facet",
-                            "@title": "Книги автора вне серий",
+                            "@title": "Sequenceless books of author",
                             "@type": "application/atom+xml;profile=opds-catalog"
                         }
                     ],
@@ -171,7 +171,7 @@ def get_author_list(auth_id):
                     "id": "tag:author:" + auth_id + ":sequenceless",
                     "title": "Books outside of sequences",
                     "link": {
-                        "@href": "/opds/author/" + auth_id + "/equenceless",
+                        "@href": "/opds/author/" + auth_id + "/sequenceless",
                         "@type": "application/atom+xml;profile=opds-catalog"
                     }
                 },
@@ -254,7 +254,7 @@ def get_author_sequence(auth_id, seq_id):
     ret["feed"]["title"] = "Books of author: " + auth_name + " by sequence '" + seq_name + "'"
     ret["feed"]["updated"] = dtiso
 
-    REQ0 = "SELECT zipfile, filename, genres, author_ids, book_id, book_title, lang, size, annotation"
+    REQ0 = "SELECT zipfile, filename, genres, author_ids, sequence_ids, book_id, book_title, lang, size, annotation"
     REQ1 = REQ0 + " FROM books WHERE (author_ids = '"  # fix E501 line too long
     REQ2 = "' OR author_ids LIKE '"
     REQ3 = ",%' OR author_ids LIKE '%,"
@@ -272,6 +272,7 @@ def get_author_sequence(auth_id, seq_id):
         filename = row["filename"]
         genres = row["genres"]
         author_ids = row["author_ids"]
+        seq_ids = row["sequence_ids"]
         book_title = row["book_title"]
         book_id = row["book_id"]
         lang = row["lang"]
@@ -279,6 +280,7 @@ def get_author_sequence(auth_id, seq_id):
         annotation = row["annotation"]
 
         authors = []
+        links = []
         authors_data = get_authors(author_ids)
         for k, v in authors_data.items():
             authors.append(
@@ -287,33 +289,40 @@ def get_author_sequence(auth_id, seq_id):
                     "name": v
                 }
             )
+            links.append(
+                {
+                    "@href": "/opds/author/" + k,
+                    "@rel": "related",
+                    "@title": "All books of author: '" +  v,
+                    "@type": "application/atom+xml"
+                }
+            )
+        seq_data = get_seqs(seq_ids)
+        for k, v in seq_data.items():
+            links.append(
+                {
+                "@href": "/opds/sequencebooks/" + k,
+                "@rel": "related",
+                "@title": "All books in sequence '" + v + "'",
+                "@type": "application/atom+xml"
+                }
+            )
 
-        links = [
-                    # {  # ToDo for over authors
-                    # "@href": "/opds/author/" + author_id,
-                    # "@rel": "related",
-                    # "@title": "All books of author: '" + authors,  # ToDo: имя автора
-                    # "@type": "application/atom+xml"
-                    # }
-                    # {  # ToDo for over sequences
-                    # "@href": "/opds/sequencebooks/63116",
-                    # "@rel": "related",
-                    # "@title": "Все книги серии \"AYENA\"",
-                    # "@type": "application/atom+xml"
-                    # },
-
-                    {
-                        "@href": "/fb2/" + zipfile + "/" + filename,
-                        "@rel": "http://opds-spec.org/acquisition/open-access",
-                        "@type": "application/fb2+zip"
-                    },
-                    {
-                        "@href": "/read/" + zipfile + "/" + filename,
-                        "@rel": "alternate",
-                        "@title": "Read in browser",
-                        "@type": "text/html"
-                    }
-        ]
+        links.append(
+            {
+                "@href": "/fb2/" + zipfile + "/" + filename,
+                "@rel": "http://opds-spec.org/acquisition/open-access",
+                "@type": "application/fb2+zip"
+            },
+        )
+        links.append(
+            {
+                "@href": "/read/" + zipfile + "/" + filename,
+                "@rel": "alternate",
+                "@title": "Read in browser",
+                "@type": "text/html"
+            }
+        )
 
         category = []
         category_data = get_genres_names(genres)
@@ -653,5 +662,5 @@ def get_author_by_time(auth_id):
             }
         )
     conn.close()
-    return xmltodict.unparse(ret, pretty=True)
+
 

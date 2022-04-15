@@ -8,6 +8,7 @@ import urllib.parse
 from flask import current_app
 
 from .opds_internals import get_db_connection, get_dtiso, any2alphabet, get_authors, get_genres_names, sizeof_fmt
+from .opds_internals import get_seqs
 
 
 def main_opds():
@@ -213,7 +214,7 @@ def get_books_in_seq(seq_id):
             "@xmlns:dc": "http://purl.org/dc/terms/",
             "@xmlns:os": "http://a9.com/-/spec/opensearch/1.1/",
             "@xmlns:opds": "http://opds-spec.org/2010/catalog",
-            "id": "tag:sequence:" + urllib.parse.quote_plus(seq_id) + ":",
+            "id": "tag:sequence:" + seq_id + ":",
             "title": "Books in series: '" + seq + "'",
             "updated": dtiso,
             "icon": "/favicon.ico",
@@ -237,7 +238,7 @@ def get_books_in_seq(seq_id):
             "entry": []
         }
     }
-    REQ1 = 'SELECT zipfile, filename, genres, author_ids, book_id, book_title, lang, size, annotation'
+    REQ1 = 'SELECT zipfile, filename, genres, author_ids, sequence_ids, book_id, book_title, lang, size, annotation'
     REQ1 = REQ1 + ' FROM books WHERE sequence_ids = "'  # fix E501 line too long
     REQ2 = '" OR sequence_ids like "%,'
     REQ3 = '" OR sequence_ids like "'
@@ -246,12 +247,12 @@ def get_books_in_seq(seq_id):
     REQ = REQ1 + seq_id + REQ2 + seq_id + REQ3 + seq_id + REQ4 + seq_id + REQ5
     conn = get_db_connection()
     rows = conn.execute(REQ).fetchall()
-    print(REQ)
     for row in rows:
         zipfile = row["zipfile"]
         filename = row["filename"]
         genres = row["genres"]
         author_ids = row["author_ids"]
+        seq_ids = row["sequence_ids"]
         book_title = row["book_title"]
         book_id = row["book_id"]
         lang = row["lang"]
@@ -259,6 +260,7 @@ def get_books_in_seq(seq_id):
         annotation = row["annotation"]
 
         authors = []
+        links = []
         authors_data = get_authors(author_ids)
         for k, v in authors_data.items():
             authors.append(
@@ -267,33 +269,41 @@ def get_books_in_seq(seq_id):
                     "name": v
                 }
             )
+            links.append(
+                {
+                    "@href": "/opds/author/" + k,
+                    "@rel": "related",
+                    "@title": "All books of author: '" +  v,
+                    "@type": "application/atom+xml"
+                }
+            )
 
-        links = [
-                    # {  # ToDo for over authors
-                    # "@href": "/opds/author/" + author_id,
-                    # "@rel": "related",
-                    # "@title": "All books of author: '" + authors,  # ToDo: имя автора
-                    # "@type": "application/atom+xml"
-                    # }
-                    # {  # ToDo for over sequences
-                    # "@href": "/opds/sequencebooks/63116",
-                    # "@rel": "related",
-                    # "@title": "Все книги серии \"AYENA\"",
-                    # "@type": "application/atom+xml"
-                    # },
+        seq_data = get_seqs(seq_ids)
+        for k, v in seq_data.items():
+            links.append(
+                {
+                "@href": "/opds/sequencebooks/" + k,
+                "@rel": "related",
+                "@title": "All books in sequence '" + v + "'",
+                "@type": "application/atom+xml"
+                }
+            )
 
-                    {
-                        "@href": "/fb2/" + zipfile + "/" + filename,
-                        "@rel": "http://opds-spec.org/acquisition/open-access",
-                        "@type": "application/fb2+zip"
-                    },
-                    {
-                        "@href": "/read/" + zipfile + "/" + filename,
-                        "@rel": "alternate",
-                        "@title": "Read in browser",
-                        "@type": "text/html"
-                    }
-        ]
+        links.append(
+            {
+                "@href": "/fb2/" + zipfile + "/" + filename,
+                "@rel": "http://opds-spec.org/acquisition/open-access",
+                "@type": "application/fb2+zip"
+            }
+        )
+        links.append(
+            {
+                "@href": "/read/" + zipfile + "/" + filename,
+                "@rel": "alternate",
+                "@title": "Read in browser",
+                "@type": "text/html"
+            }
+        )
 
         category = []
         category_data = get_genres_names(genres)

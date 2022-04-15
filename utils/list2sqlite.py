@@ -43,9 +43,10 @@ CREATE TABLE "sequences" (
     PRIMARY KEY("id")
 );
 CREATE TABLE "genres" (
-    "id"    TEXT UNIQUE,
-    "description"   TEXT COLLATE NOCASE,
-    PRIMARY KEY("id")
+	"id"	TEXT UNIQUE,
+	"description"	TEXT COLLATE NOCASE,
+	"group"	TEXT,
+	PRIMARY KEY("id")
 );
 """
 # global vars
@@ -186,8 +187,8 @@ def genres2db(cur, genrs):
             rows = cur.fetchall()
             cnt = rows[0][0]
             if cnt == 0:
-                genre_data = [genre_id, genre]
-                cur.execute("INSERT INTO genres VALUES (?, ?)", (genre_data))
+                genre_data = [genre_id, genre, ""]
+                cur.execute("INSERT INTO genres VALUES (?, ?, ?)", (genre_data))
 
 
 # main function

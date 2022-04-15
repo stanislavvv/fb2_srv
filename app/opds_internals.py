@@ -5,6 +5,10 @@ import sqlite3
 from flask import current_app
 
 
+# max books on page
+BOOKS_LIMIT = 100
+
+
 # return [ { "name": seq_name, "id": seq_id, "count": books_count }, ...]
 def get_auth_seqs(auth_id):
     ret = []
@@ -85,6 +89,22 @@ def get_genres_names(genres_ids):
     for row in rows:
         (genre_id, description) = (row[0], row[1])
         ret[genre_id] = description
+    conn.close()
+    return ret
+
+
+def get_seqs(ids):
+    ret = {}
+    selector = []
+    print(ids)
+    for i in ids.split(","):
+        selector.append("'" + i + "'")
+    REQ = "SELECT id, name FROM sequences WHERE id IN (" + ",".join(selector) + ");"
+    conn = get_db_connection()
+    rows = conn.execute(REQ).fetchall()
+    for row in rows:
+        (seq_id, name) = (row[0], row[1])
+        ret[seq_id] = name
     conn.close()
     return ret
 
