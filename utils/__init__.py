@@ -96,22 +96,24 @@ def get_authors(author):
     if isinstance(author, list):
         for i in author:
             a_tmp = []
-            if 'last-name' in i and i['last-name'] is not None:
-                a_tmp.append(strlist(i['last-name']))
-            if 'first-name' in i and i['first-name'] is not None:
-                a_tmp.append(strlist(i['first-name']))
-            if 'middle-name' in i and i['middle-name'] is not None:
-                a_tmp.append(strlist(i['middle-name']))
-            g.append(" ".join(a_tmp))
+            if i is not None:
+                if 'last-name' in i and i['last-name'] is not None:
+                    a_tmp.append(strlist(i['last-name']))
+                if 'first-name' in i and i['first-name'] is not None:
+                    a_tmp.append(strlist(i['first-name']))
+                if 'middle-name' in i and i['middle-name'] is not None:
+                    a_tmp.append(strlist(i['middle-name']))
+                g.append(" ".join(a_tmp))
         ret = ",".join(g)
     else:
         a_tmp = []
-        if 'last-name' in author and author['last-name'] is not None:
-            a_tmp.append(strlist(author['last-name']))
-        if 'first-name' in author and author['first-name'] is not None:
-            a_tmp.append(strlist(author['first-name']))
-        if 'middle-name' in author and author['middle-name'] is not None:
-            a_tmp.append(strlist(author['middle-name']))
+        if author is not None:
+            if 'last-name' in author and author['last-name'] is not None:
+                a_tmp.append(strlist(author['last-name']))
+            if 'first-name' in author and author['first-name'] is not None:
+                a_tmp.append(strlist(author['first-name']))
+            if 'middle-name' in author and author['middle-name'] is not None:
+                a_tmp.append(strlist(author['middle-name']))
         ret = " ".join(a_tmp)
     return ret
 
@@ -123,23 +125,25 @@ def get_author_ids(author):
     if isinstance(author, list):
         for i in author:
             a_tmp = []
-            if 'last-name' in i and i['last-name'] is not None:
-                a_tmp.append(strlist(i['last-name']))
-            if 'first-name' in i and i['first-name'] is not None:
-                a_tmp.append(strlist(i['first-name']))
-            if 'middle-name' in i and i['middle-name'] is not None:
-                a_tmp.append(strlist(i['middle-name']))
+            if i is not None:
+                if 'last-name' in i and i['last-name'] is not None:
+                    a_tmp.append(strlist(i['last-name']))
+                if 'first-name' in i and i['first-name'] is not None:
+                    a_tmp.append(strlist(i['first-name']))
+                if 'middle-name' in i and i['middle-name'] is not None:
+                    a_tmp.append(strlist(i['middle-name']))
             a_tmp2 = " ".join(a_tmp)
             g.append(hashlib.md5(a_tmp2.encode('utf-8')).hexdigest())
         ret = ",".join(g)
     else:
         a_tmp = []
-        if 'last-name' in author and author['last-name'] is not None:
-            a_tmp.append(strlist(author['last-name']))
-        if 'first-name' in author and author['first-name'] is not None:
-            a_tmp.append(strlist(author['first-name']))
-        if 'middle-name' in author and author['middle-name'] is not None:
-            a_tmp.append(strlist(author['middle-name']))
+        if author is not None:
+            if 'last-name' in author and author['last-name'] is not None:
+                a_tmp.append(strlist(author['last-name']))
+            if 'first-name' in author and author['first-name'] is not None:
+                a_tmp.append(strlist(author['first-name']))
+            if 'middle-name' in author and author['middle-name'] is not None:
+                a_tmp.append(strlist(author['middle-name']))
         r = " ".join(a_tmp)
         ret = hashlib.md5(r.encode('utf-8')).hexdigest()
     return ret
@@ -467,7 +471,6 @@ def iterate_list(blist, dbfile):
             book["size"],
             book["annotation"]
         ]
-        print(insdata)
 
         insdata[2] = genres_replace(insdata[2])
         check_genres(insdata[:3])

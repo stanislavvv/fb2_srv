@@ -12,7 +12,7 @@ class Config:
 
 class DevelopmentConfig(Config):
     DEBUG = True
-    DBSQLITE = "fb_data.sqlite"
+    DBSQLITE = "data/fb_data.sqlite"
     GENRES_LIST = "genres.list"
     ZIPS = "data"
     TITLE = "Home opds directory"
@@ -21,7 +21,7 @@ class DevelopmentConfig(Config):
 class TestConfig(Config):
     TESTING = True
     DEBUG = False
-    DBSQLITE = "fb_data.sqlite"
+    DBSQLITE = "data/fb_data.sqlite"
     GENRES_LIST = "genres.list"
     ZIPS = "data"
     TITLE = "Home opds directory"
@@ -29,7 +29,7 @@ class TestConfig(Config):
 
 class ProductionConfig(Config):
     DEBUG = False
-    DBSQLITE = "fb_data.sqlite"
+    DBSQLITE = "data/fb_data.sqlite"
     GENRES_LIST = "genres.list"
     ZIPS = "data"
     TITLE = "Home opds directory"
