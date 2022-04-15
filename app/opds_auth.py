@@ -67,13 +67,13 @@ def get_authors_list(auth_root):
             )
         conn.close()
     elif len(auth_root) < 2:
-        
+
         # BUG HERE
         REQ = 'SELECT substr(name,1,3) as nm FROM authors WHERE name like "' + auth_root + '%" GROUP BY nm ORDER BY nm;'
         conn = get_db_connection()
         rows = conn.execute(REQ).fetchall()
         ret["feed"]["id"] = "tag:root:authors:" + auth_root
-        #for ch in any2alphabet("name", rows, 3):
+        # for ch in any2alphabet("name", rows, 3):
         for row in rows:
             ch = row["nm"]
             ret["feed"]["entry"].append(
@@ -298,7 +298,7 @@ def get_author_sequence(auth_id, seq_id):
                 {
                     "@href": "/opds/author/" + k,
                     "@rel": "related",
-                    "@title": "All books of author: '" +  v,
+                    "@title": "All books of author: '" + v,
                     "@type": "application/atom+xml"
                 }
             )
@@ -306,10 +306,10 @@ def get_author_sequence(auth_id, seq_id):
         for k, v in seq_data.items():
             links.append(
                 {
-                "@href": "/opds/sequencebooks/" + k,
-                "@rel": "related",
-                "@title": "All books in sequence '" + v + "'",
-                "@type": "application/atom+xml"
+                    "@href": "/opds/sequencebooks/" + k,
+                    "@rel": "related",
+                    "@title": "All books in sequence '" + v + "'",
+                    "@type": "application/atom+xml"
                 }
             )
 
@@ -667,5 +667,3 @@ def get_author_by_time(auth_id):
             }
         )
     conn.close()
-
-

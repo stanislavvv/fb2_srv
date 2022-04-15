@@ -273,7 +273,7 @@ def get_books_in_seq(seq_id):
                 {
                     "@href": "/opds/author/" + k,
                     "@rel": "related",
-                    "@title": "All books of author: '" +  v,
+                    "@title": "All books of author: '" + v,
                     "@type": "application/atom+xml"
                 }
             )
@@ -282,10 +282,10 @@ def get_books_in_seq(seq_id):
         for k, v in seq_data.items():
             links.append(
                 {
-                "@href": "/opds/sequencebooks/" + k,
-                "@rel": "related",
-                "@title": "All books in sequence '" + v + "'",
-                "@type": "application/atom+xml"
+                    "@href": "/opds/sequencebooks/" + k,
+                    "@rel": "related",
+                    "@title": "All books in sequence '" + v + "'",
+                    "@type": "application/atom+xml"
                 }
             )
 

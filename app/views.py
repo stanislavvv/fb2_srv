@@ -9,9 +9,6 @@ from .opds_genres import get_genres_list, get_genre_books
 
 api = Blueprint("api", __name__)
 
-def resp_exired(page, mimetype=None):
-    return Response(page, mimetype)
-
 
 @api.route("/", methods=['GET'])
 def hello_world():
@@ -30,8 +27,7 @@ def static_root():
 @api.route("/opds/", methods=['GET'])
 def opds_root():
     xml = main_opds()
-    #return Response(xml, mimetype='text/xml')
-    return resp_exired(xml, mimetype='text/xml')
+    return Response(xml, mimetype='text/xml')
 
 
 @api.route("/opds/sequencesindex/", methods=['GET'])
@@ -115,6 +111,7 @@ def opds_genres_root():
 def opds_genres_book(gen_id=None):
     xml = get_genre_books(gen_id)
     return Response(xml, mimetype='text/xml')
+
 
 @api.route("/opds/genres/<gen_id>/<int:page>")
 def opds_genres_book_page(gen_id=None, page=0):

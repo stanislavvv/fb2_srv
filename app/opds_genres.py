@@ -2,7 +2,7 @@
 
 import xmltodict
 # import sqlite3
-import urllib.parse
+# import urllib.parse
 # import hashlib
 # from flask import current_app
 from .opds_internals import BOOKS_LIMIT, get_db_connection, get_dtiso, sizeof_fmt, get_authors, get_genres_names
@@ -180,4 +180,3 @@ def get_genre_books(gen_id, page=0):
         )
     conn.close()
     return xmltodict.unparse(ret, pretty=True)
-
