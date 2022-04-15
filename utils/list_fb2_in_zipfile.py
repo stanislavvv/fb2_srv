@@ -7,6 +7,8 @@ import zipfile
 import xmltodict
 import hashlib
 from bs4 import BeautifulSoup
+from datetime import datetime
+
 
 # True for debug json output
 # DEBUG = True
@@ -20,7 +22,7 @@ READ_SIZE = 40960  # description in 20kb...
 
 # show headers for pipe-separated output
 def show_headers():
-    print("zip|filename|genre|authors|author_ids|sequence|sequence_names|sequence_ids|book_title|book_id|lang|annotation_text")
+    print("zip|filename|genre|authors|author_ids|sequence|sequence_names|sequence_ids|book_title|book_id|lang|date_time|annotation_text")
 
 
 # return empty string if None, else return content
@@ -239,6 +241,10 @@ def get_lang(lng):
 
 # get filename in zip, print some data
 def fb2parse(filename):
+    file_info = z.getinfo(filename)
+    fb2dt = datetime(*file_info.date_time)
+    date_time = fb2dt.strftime("%F_%H:%M")
+    size = file_info.file_size
     fb2 = z.open(filename)
     bs = BeautifulSoup(fb2.read(READ_SIZE), 'xml')
     doc = bs.prettify()
@@ -289,6 +295,8 @@ def fb2parse(filename):
         str(book_title),
         book_id,
         str(lang),
+        date_time,
+        str(size),
         str(annotext.replace('\n', " ").replace('|', " "))
     ]
     # print(json.dumps(out, indent=2))  # debug

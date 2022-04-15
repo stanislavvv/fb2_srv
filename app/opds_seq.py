@@ -1,21 +1,13 @@
 # -*- coding: utf-8 -*-
 
 import xmltodict
-import datetime
-import sqlite3
+# import datetime
+# import sqlite3
 import urllib.parse
 # import hashlib
 from flask import current_app
 
-
-def get_db_connection():
-    conn = sqlite3.connect(current_app.config['DBSQLITE'])
-    conn.row_factory = sqlite3.Row
-    return conn
-
-
-def get_dtiso():
-    return datetime.datetime.now().astimezone().replace(microsecond=0).isoformat()
+from .opds_internals import get_db_connection, get_dtiso, any2alphabet, get_authors, get_genres_names, sizeof_fmt
 
 
 def main_opds():
@@ -98,14 +90,6 @@ def main_opds():
     return xmltodict.unparse(ret, pretty=True)
 
 
-def any2alphabet(field, sq3_rows, num):
-    alphabet = {}
-    for i in sq3_rows:
-        s = i[field]
-        alphabet[s[:num]] = 1
-    return sorted(list(alphabet))
-
-
 # seq_root - /opds/sequencesindex/(.*)
 #   may be None, "" or / for /opds/sequencesindex
 def get_sequences(seq_root):
@@ -141,7 +125,7 @@ def get_sequences(seq_root):
         }
     }
     if seq_root is None or seq_root == "" or seq_root == "/" or not isinstance(seq_root, str):
-        ALL_SEQUENCES = 'SELECT sequence FROM books GROUP BY sequence ORDER BY sequence;'
+        ALL_SEQUENCES = 'SELECT sequence FROM sequences GROUP BY sequence ORDER BY sequence;'
         conn = get_db_connection()
         rows = conn.execute(ALL_SEQUENCES).fetchall()
         for ch in any2alphabet("sequence", rows, 1):
@@ -162,10 +146,9 @@ def get_sequences(seq_root):
             )
         conn.close()
     elif len(seq_root) < 2:
-        REQ1 = 'SELECT sequence_names as seq FROM books WHERE UPPER(sequence_names) like "'
-        REQ2 = '%" OR sequence_names like "%,'
-        REQ3 = '%" GROUP BY seq ORDER BY seq;'
-        REQ = REQ1 + seq_root + REQ2 + seq_root + REQ3
+        REQ1 = 'SELECT sequence_names as seq FROM sequences WHERE UPPER(sequence_names) like "'
+        REQ2 = '%" GROUP BY seq ORDER BY seq;'
+        REQ = REQ1 + seq_root + REQ2
         conn = get_db_connection()
         rows = conn.execute(REQ).fetchall()
         ret["feed"]["id"] = "tag:root:sequences:" + urllib.parse.quote_plus(seq_root, encoding='utf-8')
@@ -216,36 +199,6 @@ def get_sequences(seq_root):
     return xmltodict.unparse(ret, pretty=True)
 
 
-def get_authors(ids):
-    ret = {}
-    selector = []
-    for i in ids.split(","):
-        selector.append("'" + i + "'")
-    REQ = "SELECT id, name FROM authors WHERE id IN (" + ",".join(selector) + ");"
-    conn = get_db_connection()
-    rows = conn.execute(REQ).fetchall()
-    for row in rows:
-        (author_id, name) = (row[0], row[1])
-        ret[author_id] = name
-    conn.close()
-    return ret
-
-
-def get_genres_names(genres_ids):
-    ret = {}
-    selector = []
-    for i in genres_ids.split(","):
-        selector.append("'" + i + "'")
-    REQ = "SELECT id, description FROM genres WHERE id IN (" + ",".join(selector) + ");"
-    conn = get_db_connection()
-    rows = conn.execute(REQ).fetchall()
-    for row in rows:
-        (genre_id, description) = (row[0], row[1])
-        ret[genre_id] = description
-    conn.close()
-    return ret
-
-
 def get_books_in_seq(seq_id):
     dtiso = get_dtiso()
     REQ = 'SELECT id, name FROM sequences WHERE id = "' + seq_id + '"'
@@ -284,7 +237,7 @@ def get_books_in_seq(seq_id):
             "entry": []
         }
     }
-    REQ1 = 'SELECT zipfile, filename, genres, author_ids, book_id, book_title, lang, annotation'
+    REQ1 = 'SELECT zipfile, filename, genres, author_ids, book_id, book_title, lang, size, annotation'
     REQ1 = REQ1 + ' FROM books WHERE sequence_ids = "'  # fix E501 line too long
     REQ2 = '" OR sequence_ids like "%,'
     REQ3 = '" OR sequence_ids like "'
@@ -302,6 +255,7 @@ def get_books_in_seq(seq_id):
         book_title = row["book_title"]
         book_id = row["book_id"]
         lang = row["lang"]
+        size = row["size"]
         annotation = row["annotation"]
 
         authors = []
@@ -353,7 +307,7 @@ def get_books_in_seq(seq_id):
         annotext = """
         <p class=\"book\"> %s </p>\n<br/>Format: fb2<br/>Lang: ru<br/>
         Size: %s<br/>Sequence: %s"<br/>
-        """ % (annotation, "0k", seq)
+        """ % (annotation, sizeof_fmt(size), seq)
         ret["feed"]["entry"].append(
             {
                 "updated": dtiso,

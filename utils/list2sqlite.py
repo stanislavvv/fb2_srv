@@ -14,19 +14,21 @@ import hashlib
 # book_id = md5("zipfile/filename")
 """
 CREATE TABLE "books" (
-    "zipfile"   TEXT NOT NULL,
-    "filename"  TEXT NOT NULL,
-    "genres"    TEXT,
-    "authors"   TEXT COLLATE NOCASE,
-    "author_ids"    TEXT,
-    "sequence"  TEXT,
-    "sequence_names"    TEXT COLLATE NOCASE,
-    "sequence_ids"  TEXT,
-    "book_title"    TEXT COLLATE NOCASE,
-    "book_id"   TEXT,
-    "lang"  TEXT,
-    "annotation"    TEXT COLLATE NOCASE,
-    PRIMARY KEY("zipfile","filename","authors","book_title")
+	"zipfile"	TEXT NOT NULL,
+	"filename"	TEXT NOT NULL,
+	"genres"	TEXT,
+	"authors"	TEXT COLLATE NOCASE,
+	"author_ids"	NUMERIC,
+	"sequence"	TEXT,
+	"sequence_names"	TEXT COLLATE NOCASE,
+	"sequence_ids"	TEXT,
+	"book_title"	TEXT COLLATE NOCASE,
+	"book_id"	TEXT,
+	"lang"	TEXT,
+	"date_time"	TEXT,
+	"size"	INTEGER,
+	"annotation"	TEXT COLLATE NOCASE,
+	PRIMARY KEY("zipfile","filename","authors","book_title")
 )
 CREATE TABLE "authors" (
     "id"    TEXT UNIQUE,
@@ -204,7 +206,7 @@ def iterate_list(blist):
         if not line:
             break
         insdatat = line.strip('\n').split('|')
-        insdata = insdatat[:12]
+        insdata = insdatat[:14]
         insdata[2] = genres_replace(insdata[2])
         check_genres(insdata[:3])
         genres2db(cur, insdata[2])
@@ -213,9 +215,10 @@ def iterate_list(blist):
         if len(insdata) != len(insdatat):  # something strange in description
             print(">>>", insdatat)
             print("<<<", insdata)
-            insdata[11] = "".join(insdatat[11:])
+            insdata[13] = "".join(insdatat[13:])
+            insdata[12] = int(insdata[12])
         # print(insdata)  # debug
-        cur.execute("INSERT INTO books VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (insdata))
+        cur.execute("INSERT INTO books VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (insdata))
     con.commit()
     con.close()
     data.close()
