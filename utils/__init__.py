@@ -247,6 +247,8 @@ def fb2parse(z, filename):
     fb2dt = datetime(*file_info.date_time)
     date_time = fb2dt.strftime("%F_%H:%M")
     size = file_info.file_size
+    if size < 1000:
+        return None
     fb2 = z.open(filename)
     bs = BeautifulSoup(fb2.read(READ_SIZE), 'xml')
     doc = bs.prettify()
@@ -312,7 +314,9 @@ def ziplist(zip_file):
     for filename in z.namelist():
         if not os.path.isdir(filename):
             print(zip_file + "/" + filename + "             ", end="\r")
-            ret.append(fb2parse(z, filename))
+            res = fb2parse(z, filename)
+            if res is not None:
+                ret.append(res)
     print("")
     return ret
 
