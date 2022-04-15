@@ -30,8 +30,8 @@ def opds_root():
     return Response(xml, mimetype='text/xml')
 
 
-@api.route("/opds/sequencesindex", methods=['GET'])
 @api.route("/opds/sequencesindex/", methods=['GET'])
+@api.route("/opds/sequencesindex", methods=['GET'])
 def opds_by_seq_root():
     xml = get_sequences(None)
     return Response(xml, mimetype='text/xml')
@@ -50,8 +50,8 @@ def opds_books_in_seq(seq=None):
     return Response(xml, mimetype='text/xml')
 
 
-@api.route("/opds/authorsindex", methods=['GET'])
 @api.route("/opds/authorsindex/", methods=['GET'])
+@api.route("/opds/authorsindex", methods=['GET'])
 def opds_by_authors_root():
     xml = get_authors_list(None)
     return Response(xml, mimetype='text/xml')
@@ -100,8 +100,8 @@ def opds_author_time(auth=None):
     return Response(xml, mimetype='text/xml')
 
 
-@api.route("/opds/genres")
 @api.route("/opds/genres/")
+@api.route("/opds/genres")
 def opds_genres_root():
     xml = get_genres_list()
     return Response(xml, mimetype='text/xml')
