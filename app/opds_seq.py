@@ -126,10 +126,10 @@ def get_sequences(seq_root):
         }
     }
     if seq_root is None or seq_root == "" or seq_root == "/" or not isinstance(seq_root, str):
-        ALL_SEQUENCES = 'SELECT sequence FROM sequences GROUP BY sequence ORDER BY sequence;'
+        ALL_SEQUENCES = 'SELECT name FROM sequences GROUP BY name ORDER BY name;'
         conn = get_db_connection()
         rows = conn.execute(ALL_SEQUENCES).fetchall()
-        for ch in any2alphabet("sequence", rows, 1):
+        for ch in any2alphabet("name", rows, 1):
             ret["feed"]["entry"].append(
                 {
                     "updated": dtiso,
@@ -147,7 +147,7 @@ def get_sequences(seq_root):
             )
         conn.close()
     elif len(seq_root) < 2:
-        REQ1 = 'SELECT sequence_names as seq FROM sequences WHERE UPPER(sequence_names) like "'
+        REQ1 = 'SELECT name as seq FROM sequences WHERE UPPER(name) like "'
         REQ2 = '%" GROUP BY seq ORDER BY seq;'
         REQ = REQ1 + seq_root + REQ2
         conn = get_db_connection()

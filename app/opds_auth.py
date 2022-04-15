@@ -45,14 +45,15 @@ def get_authors_list(auth_root):
     ret = ret_hdr_author
     ret["feed"]["updated"] = dtiso
     if auth_root is None or auth_root == "" or auth_root == "/" or not isinstance(auth_root, str):
-        ALL_AUTHORS = 'SELECT name FROM authors ORDER BY name;'
+        ALL_AUTHORS = 'SELECT substr(name, 1, 1) as nm FROM authors GROUP BY nm ORDER BY nm ;'
         conn = get_db_connection()
         rows = conn.execute(ALL_AUTHORS).fetchall()
-        for ch in any2alphabet("name", rows, 1):
+        for row in rows:
+            ch = row["nm"]
             ret["feed"]["entry"].append(
                 {
                     "updated": dtiso,
-                    "id": "tag:authors:" + urllib.parse.quote(ch),
+                    "id": "tag:authors:" + ch,
                     "title": ch,
                     "content": {
                         "@type": "text",
@@ -66,11 +67,15 @@ def get_authors_list(auth_root):
             )
         conn.close()
     elif len(auth_root) < 2:
-        REQ = 'SELECT name FROM authors WHERE name like "' + auth_root + '%";'
+        
+        # BUG HERE
+        REQ = 'SELECT substr(name,1,3) as nm FROM authors WHERE name like "' + auth_root + '%" GROUP BY nm ORDER BY nm;'
         conn = get_db_connection()
         rows = conn.execute(REQ).fetchall()
-        ret["feed"]["id"] = "tag:root:authors:" + urllib.parse.quote_plus(auth_root, encoding='utf-8')
-        for ch in any2alphabet("name", rows, 3):
+        ret["feed"]["id"] = "tag:root:authors:" + auth_root
+        #for ch in any2alphabet("name", rows, 3):
+        for row in rows:
+            ch = row["nm"]
             ret["feed"]["entry"].append(
                 {
                     "updated": dtiso,
