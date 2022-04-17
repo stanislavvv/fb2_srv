@@ -254,7 +254,12 @@ def fb2parse(z, filename):
     doc = bs.prettify()
     # data = xmltodict.parse(doc, xml_attribs=False)
     data = xmltodict.parse(doc)
-    info = data['FictionBook']['description']['title-info']
+    if 'FictionBook' not in data:
+        data = xmltodict.parse(doc, process_namespaces=True, namespaces={'http://www.gribuser.ru/xml/fictionbook/2.0':None})
+    fb2data = data['FictionBook']
+    descr = fb2data['description']
+    info = descr['title-info']
+
     if 'genre' in info and info['genre'] is not None:
         genre = get_genre(info['genre'])
     else:
@@ -281,7 +286,7 @@ def fb2parse(z, filename):
     if 'lang' in info and info['lang'] is not None:
         lang = get_lang(info['lang'])
     annotext = ''
-    if 'annotation' in info:
+    if 'annotation' in info and info['annotation'] is not None:
         annotext = recursive_text(info['annotation'])
     book_path = str(os.path.basename(z.filename)) + "/" + filename
     book_id = hashlib.md5(book_path.encode('utf-8')).hexdigest()
