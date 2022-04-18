@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import xmltodict
+# import xmltodict
 # import sqlite3
 # import urllib.parse
 # import hashlib
@@ -67,7 +67,7 @@ def get_genres_list():
             }
         )
     conn.close()
-    return xmltodict.unparse(ret, pretty=True)
+    return ret
 
 
 def get_genre_books(gen_id, page=0):
@@ -99,7 +99,6 @@ def get_genre_books(gen_id, page=0):
     REQ4 = "' OR genres LIKE '%,"
     REQ5 = ",%') ORDER BY book_title LIMIT " + str(BOOKS_LIMIT) + " OFFSET " + str(page * BOOKS_LIMIT) + ";"
     REQ = REQ1 + gen_id + REQ2 + gen_id + REQ3 + gen_id + REQ4 + gen_id + REQ5
-    print(REQ)
     rows = conn.execute(REQ).fetchall()
     for row in rows:
         zipfile = row["zipfile"]
@@ -117,7 +116,7 @@ def get_genre_books(gen_id, page=0):
         for k, v in authors_data.items():
             authors.append(
                 {
-                    "uri": "/opds/a/" + k,
+                    "uri": "/opds/author/" + k,
                     "name": v
                 }
             )
@@ -139,6 +138,7 @@ def get_genre_books(gen_id, page=0):
                     {
                         "@href": "/fb2/" + zipfile + "/" + filename,
                         "@rel": "http://opds-spec.org/acquisition/open-access",
+                        "@title": "Download",
                         "@type": "application/fb2+zip"
                     },
                     {
@@ -179,4 +179,4 @@ def get_genre_books(gen_id, page=0):
             }
         )
     conn.close()
-    return xmltodict.unparse(ret, pretty=True)
+    return ret

@@ -96,7 +96,6 @@ def get_genres_names(genres_ids):
 def get_seqs(ids):
     ret = {}
     selector = []
-    print(ids)
     for i in ids.split(","):
         selector.append("'" + i + "'")
     REQ = "SELECT id, name FROM sequences WHERE id IN (" + ",".join(selector) + ");"

@@ -116,7 +116,7 @@ def get_authors_list(auth_root):
                 }
             )
         conn.close()
-    return xmltodict.unparse(ret, pretty=True)
+    return ret
 
 
 def get_author_list(auth_id):
@@ -200,7 +200,7 @@ def get_author_list(auth_id):
                 }
             ]
     conn.close()
-    return xmltodict.unparse(ret, pretty=True)
+    return ret
 
 
 def get_author_sequences(auth_id):
@@ -237,7 +237,7 @@ def get_author_sequences(auth_id):
             },
         )
     conn.close()
-    return xmltodict.unparse(ret, pretty=True)
+    return ret
 
 
 def get_author_sequence(auth_id, seq_id):
@@ -290,7 +290,7 @@ def get_author_sequence(auth_id, seq_id):
         for k, v in authors_data.items():
             authors.append(
                 {
-                    "uri": "/opds/a/" + k,
+                    "uri": "/opds/author/" + k,
                     "name": v
                 }
             )
@@ -317,6 +317,7 @@ def get_author_sequence(auth_id, seq_id):
             {
                 "@href": "/fb2/" + zipfile + "/" + filename,
                 "@rel": "http://opds-spec.org/acquisition/open-access",
+                "@title": "Download",
                 "@type": "application/fb2+zip"
             },
         )
@@ -360,7 +361,7 @@ def get_author_sequence(auth_id, seq_id):
             }
         )
     conn.close()
-    return xmltodict.unparse(ret, pretty=True)
+    return ret
 
 
 def get_author_sequenceless(auth_id):
@@ -400,7 +401,7 @@ def get_author_sequenceless(auth_id):
         for k, v in authors_data.items():
             authors.append(
                 {
-                    "uri": "/opds/a/" + k,
+                    "uri": "/opds/author/" + k,
                     "name": v
                 }
             )
@@ -422,6 +423,7 @@ def get_author_sequenceless(auth_id):
                     {
                         "@href": "/fb2/" + zipfile + "/" + filename,
                         "@rel": "http://opds-spec.org/acquisition/open-access",
+                        "@title": "Download",
                         "@type": "application/fb2+zip"
                     },
                     {
@@ -463,7 +465,7 @@ def get_author_sequenceless(auth_id):
             }
         )
     conn.close()
-    return xmltodict.unparse(ret, pretty=True)
+    return ret
 
 
 def get_author_by_alphabet(auth_id):
@@ -503,7 +505,7 @@ def get_author_by_alphabet(auth_id):
         for k, v in authors_data.items():
             authors.append(
                 {
-                    "uri": "/opds/a/" + k,
+                    "uri": "/opds/author/" + k,
                     "name": v
                 }
             )
@@ -525,6 +527,7 @@ def get_author_by_alphabet(auth_id):
                     {
                         "@href": "/fb2/" + zipfile + "/" + filename,
                         "@rel": "http://opds-spec.org/acquisition/open-access",
+                        "@title": "Download",
                         "@type": "application/fb2+zip"
                     },
                     {
@@ -565,7 +568,7 @@ def get_author_by_alphabet(auth_id):
             }
         )
     conn.close()
-    return xmltodict.unparse(ret, pretty=True)
+    return ret
 
 
 def get_author_by_time(auth_id):
@@ -605,7 +608,7 @@ def get_author_by_time(auth_id):
         for k, v in authors_data.items():
             authors.append(
                 {
-                    "uri": "/opds/a/" + k,
+                    "uri": "/opds/author/" + k,
                     "name": v
                 }
             )
@@ -627,6 +630,7 @@ def get_author_by_time(auth_id):
                     {
                         "@href": "/fb2/" + zipfile + "/" + filename,
                         "@rel": "http://opds-spec.org/acquisition/open-access",
+                        "@title": "Download",
                         "@type": "application/fb2+zip"
                     },
                     {
@@ -667,3 +671,4 @@ def get_author_by_time(auth_id):
             }
         )
     conn.close()
+    return ret

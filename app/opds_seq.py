@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import xmltodict
+# import xmltodict
 # import datetime
 # import sqlite3
 import urllib.parse
@@ -88,7 +88,7 @@ def main_opds():
             ]
         }
     }
-    return xmltodict.unparse(ret, pretty=True)
+    return ret
 
 
 # seq_root - /opds/sequencesindex/(.*)
@@ -197,7 +197,7 @@ def get_sequences(seq_root):
                 }
             )
         conn.close()
-    return xmltodict.unparse(ret, pretty=True)
+    return ret
 
 
 def get_books_in_seq(seq_id):
@@ -265,7 +265,7 @@ def get_books_in_seq(seq_id):
         for k, v in authors_data.items():
             authors.append(
                 {
-                    "uri": "/opds/a/" + k,
+                    "uri": "/opds/author/" + k,
                     "name": v
                 }
             )
@@ -293,6 +293,7 @@ def get_books_in_seq(seq_id):
             {
                 "@href": "/fb2/" + zipfile + "/" + filename,
                 "@rel": "http://opds-spec.org/acquisition/open-access",
+                "@title": "Download",
                 "@type": "application/fb2+zip"
             }
         )
@@ -336,4 +337,4 @@ def get_books_in_seq(seq_id):
             }
         )
     conn.close()
-    return xmltodict.unparse(ret, pretty=True)
+    return ret
