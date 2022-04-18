@@ -241,6 +241,24 @@ def get_lang(lng):
     return ret
 
 
+
+# ret substr by key
+def get_struct_by_key(key, struct):
+    if key in struct:
+        return struct[key]
+    if isinstance(struct, list):
+        for k in struct:
+            r = get_struct_by_key(key, k)
+            if r is not None:
+                return r
+    if isinstance(struct, dict):
+        for k, v in struct.items():
+            r = get_struct_by_key(key, v)
+            if r is not None:
+                return r
+    return None
+
+
 # get filename in zip, print some data
 def fb2parse(z, filename):
     file_info = z.getinfo(filename)
@@ -250,15 +268,16 @@ def fb2parse(z, filename):
     if size < 1000:
         return None
     fb2 = z.open(filename)
-    bs = BeautifulSoup(fb2.read(READ_SIZE), 'xml')
+    bs = BeautifulSoup(bytes(fb2.read(READ_SIZE)), 'xml')
     doc = bs.prettify()
     # data = xmltodict.parse(doc, xml_attribs=False)
     data = xmltodict.parse(doc)
-    if 'FictionBook' not in data:
+    if 'FictionBook' not in data:  # parse with namespace
         data = xmltodict.parse(doc, process_namespaces=True, namespaces={'http://www.gribuser.ru/xml/fictionbook/2.0':None})
-    fb2data = data['FictionBook']
-    descr = fb2data['description']
-    info = descr['title-info']
+    fb2data = get_struct_by_key('FictionBook', data)  # data['FictionBook']
+    descr = get_struct_by_key('description', fb2data)  # fb2data['description']
+    # print(json.dumps(descr, ensure_ascii=False))
+    info = get_struct_by_key('title-info', descr)  # descr['title-info']
 
     if 'genre' in info and info['genre'] is not None:
         genre = get_genre(info['genre'])
