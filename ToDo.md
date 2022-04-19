@@ -1,6 +1,6 @@
 # ToDo
 
-  * BUG: show by alphabet with 3 characters does not work properly
   * ToDo: fb2 download
-  * ToDo: html interface (html3 for simplicity)
   * ToDo: read books in browser (simply pass it over xsltproc)
+  * ToDo: links to genres in book entry at /genres/<genre>
+  * BUG: duplicate authors in sequencebooks/<seq_id> with html interface

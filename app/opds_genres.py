@@ -92,7 +92,7 @@ def get_genre_books(gen_id, page=0):
         }
     )
 
-    REQ0 = "SELECT zipfile, filename, genres, author_ids, book_id, book_title, lang, size, annotation"
+    REQ0 = "SELECT zipfile, filename, genres, author_ids, book_id, book_title, lang, size, date_time, annotation"
     REQ1 = REQ0 + " FROM books WHERE (genres = '"  # fix E501 line too long
     REQ2 = "' OR genres LIKE '"
     REQ3 = ",%' OR genres LIKE '%,"
@@ -109,6 +109,7 @@ def get_genre_books(gen_id, page=0):
         book_id = row["book_id"]
         lang = row["lang"]
         size = row["size"]
+        date_time = row["date_time"]
         annotation = row["annotation"]
 
         authors = []
@@ -164,7 +165,7 @@ def get_genre_books(gen_id, page=0):
         """ % (annotation, sizeof_fmt(size), "")
         ret["feed"]["entry"].append(
             {
-                "updated": dtiso,
+                "updated": date_time,
                 "id": "tag:book:" + book_id,
                 "title": book_title,
                 "author": authors,

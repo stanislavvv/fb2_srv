@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
-import xmltodict
+import json
+
+# import xmltodict
 # import sqlite3
 import urllib.parse
 # import hashlib
@@ -8,7 +10,8 @@ import urllib.parse
 from .opds_internals import get_db_connection, get_dtiso, any2alphabet, get_authors, get_genres_names
 from .opds_internals import get_auth_seqs, get_seqs, sizeof_fmt
 
-ret_hdr_author = {
+def ret_hdr_author():  # python does not have constants
+    return {
         "feed": {
             "@xmlns": "http://www.w3.org/2005/Atom",
             "@xmlns:dc": "http://purl.org/dc/terms/",
@@ -42,9 +45,9 @@ ret_hdr_author = {
 
 def get_authors_list(auth_root):
     dtiso = get_dtiso()
-    ret = ret_hdr_author
-    ret["feed"]["updated"] = dtiso
     if auth_root is None or auth_root == "" or auth_root == "/" or not isinstance(auth_root, str):
+        ret = ret_hdr_author()
+        ret["feed"]["updated"] = dtiso
         ALL_AUTHORS = 'SELECT substr(name, 1, 1) as nm FROM authors GROUP BY nm ORDER BY nm ;'
         conn = get_db_connection()
         rows = conn.execute(ALL_AUTHORS).fetchall()
@@ -67,8 +70,8 @@ def get_authors_list(auth_root):
             )
         conn.close()
     elif len(auth_root) < 2:
-
-        # BUG HERE
+        ret = ret_hdr_author()
+        ret["feed"]["updated"] = dtiso
         REQ = 'SELECT substr(name,1,3) as nm FROM authors WHERE name like "' + auth_root + '%" GROUP BY nm ORDER BY nm;'
         conn = get_db_connection()
         rows = conn.execute(REQ).fetchall()
@@ -93,7 +96,11 @@ def get_authors_list(auth_root):
             )
         conn.close()
     else:
+        ret = {}
+        ret = ret_hdr_author()
+        ret["feed"]["updated"] = dtiso
         REQ = 'SELECT id, name FROM authors WHERE name LIKE "' + auth_root + '%" ORDER BY name;'
+        print(REQ)
         ret["feed"]["id"] = "tag:root:authors:" + urllib.parse.quote_plus(auth_root, encoding='utf-8')
         conn = get_db_connection()
         rows = conn.execute(REQ).fetchall()
@@ -128,7 +135,7 @@ def get_author_list(auth_id):
         return ""
     auth_name = rows[0][1]
     auth_info = rows[0][2]
-    ret = ret_hdr_author
+    ret = ret_hdr_author()
     ret["feed"]["id"] = "tag:author:" + auth_id
     ret["feed"]["title"] = "Books of author: " + auth_name + ""
     ret["feed"]["updated"] = dtiso
@@ -211,7 +218,7 @@ def get_author_sequences(auth_id):
     if len(rows) == 0:
         return ""
     auth_name = rows[0][1]
-    ret = ret_hdr_author
+    ret = ret_hdr_author()
     ret["feed"]["id"] = "tag:author:" + auth_id
     ret["feed"]["title"] = "Books of author: " + auth_name + " by sequence"
     ret["feed"]["updated"] = dtiso
@@ -254,12 +261,12 @@ def get_author_sequence(auth_id, seq_id):
     if len(rows) == 0:
         return ""
     seq_name = rows[0][1]
-    ret = ret_hdr_author
+    ret = ret_hdr_author()
     ret["feed"]["id"] = "tag:author:" + auth_id + ":sequence:" + seq_id
     ret["feed"]["title"] = "Books of author: " + auth_name + " by sequence '" + seq_name + "'"
     ret["feed"]["updated"] = dtiso
 
-    REQ0 = "SELECT zipfile, filename, genres, author_ids, sequence_ids, book_id, book_title, lang, size, annotation"
+    REQ0 = "SELECT zipfile, filename, genres, author_ids, sequence_ids, book_id, book_title, lang, size, date_time, annotation"
     REQ1 = REQ0 + " FROM books WHERE (author_ids = '"  # fix E501 line too long
     REQ2 = "' OR author_ids LIKE '"
     REQ3 = ",%' OR author_ids LIKE '%,"
@@ -282,6 +289,7 @@ def get_author_sequence(auth_id, seq_id):
         book_id = row["book_id"]
         lang = row["lang"]
         size = row["size"]
+        date_time = row["date_time"]
         annotation = row["annotation"]
 
         authors = []
@@ -298,7 +306,7 @@ def get_author_sequence(auth_id, seq_id):
                 {
                     "@href": "/opds/author/" + k,
                     "@rel": "related",
-                    "@title": "All books of author: '" + v,
+                    "@title": v,
                     "@type": "application/atom+xml"
                 }
             )
@@ -345,7 +353,7 @@ def get_author_sequence(auth_id, seq_id):
         """ % (annotation, sizeof_fmt(size), seq_name)
         ret["feed"]["entry"].append(
             {
-                "updated": dtiso,
+                "updated": date_time,
                 "id": "tag:book:" + book_id,
                 "title": book_title,
                 "author": authors,
@@ -372,12 +380,12 @@ def get_author_sequenceless(auth_id):
     if len(rows) == 0:
         return ""
     auth_name = rows[0][1]
-    ret = ret_hdr_author
+    ret = ret_hdr_author()
     ret["feed"]["id"] = "tag:author:" + auth_id + ":sequenceless:"
     ret["feed"]["title"] = "Books of author: " + auth_name
     ret["feed"]["updated"] = dtiso
 
-    REQ0 = "SELECT zipfile, filename, genres, author_ids, book_id, book_title, lang, size, annotation"
+    REQ0 = "SELECT zipfile, filename, genres, author_ids, book_id, book_title, lang, size, date_time, annotation"
     REQ1 = REQ0 + " FROM books WHERE (author_ids = '"  # fix E501 line too long
     REQ2 = "' OR author_ids LIKE '"
     REQ3 = ",%' OR author_ids LIKE '%,"
@@ -394,6 +402,7 @@ def get_author_sequenceless(auth_id):
         book_id = row["book_id"]
         lang = row["lang"]
         size = row["size"]
+        date_time = row["date_time"]
         annotation = row["annotation"]
 
         authors = []
@@ -449,7 +458,7 @@ def get_author_sequenceless(auth_id):
         """ % (annotation, sizeof_fmt(size), "")
         ret["feed"]["entry"].append(
             {
-                "updated": dtiso,
+                "updated": date_time,
                 "id": "tag:book:" + book_id,
                 "title": book_title,
                 "author": authors,
@@ -469,6 +478,7 @@ def get_author_sequenceless(auth_id):
 
 
 def get_author_by_alphabet(auth_id):
+    ret = ret_hdr_author()
     dtiso = get_dtiso()
     REQ = 'SELECT id, name FROM authors WHERE id = "' + auth_id + '"'
     conn = get_db_connection()
@@ -476,12 +486,12 @@ def get_author_by_alphabet(auth_id):
     if len(rows) == 0:
         return ""
     auth_name = rows[0][1]
-    ret = ret_hdr_author
+    ret = ret_hdr_author()
     ret["feed"]["id"] = "tag:author:" + auth_id + "books:alphabet:"
     ret["feed"]["title"] = "Books of author: " + auth_name + " by aplhabet"
     ret["feed"]["updated"] = dtiso
 
-    REQ0 = "SELECT zipfile, filename, genres, author_ids, book_id, book_title, lang, size, annotation"
+    REQ0 = "SELECT zipfile, filename, genres, author_ids, book_id, book_title, lang, size, date_time, annotation"
     REQ1 = REQ0 + " FROM books WHERE (author_ids = '"  # fix E501 line too long
     REQ2 = "' OR author_ids LIKE '"
     REQ3 = ",%' OR author_ids LIKE '%,"
@@ -498,6 +508,7 @@ def get_author_by_alphabet(auth_id):
         book_id = row["book_id"]
         lang = row["lang"]
         size = row["size"]
+        date_time = row["date_time"]
         annotation = row["annotation"]
 
         authors = []
@@ -553,7 +564,7 @@ def get_author_by_alphabet(auth_id):
         """ % (annotation, sizeof_fmt(size), "")
         ret["feed"]["entry"].append(
             {
-                "updated": dtiso,
+                "updated": date_time,
                 "id": "tag:book:" + book_id,
                 "title": book_title,
                 "author": authors,
@@ -579,7 +590,7 @@ def get_author_by_time(auth_id):
     if len(rows) == 0:
         return ""
     auth_name = rows[0][1]
-    ret = ret_hdr_author
+    ret = ret_hdr_author()
     ret["feed"]["id"] = "tag:author:" + auth_id + "books:alphabet:"
     ret["feed"]["title"] = "Books of author: " + auth_name + " by aplhabet"
     ret["feed"]["updated"] = dtiso
@@ -601,6 +612,7 @@ def get_author_by_time(auth_id):
         book_id = row["book_id"]
         lang = row["lang"]
         size = row["size"]
+        date_time = row["date_time"]
         annotation = row["annotation"]
 
         authors = []
@@ -656,7 +668,7 @@ def get_author_by_time(auth_id):
         """ % (annotation, sizeof_fmt(size), "")
         ret["feed"]["entry"].append(
             {
-                "updated": dtiso,
+                "updated": date_time,
                 "id": "tag:book:" + book_id,
                 "title": book_title,
                 "author": authors,

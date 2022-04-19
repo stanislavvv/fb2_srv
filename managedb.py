@@ -130,6 +130,13 @@ def fillnew():
             booklist2db(booklist, dbfile)
 
 
+def fill_lists():
+    dbfile = app.config['DBSQLITE']
+    zipdir = app.config['ZIPS']
+    for booklist in glob.glob(zipdir + '/*.zip.list'):
+        booklist2db(booklist, dbfile)
+
+
 if __name__ == "__main__":
     app = create_app()
     if len(sys.argv) > 1:
@@ -143,6 +150,8 @@ if __name__ == "__main__":
             fillnew()
         elif sys.argv[1] == "refillall":
             fillall()
+        elif sys.argv[1] == "fill_lists":
+            fill_lists()
         else:
             usage()
     else:

@@ -238,7 +238,7 @@ def get_books_in_seq(seq_id):
             "entry": []
         }
     }
-    REQ1 = 'SELECT zipfile, filename, genres, author_ids, sequence_ids, book_id, book_title, lang, size, annotation'
+    REQ1 = 'SELECT zipfile, filename, genres, author_ids, sequence_ids, book_id, book_title, lang, size, date_time, annotation'
     REQ1 = REQ1 + ' FROM books WHERE sequence_ids = "'  # fix E501 line too long
     REQ2 = '" OR sequence_ids like "%,'
     REQ3 = '" OR sequence_ids like "'
@@ -257,6 +257,7 @@ def get_books_in_seq(seq_id):
         book_id = row["book_id"]
         lang = row["lang"]
         size = row["size"]
+        date_time = row["date_time"]
         annotation = row["annotation"]
 
         authors = []
@@ -273,7 +274,7 @@ def get_books_in_seq(seq_id):
                 {
                     "@href": "/opds/author/" + k,
                     "@rel": "related",
-                    "@title": "All books of author: '" + v,
+                    "@title": v,
                     "@type": "application/atom+xml"
                 }
             )
@@ -321,7 +322,7 @@ def get_books_in_seq(seq_id):
         """ % (annotation, sizeof_fmt(size), seq)
         ret["feed"]["entry"].append(
             {
-                "updated": dtiso,
+                "updated": date_time,
                 "id": "tag:book:" + book_id,
                 "title": book_title,
                 "author": authors,

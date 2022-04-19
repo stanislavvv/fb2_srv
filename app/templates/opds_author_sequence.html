@@ -1,0 +1,31 @@
+<html>
+    <head>
+        <title>
+            {% if title is defined -%}
+                {{title}}
+            {% else -%}
+                Documentation
+            {% endif -%}
+        </title>
+    </head>
+    <body>
+        <h1>
+            {% if title is defined -%}
+                {{title}}
+            {% else -%}
+                Documentation
+            {% endif -%}
+        </h1>
+            {% if updated is defined -%}
+                <p>{{updated}}</p>
+            {% endif -%}
+        {% for i in entry %}
+        <div>
+            <p><a href={{i.link['@href']|replace('/opds', '/html', 1)}}>{{i.title}}</a></p>
+            <p>{{i.content['#text']|safe}}</p>
+            <hr>
+        </div>
+        {% endfor %}
+    </body>
+</html>
+
