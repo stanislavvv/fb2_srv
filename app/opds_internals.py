@@ -6,7 +6,7 @@ from flask import current_app
 
 
 # max books on page
-BOOKS_LIMIT = 100
+BOOKS_LIMIT = 10
 
 
 # return [ { "name": seq_name, "id": seq_id, "count": books_count }, ...]

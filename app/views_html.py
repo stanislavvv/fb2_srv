@@ -34,7 +34,8 @@ def html_root():
     title = data['feed']['title']
     updated = data['feed']['updated']
     entry = data['feed']['entry']
-    page = render_template('opds_root.html', title=title, updated=updated, entry=entry)
+    link = data['feed']['link']
+    page = render_template('opds_root.html', title=title, updated=updated, link=link, entry=entry)
     return Response(page, mimetype='text/html')
 
 
@@ -45,7 +46,8 @@ def html_by_seq_root():
     title = data['feed']['title']
     updated = data['feed']['updated']
     entry = data['feed']['entry']
-    page = render_template('opds_root.html', title=title, updated=updated, entry=entry)
+    link = data['feed']['link']
+    page = render_template('opds_root.html', title=title, updated=updated, link=link, entry=entry)
     return Response(page, mimetype='text/html')
 
 
@@ -56,7 +58,8 @@ def html_by_seq(seq=None):
     title = data['feed']['title']
     updated = data['feed']['updated']
     entry = data['feed']['entry']
-    page = render_template('opds_root.html', title=title, updated=updated, entry=entry)
+    link = data['feed']['link']
+    page = render_template('opds_root.html', title=title, updated=updated, link=link, entry=entry)
     return Response(page, mimetype='text/html')
 
 
@@ -66,7 +69,8 @@ def html_books_in_seq(seq=None):
     title = data['feed']['title']
     updated = data['feed']['updated']
     entry = data['feed']['entry']
-    page = render_template('opds_sequence.html', title=title, updated=updated, entry=entry)
+    link = data['feed']['link']
+    page = render_template('opds_sequence.html', title=title, updated=updated, link=link, entry=entry)
     return Response(page, mimetype='text/html')
 
 
@@ -77,7 +81,8 @@ def html_by_authors_root():
     title = data['feed']['title']
     updated = data['feed']['updated']
     entry = data['feed']['entry']
-    page = render_template('opds_root.html', title=title, updated=updated, entry=entry)
+    link = data['feed']['link']
+    page = render_template('opds_root.html', title=title, updated=updated, link=link, entry=entry)
     return Response(page, mimetype='text/html')
 
 
@@ -88,7 +93,8 @@ def html_by_authors(auth=None):
     title = data['feed']['title']
     updated = data['feed']['updated']
     entry = data['feed']['entry']
-    page = render_template('opds_root.html', title=title, updated=updated, entry=entry)
+    link = data['feed']['link']
+    page = render_template('opds_root.html', title=title, updated=updated, link=link, entry=entry)
     return Response(page, mimetype='text/html')
 
 
@@ -98,7 +104,8 @@ def html_by_author(auth=None):
     title = data['feed']['title']
     updated = data['feed']['updated']
     entry = data['feed']['entry']
-    page = render_template('opds_author_main.html', title=title, updated=updated, entry=entry)
+    link = data['feed']['link']
+    page = render_template('opds_author_main.html', title=title, updated=updated, link=link, entry=entry)
     return Response(page, mimetype='text/html')
 
 
@@ -108,7 +115,8 @@ def html_author_sequences(auth=None):
     title = data['feed']['title']
     updated = data['feed']['updated']
     entry = data['feed']['entry']
-    page = render_template('opds_author_sequence.html', title=title, updated=updated, entry=entry)
+    link = data['feed']['link']
+    page = render_template('opds_author_sequence.html', title=title, updated=updated, link=link, entry=entry)
     return Response(page, mimetype='text/html')
 
 
@@ -118,8 +126,8 @@ def html_author_sequence(auth=None, seq=None):
     title = data['feed']['title']
     updated = data['feed']['updated']
     entry = data['feed']['entry']
-    print(json.dumps(entry, indent=4, ensure_ascii=False))
-    page = render_template('opds_sequence.html', title=title, updated=updated, entry=entry)
+    link = data['feed']['link']
+    page = render_template('opds_sequence.html', title=title, updated=updated, link=link, entry=entry)
     return Response(page, mimetype='text/html')
 
 
@@ -129,7 +137,8 @@ def html_author_sequenceless(auth=None):
     title = data['feed']['title']
     updated = data['feed']['updated']
     entry = data['feed']['entry']
-    page = render_template('opds_sequence.html', title=title, updated=updated, entry=entry)
+    link = data['feed']['link']
+    page = render_template('opds_sequence.html', title=title, updated=updated, link=link, entry=entry)
     return Response(page, mimetype='text/html')
 
 
@@ -139,7 +148,8 @@ def html_author_alphabet(auth=None):
     title = data['feed']['title']
     updated = data['feed']['updated']
     entry = data['feed']['entry']
-    page = render_template('opds_sequence.html', title=title, updated=updated, entry=entry)
+    link = data['feed']['link']
+    page = render_template('opds_sequence.html', title=title, updated=updated, link=link, entry=entry)
     return Response(page, mimetype='text/html')
 
 
@@ -149,7 +159,8 @@ def html_author_time(auth=None):
     title = data['feed']['title']
     updated = data['feed']['updated']
     entry = data['feed']['entry']
-    page = render_template('opds_sequence.html', title=title, updated=updated, entry=entry)
+    link = data['feed']['link']
+    page = render_template('opds_time.html', title=title, updated=updated, link=link, entry=entry)
     return Response(page, mimetype='text/html')
 
 
@@ -160,7 +171,8 @@ def html_genres_root():
     title = data['feed']['title']
     updated = data['feed']['updated']
     entry = data['feed']['entry']
-    page = render_template('opds_root.html', title=title, updated=updated, entry=entry)
+    link = data['feed']['link']
+    page = render_template('opds_root.html', title=title, updated=updated, link=link, entry=entry)
     return Response(page, mimetype='text/html')
 
 
@@ -170,11 +182,19 @@ def html_genres_book(gen_id=None):
     title = data['feed']['title']
     updated = data['feed']['updated']
     entry = data['feed']['entry']
-    page = render_template('opds_sequence.html', title=title, updated=updated, entry=entry)
+    link = data['feed']['link']
+    print(json.dumps(data, indent=4, ensure_ascii=False))
+    page = render_template('opds_sequence.html', title=title, updated=updated, link=link, entry=entry)
     return Response(page, mimetype='text/html')
 
 
 @html.route("/html/genres/<gen_id>/<int:page>")
 def html_genres_book_page(gen_id=None, page=0):
-    page = get_genre_books(gen_id, page)
+    data = get_genre_books(gen_id, page)
+    title = data['feed']['title']
+    updated = data['feed']['updated']
+    entry = data['feed']['entry']
+    link = data['feed']['link']
+    print(json.dumps(data, indent=4, ensure_ascii=False))
+    page = render_template('opds_sequence.html', title=title, updated=updated, link=link, entry=entry)
     return Response(page, mimetype='text/html')

@@ -5,10 +5,11 @@
 # import urllib.parse
 # import hashlib
 # from flask import current_app
-from .opds_internals import BOOKS_LIMIT, get_db_connection, get_dtiso, sizeof_fmt, get_authors, get_genres_names
+from .opds_internals import BOOKS_LIMIT, get_db_connection, get_dtiso, sizeof_fmt, get_authors, get_genres_names, get_seqs
 
 
-ret_hdr_genre = {
+def ret_hdr_genre():
+    return {
         "feed": {
             "@xmlns": "http://www.w3.org/2005/Atom",
             "@xmlns:dc": "http://purl.org/dc/terms/",
@@ -42,7 +43,7 @@ ret_hdr_genre = {
 
 def get_genres_list():
     dtiso = get_dtiso()
-    ret = ret_hdr_genre
+    ret = ret_hdr_genre()
     ret["feed"]["updated"] = dtiso
 
     REQ = 'SELECT id, description, `group` FROM genres ORDER BY `group`, description;'
@@ -72,7 +73,7 @@ def get_genres_list():
 
 def get_genre_books(gen_id, page=0):
     dtiso = get_dtiso()
-    ret = ret_hdr_genre
+    ret = ret_hdr_genre()
 
     REQ = 'SELECT id, description FROM genres WHERE id = "' + gen_id + '"'
     conn = get_db_connection()
@@ -84,6 +85,22 @@ def get_genre_books(gen_id, page=0):
     ret["feed"]["id"] = "tag:root:genre:" + gen_id
     ret["feed"]["title"] = "Books in genre: " + genre + " by aplhabet"
     ret["feed"]["updated"] = dtiso
+    if page == 0:
+        ret["feed"]["link"].append(
+            {
+                "@href": "/opds/genres/",
+                "@rel": "up",
+                "@type": "application/atom+xml;profile=opds-catalog"
+            }
+        )
+    else:
+        ret["feed"]["link"].append(
+            {
+                "@href": "/opds/genres/" + gen_id,
+                "@rel": "up",
+                "@type": "application/atom+xml;profile=opds-catalog"
+            }
+        )
     ret["feed"]["link"].append(
         {
             "@href": "/opds/genres/" + gen_id + "/" + str(page + 1),
@@ -92,7 +109,7 @@ def get_genre_books(gen_id, page=0):
         }
     )
 
-    REQ0 = "SELECT zipfile, filename, genres, author_ids, book_id, book_title, lang, size, date_time, annotation"
+    REQ0 = "SELECT zipfile, filename, genres, author_ids, sequence_ids, book_id, book_title, lang, size, date_time, annotation"
     REQ1 = REQ0 + " FROM books WHERE (genres = '"  # fix E501 line too long
     REQ2 = "' OR genres LIKE '"
     REQ3 = ",%' OR genres LIKE '%,"
@@ -110,6 +127,7 @@ def get_genre_books(gen_id, page=0):
         lang = row["lang"]
         size = row["size"]
         date_time = row["date_time"]
+        seq_ids = row["sequence_ids"]
         annotation = row["annotation"]
 
         authors = []
@@ -121,8 +139,34 @@ def get_genre_books(gen_id, page=0):
                     "name": v
                 }
             )
+        seq_data = get_seqs(seq_ids)
+        links = []
+        for k, v in seq_data.items():
+            links.append(
+                {
+                    "@href": "/opds/sequencebooks/" + k,
+                    "@rel": "related",
+                    "@title": "All books in sequence '" + v + "'",
+                    "@type": "application/atom+xml"
+                }
+            )
 
-        links = [
+        links.append(
+            {
+                "@href": "/fb2/" + zipfile + "/" + filename,
+                "@rel": "http://opds-spec.org/acquisition/open-access",
+                "@title": "Download",
+                "@type": "application/fb2+zip"
+            }
+        )
+        links.append(
+            {
+                "@href": "/read/" + zipfile + "/" + filename,
+                "@rel": "alternate",
+                "@title": "Read in browser",
+                "@type": "text/html"
+            }
+        )
                     # {  # ToDo for over authors
                     # "@href": "/opds/author/" + author_id,
                     # "@rel": "related",
@@ -136,27 +180,13 @@ def get_genre_books(gen_id, page=0):
                     # "@type": "application/atom+xml"
                     # },
 
-                    {
-                        "@href": "/fb2/" + zipfile + "/" + filename,
-                        "@rel": "http://opds-spec.org/acquisition/open-access",
-                        "@title": "Download",
-                        "@type": "application/fb2+zip"
-                    },
-                    {
-                        "@href": "/read/" + zipfile + "/" + filename,
-                        "@rel": "alternate",
-                        "@title": "Read in browser",
-                        "@type": "text/html"
-                    }
-        ]
-
         category = []
         category_data = get_genres_names(genres)
         for k, v in category_data.items():
             category.append(
                 {
                     "@label": v,
-                    "@term": v
+                    "@term": k
                 }
             )
         annotext = """

@@ -469,8 +469,7 @@ def get_author_sequenceless(auth_id):
                 "content": {
                     "@type": "text/html",
                     "#text": annotext
-                },
-
+                }
             }
         )
     conn.close()
@@ -491,7 +490,7 @@ def get_author_by_alphabet(auth_id):
     ret["feed"]["title"] = "Books of author: " + auth_name + " by aplhabet"
     ret["feed"]["updated"] = dtiso
 
-    REQ0 = "SELECT zipfile, filename, genres, author_ids, book_id, book_title, lang, size, date_time, annotation"
+    REQ0 = "SELECT zipfile, filename, genres, author_ids, sequence_ids, book_id, book_title, lang, size, date_time, annotation"
     REQ1 = REQ0 + " FROM books WHERE (author_ids = '"  # fix E501 line too long
     REQ2 = "' OR author_ids LIKE '"
     REQ3 = ",%' OR author_ids LIKE '%,"
@@ -509,6 +508,7 @@ def get_author_by_alphabet(auth_id):
         lang = row["lang"]
         size = row["size"]
         date_time = row["date_time"]
+        seq_ids = row["sequence_ids"]
         annotation = row["annotation"]
 
         authors = []
@@ -520,8 +520,35 @@ def get_author_by_alphabet(auth_id):
                     "name": v
                 }
             )
+        seq_data = get_seqs(seq_ids)
+        links = []
+        for k, v in seq_data.items():
+            links.append(
+                {
+                    "@href": "/opds/sequencebooks/" + k,
+                    "@rel": "related",
+                    "@title": "All books in sequence '" + v + "'",
+                    "@type": "application/atom+xml"
+                }
+            )
 
-        links = [
+        links.append(
+            {
+                "@href": "/fb2/" + zipfile + "/" + filename,
+                "@rel": "http://opds-spec.org/acquisition/open-access",
+                "@title": "Download",
+                "@type": "application/fb2+zip"
+            }
+        )
+        links.append(
+            {
+                "@href": "/read/" + zipfile + "/" + filename,
+                "@rel": "alternate",
+                "@title": "Read in browser",
+                "@type": "text/html"
+            }
+        )
+        
                     # {  # ToDo for over authors
                     # "@href": "/opds/author/" + author_id,
                     # "@rel": "related",
@@ -534,20 +561,6 @@ def get_author_by_alphabet(auth_id):
                     # "@title": "Все книги серии \"AYENA\"",
                     # "@type": "application/atom+xml"
                     # },
-
-                    {
-                        "@href": "/fb2/" + zipfile + "/" + filename,
-                        "@rel": "http://opds-spec.org/acquisition/open-access",
-                        "@title": "Download",
-                        "@type": "application/fb2+zip"
-                    },
-                    {
-                        "@href": "/read/" + zipfile + "/" + filename,
-                        "@rel": "alternate",
-                        "@title": "Read in browser",
-                        "@type": "text/html"
-                    }
-        ]
 
         category = []
         category_data = get_genres_names(genres)
@@ -595,7 +608,7 @@ def get_author_by_time(auth_id):
     ret["feed"]["title"] = "Books of author: " + auth_name + " by aplhabet"
     ret["feed"]["updated"] = dtiso
 
-    REQ0 = "SELECT zipfile, filename, genres, author_ids, book_id, book_title, lang, size, date_time, annotation"
+    REQ0 = "SELECT zipfile, filename, genres, author_ids, sequence_ids, book_id, book_title, lang, size, date_time, annotation"
     REQ1 = REQ0 + " FROM books WHERE (author_ids = '"  # fix E501 line too long
     REQ2 = "' OR author_ids LIKE '"
     REQ3 = ",%' OR author_ids LIKE '%,"
@@ -613,6 +626,7 @@ def get_author_by_time(auth_id):
         lang = row["lang"]
         size = row["size"]
         date_time = row["date_time"]
+        seq_ids = row["sequence_ids"]
         annotation = row["annotation"]
 
         authors = []
@@ -624,8 +638,35 @@ def get_author_by_time(auth_id):
                     "name": v
                 }
             )
+        seq_data = get_seqs(seq_ids)
+        links = []
+        for k, v in seq_data.items():
+            links.append(
+                {
+                    "@href": "/opds/sequencebooks/" + k,
+                    "@rel": "related",
+                    "@title": "All books in sequence '" + v + "'",
+                    "@type": "application/atom+xml"
+                }
+            )
 
-        links = [
+        links.append(
+            {
+                "@href": "/fb2/" + zipfile + "/" + filename,
+                "@rel": "http://opds-spec.org/acquisition/open-access",
+                "@title": "Download",
+                "@type": "application/fb2+zip"
+            }
+        )
+        links.append(
+            {
+                "@href": "/read/" + zipfile + "/" + filename,
+                "@rel": "alternate",
+                "@title": "Read in browser",
+                "@type": "text/html"
+            }
+        )
+        
                     # {  # ToDo for over authors
                     # "@href": "/opds/author/" + author_id,
                     # "@rel": "related",
@@ -638,20 +679,6 @@ def get_author_by_time(auth_id):
                     # "@title": "Все книги серии \"AYENA\"",
                     # "@type": "application/atom+xml"
                     # },
-
-                    {
-                        "@href": "/fb2/" + zipfile + "/" + filename,
-                        "@rel": "http://opds-spec.org/acquisition/open-access",
-                        "@title": "Download",
-                        "@type": "application/fb2+zip"
-                    },
-                    {
-                        "@href": "/read/" + zipfile + "/" + filename,
-                        "@rel": "alternate",
-                        "@title": "Read in browser",
-                        "@type": "text/html"
-                    }
-        ]
 
         category = []
         category_data = get_genres_names(genres)
