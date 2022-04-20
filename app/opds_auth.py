@@ -1,14 +1,9 @@
 # -*- coding: utf-8 -*-
 
-import json
-
-# import xmltodict
-# import sqlite3
 import urllib.parse
-# import hashlib
-# from flask import current_app
-from .opds_internals import get_db_connection, get_dtiso, any2alphabet, get_authors, get_genres_names
+from .opds_internals import get_db_connection, get_dtiso, get_authors, get_genres_names
 from .opds_internals import get_auth_seqs, get_seqs, sizeof_fmt
+
 
 def ret_hdr_author():  # python does not have constants
     return {
@@ -306,7 +301,8 @@ def get_author_sequence(auth_id, seq_id):
         }
     )
 
-    REQ0 = "SELECT zipfile, filename, genres, author_ids, sequence_ids, book_id, book_title, lang, size, date_time, annotation"
+    REQ0 = "SELECT zipfile, filename, genres, author_ids, sequence_ids, book_id, book_title,"
+    REQ0 = REQ0 + "lang, size, date_time, annotation"  # fix E501 line too long
     REQ1 = REQ0 + " FROM books WHERE (author_ids = '"  # fix E501 line too long
     REQ2 = "' OR author_ids LIKE '"
     REQ3 = ",%' OR author_ids LIKE '%,"
@@ -530,7 +526,8 @@ def get_author_by_alphabet(auth_id):
     ret["feed"]["title"] = "Books of author: " + auth_name + " by aplhabet"
     ret["feed"]["updated"] = dtiso
 
-    REQ0 = "SELECT zipfile, filename, genres, author_ids, sequence_ids, book_id, book_title, lang, size, date_time, annotation"
+    REQ0 = "SELECT zipfile, filename, genres, author_ids, sequence_ids, book_id,"
+    REQ0 = REQ0 + " book_title, lang, size, date_time, annotation"
     REQ1 = REQ0 + " FROM books WHERE (author_ids = '"  # fix E501 line too long
     REQ2 = "' OR author_ids LIKE '"
     REQ3 = ",%' OR author_ids LIKE '%,"
@@ -588,19 +585,12 @@ def get_author_by_alphabet(auth_id):
                 "@type": "text/html"
             }
         )
-        
-                    # {  # ToDo for over authors
-                    # "@href": "/opds/author/" + author_id,
-                    # "@rel": "related",
-                    # "@title": "All books of author: '" + authors,  # ToDo: имя автора
-                    # "@type": "application/atom+xml"
-                    # }
-                    # {  # ToDo for over sequences
-                    # "@href": "/opds/sequencebooks/63116",
-                    # "@rel": "related",
-                    # "@title": "Все книги серии \"AYENA\"",
-                    # "@type": "application/atom+xml"
-                    # },
+        # {  # ToDo for over authors
+        # "@href": "/opds/author/" + author_id,
+        # "@rel": "related",
+        # "@title": "All books of author: '" + authors,  # ToDo: имя автора
+        # "@type": "application/atom+xml"
+        # }
 
         category = []
         category_data = get_genres_names(genres)
@@ -648,7 +638,8 @@ def get_author_by_time(auth_id):
     ret["feed"]["title"] = "Books of author: " + auth_name + " by aplhabet"
     ret["feed"]["updated"] = dtiso
 
-    REQ0 = "SELECT zipfile, filename, genres, author_ids, sequence_ids, book_id, book_title, lang, size, date_time, annotation"
+    REQ0 = "SELECT zipfile, filename, genres, author_ids, sequence_ids,"
+    REQ0 = REQ0 + " book_id, book_title, lang, size, date_time, annotation"
     REQ1 = REQ0 + " FROM books WHERE (author_ids = '"  # fix E501 line too long
     REQ2 = "' OR author_ids LIKE '"
     REQ3 = ",%' OR author_ids LIKE '%,"
@@ -706,19 +697,12 @@ def get_author_by_time(auth_id):
                 "@type": "text/html"
             }
         )
-        
-                    # {  # ToDo for over authors
-                    # "@href": "/opds/author/" + author_id,
-                    # "@rel": "related",
-                    # "@title": "All books of author: '" + authors,  # ToDo: имя автора
-                    # "@type": "application/atom+xml"
-                    # }
-                    # {  # ToDo for over sequences
-                    # "@href": "/opds/sequencebooks/63116",
-                    # "@rel": "related",
-                    # "@title": "Все книги серии \"AYENA\"",
-                    # "@type": "application/atom+xml"
-                    # },
+        # {  # ToDo for over authors
+        # "@href": "/opds/author/" + author_id,
+        # "@rel": "related",
+        # "@title": "All books of author: '" + authors,  # ToDo: имя автора
+        # "@type": "application/atom+xml"
+        # }
 
         category = []
         category_data = get_genres_names(genres)

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from flask import redirect, Blueprint, Response, url_for
+from flask import Blueprint, Response
 from .opds_seq import main_opds, get_sequences, get_books_in_seq
 from .opds_auth import get_authors_list, get_author_list, get_author_sequences, get_author_sequence
 from .opds_auth import get_author_sequenceless, get_author_by_alphabet, get_author_by_time

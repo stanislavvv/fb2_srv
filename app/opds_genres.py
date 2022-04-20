@@ -5,7 +5,8 @@
 # import urllib.parse
 # import hashlib
 # from flask import current_app
-from .opds_internals import BOOKS_LIMIT, get_db_connection, get_dtiso, sizeof_fmt, get_authors, get_genres_names, get_seqs
+from .opds_internals import BOOKS_LIMIT, get_db_connection, get_dtiso, sizeof_fmt
+from .opds_internals import get_authors, get_genres_names, get_seqs
 
 
 def ret_hdr_genre():
@@ -109,7 +110,8 @@ def get_genre_books(gen_id, page=0):
         }
     )
 
-    REQ0 = "SELECT zipfile, filename, genres, author_ids, sequence_ids, book_id, book_title, lang, size, date_time, annotation"
+    REQ0 = "SELECT zipfile, filename, genres, author_ids, sequence_ids,"
+    REQ0 = REQ0 + " book_id, book_title, lang, size, date_time, annotation"
     REQ1 = REQ0 + " FROM books WHERE (genres = '"  # fix E501 line too long
     REQ2 = "' OR genres LIKE '"
     REQ3 = ",%' OR genres LIKE '%,"
@@ -167,18 +169,12 @@ def get_genre_books(gen_id, page=0):
                 "@type": "text/html"
             }
         )
-                    # {  # ToDo for over authors
-                    # "@href": "/opds/author/" + author_id,
-                    # "@rel": "related",
-                    # "@title": "All books of author: '" + authors,  # ToDo: имя автора
-                    # "@type": "application/atom+xml"
-                    # }
-                    # {  # ToDo for over sequences
-                    # "@href": "/opds/sequencebooks/63116",
-                    # "@rel": "related",
-                    # "@title": "Все книги серии \"AYENA\"",
-                    # "@type": "application/atom+xml"
-                    # },
+        # {  # ToDo for over authors
+        # "@href": "/opds/author/" + author_id,
+        # "@rel": "related",
+        # "@title": "All books of author: '" + authors,  # ToDo: имя автора
+        # "@type": "application/atom+xml"
+        # }
 
         category = []
         category_data = get_genres_names(genres)
