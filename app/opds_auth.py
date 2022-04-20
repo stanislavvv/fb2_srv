@@ -48,6 +48,13 @@ def get_authors_list(auth_root):
     if auth_root is None or auth_root == "" or auth_root == "/" or not isinstance(auth_root, str):
         ret = ret_hdr_author()
         ret["feed"]["updated"] = dtiso
+        ret["feed"]["link"].append(
+            {
+                "@href": "/opds/",
+                "@rel": "up",
+                "@type": "application/atom+xml;profile=opds-catalog"
+            }
+        )
         ALL_AUTHORS = 'SELECT substr(name, 1, 1) as nm FROM authors GROUP BY nm ORDER BY nm ;'
         conn = get_db_connection()
         rows = conn.execute(ALL_AUTHORS).fetchall()
@@ -71,6 +78,13 @@ def get_authors_list(auth_root):
         conn.close()
     elif len(auth_root) < 2:
         ret = ret_hdr_author()
+        ret["feed"]["link"].append(
+            {
+                "@href": "/opds/authorsindex/",
+                "@rel": "up",
+                "@type": "application/atom+xml;profile=opds-catalog"
+            }
+        )
         ret["feed"]["updated"] = dtiso
         REQ = 'SELECT substr(name,1,3) as nm FROM authors WHERE name like "' + auth_root + '%" GROUP BY nm ORDER BY nm;'
         conn = get_db_connection()
@@ -89,15 +103,21 @@ def get_authors_list(auth_root):
                         "#text": "Авторы на '" + ch + "'"
                     },
                     "link": {
-                        "@href": "/opds/authors/" + urllib.parse.quote_plus(ch, encoding='utf-8'),
+                        "@href": "/opds/authorsindex/" + urllib.parse.quote_plus(ch, encoding='utf-8'),
                         "@type": "application/atom+xml;profile=opds-catalog"
                     }
                 }
             )
         conn.close()
     else:
-        ret = {}
         ret = ret_hdr_author()
+        ret["feed"]["link"].append(
+            {
+                "@href": "/opds/authorsindex/",
+                "@rel": "up",
+                "@type": "application/atom+xml;profile=opds-catalog"
+            }
+        )
         ret["feed"]["updated"] = dtiso
         REQ = 'SELECT id, name FROM authors WHERE name LIKE "' + auth_root + '%" ORDER BY name;'
         print(REQ)
@@ -139,6 +159,13 @@ def get_author_list(auth_id):
     ret["feed"]["id"] = "tag:author:" + auth_id
     ret["feed"]["title"] = "Books of author: " + auth_name + ""
     ret["feed"]["updated"] = dtiso
+    ret["feed"]["link"].append(
+        {
+            "@href": "/opds/authorsindex/",
+            "@rel": "up",
+            "@type": "application/atom+xml;profile=opds-catalog"
+        }
+    )
     ret["feed"]["entry"] = [
                 {
                     "updated": dtiso,
@@ -222,7 +249,13 @@ def get_author_sequences(auth_id):
     ret["feed"]["id"] = "tag:author:" + auth_id
     ret["feed"]["title"] = "Books of author: " + auth_name + " by sequence"
     ret["feed"]["updated"] = dtiso
-
+    ret["feed"]["link"].append(
+        {
+            "@href": "/opds/author/" + auth_id,
+            "@rel": "up",
+            "@type": "application/atom+xml;profile=opds-catalog"
+        }
+    )
     seqs = get_auth_seqs(auth_id)
     for seq in seqs:
         seq_name = seq["name"]
@@ -265,6 +298,13 @@ def get_author_sequence(auth_id, seq_id):
     ret["feed"]["id"] = "tag:author:" + auth_id + ":sequence:" + seq_id
     ret["feed"]["title"] = "Books of author: " + auth_name + " by sequence '" + seq_name + "'"
     ret["feed"]["updated"] = dtiso
+    ret["feed"]["link"].append(
+        {
+            "@href": "/opds/author/" + auth_id,
+            "@rel": "up",
+            "@type": "application/atom+xml;profile=opds-catalog"
+        }
+    )
 
     REQ0 = "SELECT zipfile, filename, genres, author_ids, sequence_ids, book_id, book_title, lang, size, date_time, annotation"
     REQ1 = REQ0 + " FROM books WHERE (author_ids = '"  # fix E501 line too long

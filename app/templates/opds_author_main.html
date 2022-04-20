@@ -16,9 +16,10 @@
                 Documentation
             {% endif -%}
         </h1>
-            {% if updated is defined -%}
-                <p>{{updated}}</p>
-            {% endif -%}
+        {% for l in link %}
+            <a href={{l['@href']|replace('/opds', '/html', 1)}}>{{l['@rel']|replace('/opds', '/html', 1)}}</a>
+        {% endfor %}
+        <hr>
         {% for i in entry %}
         <div>
         {% if i.content is defined -%}
@@ -29,6 +30,14 @@
         {% endif -%}
         </div>
         {% endfor %}
+        <hr>
+        {% for l in link %}
+            <a href={{l['@href']|replace('/opds', '/html', 1)}}>{{l['@rel']|replace('/opds', '/html', 1)}}</a>
+        {% endfor %}
+        </p>
+        {% if updated is defined -%}
+            <p>{{updated}}</p>
+        {% endif -%}
     </body>
 </html>
 
