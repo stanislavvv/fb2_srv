@@ -404,7 +404,7 @@ def get_genres_replace():
 
 # print unknown genres
 def check_genres(g):
-    gg = g[2].split(',')
+    gg = g[2].split('|')
     for i in gg:
         if i not in genres and i != "":
             print(g[0] + "|" + g[1] + "|" + i)
@@ -470,7 +470,7 @@ def seq2db(cur, seqs):
 
 
 def genres2db(cur, genrs):
-    for genre_id in genrs.split(","):
+    for genre_id in genrs.split("|"):
         if genre_id is not None and genre_id != "":
             genre = genres[genre_id]
             REQ = 'SELECT count(*) FROM genres WHERE id = "%s"' % genre_id
