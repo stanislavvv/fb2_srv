@@ -103,7 +103,9 @@ def get_authors(author):
                     a_tmp.append(strlist(i['first-name']))
                 if 'middle-name' in i and i['middle-name'] is not None:
                     a_tmp.append(strlist(i['middle-name']))
-                g.append(" ".join(a_tmp))
+                a_tmp2 = " ".join(a_tmp)
+                a_tmp2 = a_tmp2.strip()
+                g.append(a_tmp2)
         ret = ",".join(g)
     else:
         a_tmp = []
@@ -115,6 +117,7 @@ def get_authors(author):
             if 'middle-name' in author and author['middle-name'] is not None:
                 a_tmp.append(strlist(author['middle-name']))
         ret = " ".join(a_tmp)
+        ret = ret.strip()
     return ret
 
 
@@ -133,6 +136,7 @@ def get_author_ids(author):
                 if 'middle-name' in i and i['middle-name'] is not None:
                     a_tmp.append(strlist(i['middle-name']))
             a_tmp2 = " ".join(a_tmp)
+            a_tmp2 = a_tmp2.strip()
             g.append(hashlib.md5(a_tmp2.encode('utf-8')).hexdigest())
         ret = ",".join(g)
     else:
@@ -145,6 +149,7 @@ def get_author_ids(author):
             if 'middle-name' in author and author['middle-name'] is not None:
                 a_tmp.append(strlist(author['middle-name']))
         r = " ".join(a_tmp)
+        r = r.strip()
         ret = hashlib.md5(r.encode('utf-8')).hexdigest()
     return ret
 
@@ -440,6 +445,7 @@ def genres_replace(genrs):
 def author2db(cur, authors):
     for author in authors.split(","):
         if author is not None and author != "":
+            author = author.strip()
             author_id = hashlib.md5(author.encode('utf-8')).hexdigest()
             REQ = 'SELECT count(*) FROM authors WHERE id = "%s"' % author_id
             cur.execute(REQ)
