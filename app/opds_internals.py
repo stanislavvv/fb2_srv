@@ -25,7 +25,7 @@ def get_auth_seqs(auth_id):
         for row in rows:
             # book_id = row["book_id"]
             seq_ids = row["sequence_ids"]
-            for seq in seq_ids.split(","):
+            for seq in seq_ids.split("|"):
                 if seq is not None and seq != "":
                     if seq not in seq_cnt:
                         seq_cnt[seq] = 1
@@ -66,7 +66,7 @@ def any2alphabet(field, sq3_rows, num):
 def get_authors(ids):
     ret = {}
     selector = []
-    for i in ids.split(","):
+    for i in ids.split("|"):
         selector.append("'" + i + "'")
     REQ = "SELECT id, name FROM authors WHERE id IN (" + ",".join(selector) + ");"
     conn = get_db_connection()
@@ -81,7 +81,7 @@ def get_authors(ids):
 def get_genres_names(genres_ids):
     ret = {}
     selector = []
-    for i in genres_ids.split(","):
+    for i in genres_ids.split("|"):
         selector.append("'" + i + "'")
     REQ = "SELECT id, description FROM genres WHERE id IN (" + ",".join(selector) + ");"
     conn = get_db_connection()
@@ -96,7 +96,7 @@ def get_genres_names(genres_ids):
 def get_seqs(ids):
     ret = {}
     selector = []
-    for i in ids.split(","):
+    for i in ids.split("|"):
         selector.append("'" + i + "'")
     REQ = "SELECT id, name FROM sequences WHERE id IN (" + ",".join(selector) + ");"
     conn = get_db_connection()

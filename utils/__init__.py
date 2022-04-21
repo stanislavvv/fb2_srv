@@ -70,7 +70,7 @@ def get_genre(genr):
                 for v2 in v:
                     if not v2.isdigit() and v2 != "":
                         g.append(v2)
-        genre = ",".join(g)
+        genre = "|".join(g)
     elif isinstance(genr, list):
         for i in genr:
             if type(i) is str and not i.isdigit() and i != "":
@@ -83,7 +83,7 @@ def get_genre(genr):
                 for v in i:
                     if not v.isdigit() and v != "":
                         g.append(v)
-        genre = ",".join(g)
+        genre = "|".join(g)
     else:
         genre = str(genr)
     return genre
@@ -106,7 +106,7 @@ def get_authors(author):
                 a_tmp2 = " ".join(a_tmp)
                 a_tmp2 = a_tmp2.strip()
                 g.append(a_tmp2)
-        ret = ",".join(g)
+        ret = "|".join(g)
     else:
         a_tmp = []
         if author is not None:
@@ -138,7 +138,7 @@ def get_author_ids(author):
             a_tmp2 = " ".join(a_tmp)
             a_tmp2 = a_tmp2.strip()
             g.append(hashlib.md5(a_tmp2.encode('utf-8')).hexdigest())
-        ret = ",".join(g)
+        ret = "|".join(g)
     else:
         a_tmp = []
         if author is not None:
@@ -186,7 +186,7 @@ def get_sequence(seq):
                 ret.append("%s" % name)
             elif num is not None:
                 ret.append(":%s" % num)
-        return ",".join(ret)
+        return "|".join(ret)
     return str(seq)
 
 
@@ -208,7 +208,7 @@ def get_sequence_names(seq):
                 name = s['@name']
                 r = "%s" % name
                 ret.append(r)
-        return ",".join(ret)
+        return "|".join(ret)
     return str(seq)
 
 
@@ -230,7 +230,7 @@ def get_sequence_ids(seq):
                 name = s['@name']
                 r = "%s" % name
                 ret.append(hashlib.md5(r.encode('utf-8')).hexdigest())
-        return ",".join(ret)
+        return "|".join(ret)
     return str(seq)
 
 
@@ -240,7 +240,7 @@ def get_lang(lng):
     if isinstance(lng, list):
         for i in lng:
             rets[i] = 1
-        ret = ",".join(rets)
+        ret = "|".join(rets)
     else:
         ret = str(lng)
     return ret
@@ -428,7 +428,7 @@ def listdiff(l1, l2):
 
 
 def genres_replace(genrs):
-    gg = genrs.split(",")
+    gg = genrs.split("|")
     ret = []
     for i in gg:
         if i not in genres and i != "":
@@ -439,11 +439,11 @@ def genres_replace(genrs):
                 ret.append('other')
         else:
             ret.append(i)
-    return ",".join(ret)
+    return "|".join(ret)
 
 
 def author2db(cur, authors):
-    for author in authors.split(","):
+    for author in authors.split("|"):
         if author is not None and author != "":
             author = author.strip()
             author_id = hashlib.md5(author.encode('utf-8')).hexdigest()
@@ -457,7 +457,7 @@ def author2db(cur, authors):
 
 
 def seq2db(cur, seqs):
-    for seq in seqs.split(","):
+    for seq in seqs.split("|"):
         if seq is not None and seq != "":
             seq_id = hashlib.md5(seq.encode('utf-8')).hexdigest()
             REQ = 'SELECT count(*) FROM sequences WHERE id = "%s"' % seq_id
@@ -516,7 +516,7 @@ def iterate_list(blist, dbfile):
         author2db(cur, insdata[3])
         seq2db(cur, insdata[6])
         cur.execute("INSERT INTO books VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (insdata))
-        for author in book["authors"].split(","):  # debug
+        for author in book["authors"].split("|"):  # debug
             au.write(author + "|" + book["zipfile"] + "/" + book["filename"] + "\n")  # debug
     con.commit()
     con.close()
