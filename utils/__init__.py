@@ -483,16 +483,17 @@ def iterate_list(blist, dbfile):
     con = sqlite3.connect(dbfile)
     cur = con.cursor()
     cur.execute("DELETE FROM books WHERE zipfile = ?", [zip_file])
-    # con.commit()
+    authors_list = blist + ".authors"  # debug
+    au = open(authors_list, 'w')  # debug
     books = json.load(data)
     for book in books:
         insdata = [
             book["zipfile"],
             book["filename"],
             book["genres"],
-            book["authors"],
+            book["authors"].replace("'","''"),
             book["author_ids"],
-            book["sequences"],
+            book["sequences"].replace("'","''"),
             book["sequence_names"],
             book["sequence_ids"],
             book["book_title"],
@@ -509,8 +510,11 @@ def iterate_list(blist, dbfile):
         author2db(cur, insdata[3])
         seq2db(cur, insdata[6])
         cur.execute("INSERT INTO books VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (insdata))
+        for author in book["authors"].split(","):  # debug
+            au.write(author + "|" + book["zipfile"] + "/" + book["filename"] + "\n")  # debug
     con.commit()
     con.close()
+    au.close()
     data.close()
 
 
