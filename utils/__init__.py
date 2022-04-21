@@ -54,7 +54,7 @@ def recursive_text(data):
     return ret
 
 
-# return comma-separated string of genres from input struct
+# return pipe-separated string of genres from input struct
 def get_genre(genr):
     genre = ""  # default
     g = []
@@ -398,7 +398,8 @@ def get_genres_replace():
             break
         f = line.strip('\n').split('|')
         if len(f) > 1:
-            genres_replacements[f[0]] = f[1]
+            replacement = f[1].split(",")
+            genres_replacements[f[0]] = '|'.join(replacement)
     data.close()
 
 
