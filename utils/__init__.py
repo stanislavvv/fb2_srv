@@ -91,7 +91,7 @@ def get_genre(genr):
 
 # return comma-separated string of authors from input struct
 def get_authors(author):
-    ret = ""  # default
+    ret = "-"  # default
     g = []
     if isinstance(author, list):
         for i in author:
@@ -103,10 +103,14 @@ def get_authors(author):
                     a_tmp.append(strlist(i['first-name']))
                 if 'middle-name' in i and i['middle-name'] is not None:
                     a_tmp.append(strlist(i['middle-name']))
+                if 'nickname' in i and i['nickname'] is not None:
+                    a_tmp.append('(' + strlist(i['nickname']) + ')')
                 a_tmp2 = " ".join(a_tmp)
-                a_tmp2 = a_tmp2.strip()
-                g.append(a_tmp2)
-        ret = "|".join(g)
+                a_tmp2 = a_tmp2.strip().strip("'").strip('"')
+                if len(a_tmp2) > 0:
+                    g.append(a_tmp2)
+        if len(g) > 0:
+            ret = "|".join(g)
     else:
         a_tmp = []
         if author is not None:
@@ -116,14 +120,18 @@ def get_authors(author):
                 a_tmp.append(strlist(author['first-name']))
             if 'middle-name' in author and author['middle-name'] is not None:
                 a_tmp.append(strlist(author['middle-name']))
-        ret = " ".join(a_tmp)
-        ret = ret.strip()
+            if 'nickname' in author and author['nickname'] is not None:
+                a_tmp.append('(' + strlist(author['nickname']) + ')')
+        r = " ".join(a_tmp)
+        r = r.strip().strip("'").strip('"')
+        if len(r) > 0:
+            ret = r
     return ret
 
 
 # return comma-separated string of authors from input struct
 def get_author_ids(author):
-    ret = ""  # default
+    ret = "336d5ebc5436534e61d16e63ddfca327"  # default
     g = []
     if isinstance(author, list):
         for i in author:
@@ -135,10 +143,14 @@ def get_author_ids(author):
                     a_tmp.append(strlist(i['first-name']))
                 if 'middle-name' in i and i['middle-name'] is not None:
                     a_tmp.append(strlist(i['middle-name']))
+                if 'nickname' in i and i['nickname'] is not None:
+                    a_tmp.append('(' + strlist(i['nickname']) + ')')
             a_tmp2 = " ".join(a_tmp)
-            a_tmp2 = a_tmp2.strip()
-            g.append(hashlib.md5(a_tmp2.encode('utf-8')).hexdigest())
-        ret = "|".join(g)
+            a_tmp2 = a_tmp2.strip().strip("'").strip('"')
+            if len(a_tmp2) > 0:
+                g.append(hashlib.md5(a_tmp2.encode('utf-8')).hexdigest())
+        if len(g) > 0:
+            ret = "|".join(g)
     else:
         a_tmp = []
         if author is not None:
@@ -148,9 +160,12 @@ def get_author_ids(author):
                 a_tmp.append(strlist(author['first-name']))
             if 'middle-name' in author and author['middle-name'] is not None:
                 a_tmp.append(strlist(author['middle-name']))
+            if 'nickname' in author and author['nickname'] is not None:
+                a_tmp.append('(' + strlist(author['nickname']) + ')')
         r = " ".join(a_tmp)
-        r = r.strip()
-        ret = hashlib.md5(r.encode('utf-8')).hexdigest()
+        r = r.strip().strip("'").strip('"')
+        if len(r) > 0:
+            ret = hashlib.md5(r.encode('utf-8')).hexdigest()
     return ret
 
 
@@ -284,17 +299,18 @@ def fb2parse(z, filename):
         )
     fb2data = get_struct_by_key('FictionBook', data)  # data['FictionBook']
     descr = get_struct_by_key('description', fb2data)  # fb2data['description']
-    # print(json.dumps(descr, ensure_ascii=False))
+    # if filename == '509075.fb2':  # debug
+    #     print(json.dumps(descr, ensure_ascii=False))
     info = get_struct_by_key('title-info', descr)  # descr['title-info']
 
     if 'genre' in info and info['genre'] is not None:
         genre = get_genre(info['genre'])
     else:
         genre = ""
-    author = ''
+    author = '-'
     if 'author' in info and info['author'] is not None:
         author = get_authors(info['author'])
-    author_ids = ''
+    author_ids = '336d5ebc5436534e61d16e63ddfca327'  # author == '-'
     if 'author' in info and info['author'] is not None:
         author_ids = get_author_ids(info['author'])
     sequence = ''
