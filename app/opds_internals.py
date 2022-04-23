@@ -15,9 +15,9 @@ def get_auth_seqs(auth_id):
     seq_cnt = {}
     REQ1 = "SELECT book_id, sequence_ids FROM books WHERE length(sequence_ids) > 0 AND author_ids = '"
     REQ2 = "' OR author_ids LIKE '"
-    REQ3 = ",%' OR author_ids LIKE '%,"
-    REQ4 = "' OR author_ids LIKE '%,"
-    REQ5 = ",%' AND sequence_ids != '';"
+    REQ3 = "|%' OR author_ids LIKE '%|"
+    REQ4 = "' OR author_ids LIKE '%|"
+    REQ5 = "|%' AND sequence_ids != '';"
     REQ = REQ1 + auth_id + REQ2 + auth_id + REQ3 + auth_id + REQ4 + auth_id + REQ5
     conn = get_db_connection()
     rows = conn.execute(REQ).fetchall()

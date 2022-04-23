@@ -32,7 +32,7 @@ def ret_hdr_genre():
                     # "@type": "application/atom+xml"
                 # },
                 {
-                    "@href": "/opds",
+                    "@href": "/opds/",
                     "@rel": "start",
                     "@type": "application/atom+xml;profile=opds-catalog"
                 }
@@ -114,9 +114,9 @@ def get_genre_books(gen_id, page=0):
     REQ0 = REQ0 + " book_id, book_title, lang, size, date_time, annotation"
     REQ1 = REQ0 + " FROM books WHERE (genres = '"  # fix E501 line too long
     REQ2 = "' OR genres LIKE '"
-    REQ3 = ",%' OR genres LIKE '%,"
-    REQ4 = "' OR genres LIKE '%,"
-    REQ5 = ",%') ORDER BY book_title LIMIT " + str(BOOKS_LIMIT) + " OFFSET " + str(page * BOOKS_LIMIT) + ";"
+    REQ3 = "|%' OR genres LIKE '%|"
+    REQ4 = "' OR genres LIKE '%|"
+    REQ5 = "|%') ORDER BY book_title LIMIT " + str(BOOKS_LIMIT) + " OFFSET " + str(page * BOOKS_LIMIT) + ";"
     REQ = REQ1 + gen_id + REQ2 + gen_id + REQ3 + gen_id + REQ4 + gen_id + REQ5
     rows = conn.execute(REQ).fetchall()
     for row in rows:

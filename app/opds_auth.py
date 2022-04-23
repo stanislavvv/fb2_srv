@@ -28,7 +28,7 @@ def ret_hdr_author():  # python does not have constants
                     # "@type": "application/atom+xml"
                 # },
                 {
-                    "@href": "/opds",
+                    "@href": "/opds/",
                     "@rel": "start",
                     "@type": "application/atom+xml;profile=opds-catalog"
                 }
@@ -305,13 +305,13 @@ def get_author_sequence(auth_id, seq_id):
     REQ0 = REQ0 + "lang, size, date_time, annotation"  # fix E501 line too long
     REQ1 = REQ0 + " FROM books WHERE (author_ids = '"  # fix E501 line too long
     REQ2 = "' OR author_ids LIKE '"
-    REQ3 = ",%' OR author_ids LIKE '%,"
-    REQ4 = "' OR author_ids LIKE '%,"
-    REQ5 = ",%') AND (sequence_ids = '"
+    REQ3 = "|%' OR author_ids LIKE '%|"
+    REQ4 = "' OR author_ids LIKE '%|"
+    REQ5 = "|%') AND (sequence_ids = '"
     REQ6 = "' OR sequence_ids LIKE '"
-    REQ7 = ",%' OR sequence_ids LIKE '%,"
-    REQ8 = "' OR sequence_ids LIKE '%,"
-    REQ9 = ",%');"
+    REQ7 = "|%' OR sequence_ids LIKE '%|"
+    REQ8 = "' OR sequence_ids LIKE '%|"
+    REQ9 = "|%');"
     REQ = REQ1 + auth_id + REQ2 + auth_id + REQ3 + auth_id + REQ4 + auth_id + REQ5 + seq_id + REQ6 + seq_id + REQ7
     REQ = REQ + seq_id + REQ8 + seq_id + REQ9  # fix E501 line too long
     rows = conn.execute(REQ).fetchall()
@@ -424,9 +424,9 @@ def get_author_sequenceless(auth_id):
     REQ0 = "SELECT zipfile, filename, genres, author_ids, book_id, book_title, lang, size, date_time, annotation"
     REQ1 = REQ0 + " FROM books WHERE (author_ids = '"  # fix E501 line too long
     REQ2 = "' OR author_ids LIKE '"
-    REQ3 = ",%' OR author_ids LIKE '%,"
-    REQ4 = "' OR author_ids LIKE '%,"
-    REQ5 = ",%') AND sequence_ids = '';"
+    REQ3 = "|%' OR author_ids LIKE '%|"
+    REQ4 = "' OR author_ids LIKE '%|"
+    REQ5 = "|%') AND sequence_ids = '';"
     REQ = REQ1 + auth_id + REQ2 + auth_id + REQ3 + auth_id + REQ4 + auth_id + REQ5
     rows = conn.execute(REQ).fetchall()
     for row in rows:
@@ -530,9 +530,9 @@ def get_author_by_alphabet(auth_id):
     REQ0 = REQ0 + " book_title, lang, size, date_time, annotation"
     REQ1 = REQ0 + " FROM books WHERE (author_ids = '"  # fix E501 line too long
     REQ2 = "' OR author_ids LIKE '"
-    REQ3 = ",%' OR author_ids LIKE '%,"
-    REQ4 = "' OR author_ids LIKE '%,"
-    REQ5 = ",%') ORDER BY book_title;"
+    REQ3 = "|%' OR author_ids LIKE '%|"
+    REQ4 = "' OR author_ids LIKE '%|"
+    REQ5 = "|%') ORDER BY book_title;"
     REQ = REQ1 + auth_id + REQ2 + auth_id + REQ3 + auth_id + REQ4 + auth_id + REQ5
     rows = conn.execute(REQ).fetchall()
     for row in rows:
@@ -642,9 +642,9 @@ def get_author_by_time(auth_id):
     REQ0 = REQ0 + " book_id, book_title, lang, size, date_time, annotation"
     REQ1 = REQ0 + " FROM books WHERE (author_ids = '"  # fix E501 line too long
     REQ2 = "' OR author_ids LIKE '"
-    REQ3 = ",%' OR author_ids LIKE '%,"
-    REQ4 = "' OR author_ids LIKE '%,"
-    REQ5 = ",%') ORDER BY date_time;"
+    REQ3 = "|%' OR author_ids LIKE '%|"
+    REQ4 = "' OR author_ids LIKE '%|"
+    REQ5 = "|%') ORDER BY date_time;"
     REQ = REQ1 + auth_id + REQ2 + auth_id + REQ3 + auth_id + REQ4 + auth_id + REQ5
     rows = conn.execute(REQ).fetchall()
     for row in rows:

@@ -35,12 +35,12 @@ def main_opds():
                     # "@type": "application/atom+xml"
                 # },
                 {
-                    "@href": "/opds",
+                    "@href": "/opds/",
                     "@rel": "start",
                     "@type": "application/atom+xml;profile=opds-catalog"
                 },
                 {
-                    "@href": "/opds",
+                    "@href": "/opds/",
                     "@rel": "self",
                     "@type": "application/atom+xml;profile=opds-catalog"
                 }
@@ -117,7 +117,7 @@ def get_sequences(seq_root):
                     # "@type": "application/atom+xml"
                 # },
                 {
-                    "@href": "/opds",
+                    "@href": "/opds/",
                     "@rel": "start",
                     "@type": "application/atom+xml;profile=opds-catalog"
                 }
@@ -172,7 +172,7 @@ def get_sequences(seq_root):
         conn.close()
     else:
         REQ1 = 'SELECT id, name FROM sequences WHERE name like "'
-        REQ2 = '%" OR name like ",'
+        REQ2 = '%" OR name like "%|'
         REQ3 = '%" GROUP BY name ORDER BY name;'
         REQ = REQ1 + seq_root + REQ2 + seq_root + REQ3
         ret["feed"]["id"] = "tag:root:sequences:" + urllib.parse.quote_plus(seq_root, encoding='utf-8')
@@ -230,7 +230,7 @@ def get_books_in_seq(seq_id):
                     # "@type": "application/atom+xml"
                 # },
                 {
-                    "@href": "/opds",
+                    "@href": "/opds/",
                     "@rel": "start",
                     "@type": "application/atom+xml;profile=opds-catalog"
                 }
@@ -241,9 +241,9 @@ def get_books_in_seq(seq_id):
     REQ1 = 'SELECT zipfile, filename, genres, author_ids, sequence_ids,'
     REQ1 = REQ1 + ' book_id, book_title, lang, size, date_time, annotation'
     REQ1 = REQ1 + ' FROM books WHERE sequence_ids = "'  # fix E501 line too long
-    REQ2 = '" OR sequence_ids like "%,'
+    REQ2 = '" OR sequence_ids like "%|'
     REQ3 = '" OR sequence_ids like "'
-    REQ4 = ',%" OR sequence_ids like "%,'
+    REQ4 = '|%" OR sequence_ids like "%|'
     REQ5 = '%" GROUP BY authors, book_title ORDER BY authors, book_title'
     REQ = REQ1 + seq_id + REQ2 + seq_id + REQ3 + seq_id + REQ4 + seq_id + REQ5
     conn = get_db_connection()
