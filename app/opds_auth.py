@@ -385,7 +385,7 @@ def get_author_sequence(auth_id, seq_id):
             )
         annotext = """
         <p class=\"book\"> %s </p>\n<br/>Format: fb2<br/>Lang: ru<br/>
-        Size: %s<br/>Sequence: %s"<br/>
+        Size: %s<br/>Sequence: %s<br/>
         """ % (annotation, sizeof_fmt(size), seq_name)
         ret["feed"]["entry"].append(
             {
@@ -490,7 +490,7 @@ def get_author_sequenceless(auth_id):
             )
         annotext = """
         <p class=\"book\"> %s </p>\n<br/>Format: fb2<br/>Lang: ru<br/>
-        Size: %s<br/>Sequence: %s"<br/>
+        Size: %s<br/>Sequence: %s<br/>
         """ % (annotation, sizeof_fmt(size), "")
         ret["feed"]["entry"].append(
             {
@@ -603,7 +603,7 @@ def get_author_by_alphabet(auth_id):
             )
         annotext = """
         <p class=\"book\"> %s </p>\n<br/>Format: fb2<br/>Lang: ru<br/>
-        Size: %s<br/>Sequence: %s"<br/>
+        Size: %s<br/>Sequence: %s<br/>
         """ % (annotation, sizeof_fmt(size), "")
         ret["feed"]["entry"].append(
             {
@@ -715,7 +715,7 @@ def get_author_by_time(auth_id):
             )
         annotext = """
         <p class=\"book\"> %s </p>\n<br/>Format: fb2<br/>Lang: ru<br/>
-        Size: %s<br/>Sequence: %s"<br/>
+        Size: %s<br/>Sequence: %s<br/>
         """ % (annotation, sizeof_fmt(size), "")
         ret["feed"]["entry"].append(
             {

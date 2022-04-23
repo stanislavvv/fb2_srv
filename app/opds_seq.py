@@ -319,7 +319,7 @@ def get_books_in_seq(seq_id):
             )
         annotext = """
         <p class=\"book\"> %s </p>\n<br/>Format: fb2<br/>Lang: ru<br/>
-        Size: %s<br/>Sequence: %s"<br/>
+        Size: %s<br/>Sequence: %s<br/>
         """ % (annotation, sizeof_fmt(size), seq)
         ret["feed"]["entry"].append(
             {
