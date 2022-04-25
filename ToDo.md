@@ -10,3 +10,4 @@
   * replace empty author to 'unknown' -- in progress
   * better show authors with quotes in name like 'Аквариум' (may be strip quotes from begin and end)
   * full book metadata replacement list (json like `[ "zipfile/filename": { "authors": "....", ...}, ...]`)
+  * utf8-ignore case in authors and sequences
