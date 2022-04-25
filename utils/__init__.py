@@ -54,6 +54,13 @@ def recursive_text(data):
     return ret
 
 
+# add spaces if len(s) < 4
+def pad_space_if_short(s):
+    if len(s) >= 4:
+        return s
+    return s.ljust(4)
+
+
 # return pipe-separated string of genres from input struct
 def get_genre(genr):
     genre = ""  # default
@@ -61,37 +68,37 @@ def get_genre(genr):
     if isinstance(genr, dict):
         for k, v in genr.items():
             if type(v) is str and not v.isdigit() and v != "":
-                g.append(v)
+                g.append(v.ljust(4))
             elif isinstance(v, dict):
                 for k, v2 in v.items():
                     if not v2.isdigit() and v2 != "":
-                        g.append(v2)
+                        g.append(v2.ljust(4))
             elif isinstance(v, list):
                 for v2 in v:
                     if not v2.isdigit() and v2 != "":
-                        g.append(v2)
+                        g.append(v2.ljust(4))
         genre = "|".join(g)
     elif isinstance(genr, list):
         for i in genr:
             if type(i) is str and not i.isdigit() and i != "":
-                g.append(i)
+                g.append(i.ljust(4))
             elif isinstance(i, dict):
                 for k, v in i.items():
                     if not v.isdigit() and v != "":
-                        g.append(v)
+                        g.append(v.ljust(4))
             elif isinstance(i, list):
                 for v in i:
                     if not v.isdigit() and v != "":
-                        g.append(v)
+                        g.append(v.ljust(4))
         genre = "|".join(g)
     else:
-        genre = str(genr)
+        genre = str(genr.ljust(4))
     return genre
 
 
 # return comma-separated string of authors from input struct
 def get_authors(author):
-    ret = "-"  # default
+    ret = "--- unknown ---"  # default
     g = []
     if isinstance(author, list):
         for i in author:
@@ -108,7 +115,7 @@ def get_authors(author):
                 a_tmp2 = " ".join(a_tmp)
                 a_tmp2 = a_tmp2.strip().strip("'").strip('"')
                 if len(a_tmp2) > 0:
-                    g.append(a_tmp2)
+                    g.append(a_tmp2.ljust(4))
         if len(g) > 0:
             ret = "|".join(g)
     else:
@@ -125,13 +132,13 @@ def get_authors(author):
         r = " ".join(a_tmp)
         r = r.strip().strip("'").strip('"')
         if len(r) > 0:
-            ret = r
+            ret = r.ljust(4)
     return ret
 
 
 # return comma-separated string of authors from input struct
 def get_author_ids(author):
-    ret = "336d5ebc5436534e61d16e63ddfca327"  # default
+    ret = "f52d1a36a9e335e9416f32ddc9c9814b"  # default
     g = []
     if isinstance(author, list):
         for i in author:
@@ -148,7 +155,7 @@ def get_author_ids(author):
             a_tmp2 = " ".join(a_tmp)
             a_tmp2 = a_tmp2.strip().strip("'").strip('"')
             if len(a_tmp2) > 0:
-                g.append(hashlib.md5(a_tmp2.encode('utf-8')).hexdigest())
+                g.append(hashlib.md5(a_tmp2.ljust(4).encode('utf-8')).hexdigest())
         if len(g) > 0:
             ret = "|".join(g)
     else:
@@ -165,7 +172,7 @@ def get_author_ids(author):
         r = " ".join(a_tmp)
         r = r.strip().strip("'").strip('"')
         if len(r) > 0:
-            ret = hashlib.md5(r.encode('utf-8')).hexdigest()
+            ret = hashlib.md5(r.ljust(4).encode('utf-8')).hexdigest()
     return ret
 
 
@@ -207,7 +214,7 @@ def get_sequence(seq):
 
 def get_sequence_names(seq):
     if isinstance(seq, str):
-        return seq, ""
+        return seq
     if isinstance(seq, dict):
         name = None
         if '@name' in seq:
@@ -229,7 +236,7 @@ def get_sequence_names(seq):
 
 def get_sequence_ids(seq):
     if isinstance(seq, str):
-        return seq, ""
+        return hashlib.md5(seq.encode('utf-8')).hexdigest()
     if isinstance(seq, dict):
         name = None
         if '@name' in seq:
@@ -307,10 +314,10 @@ def fb2parse(z, filename):
         genre = get_genre(info['genre'])
     else:
         genre = ""
-    author = '-'
+    author = '--- unknown ---'
     if 'author' in info and info['author'] is not None:
         author = get_authors(info['author'])
-    author_ids = '336d5ebc5436534e61d16e63ddfca327'  # author == '-'
+    author_ids = 'f52d1a36a9e335e9416f32ddc9c9814b'  # author == '--- unknown ---'
     if 'author' in info and info['author'] is not None:
         author_ids = get_author_ids(info['author'])
     sequence = ''
@@ -514,9 +521,9 @@ def iterate_list(blist, dbfile):
             book["zipfile"],
             book["filename"],
             book["genres"],
-            book["authors"].replace("'","''"),
+            book["authors"].replace("'", "''"),
             book["author_ids"],
-            book["sequences"].replace("'","''"),
+            book["sequences"].replace("'", "''"),
             book["sequence_names"],
             book["sequence_ids"],
             book["book_title"],

@@ -4,7 +4,7 @@
             {% if title is defined -%}
                 {{title}}
             {% else -%}
-                Documentation
+                Books
             {% endif -%}
         </title>
     </head>
@@ -13,7 +13,7 @@
         {% if title is defined -%}
             {{title}}
         {% else -%}
-            Documentation
+            Books
         {% endif -%}
         </h1>
         {% for l in link %}
@@ -38,7 +38,7 @@
             <p>
             Genres: 
             {% for c in i.category %}
-                {{c['@label']}}
+                <a href="/html/genres/{{c['@term']}}">{{c['@label']}}</a> 
             {% endfor %}
             </p>
             <p>

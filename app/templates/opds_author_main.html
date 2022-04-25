@@ -4,7 +4,7 @@
             {% if title is defined -%}
                 {{title}}
             {% else -%}
-                Documentation
+                Books
             {% endif -%}
         </title>
     </head>
@@ -13,7 +13,7 @@
             {% if title is defined -%}
                 {{title}}
             {% else -%}
-                Documentation
+                Books
             {% endif -%}
         </h1>
         {% for l in link %}
@@ -31,6 +31,7 @@
         </div>
         {% endfor %}
         <hr>
+        <p>
         {% for l in link %}
             <a href={{l['@href']|replace('/opds', '/html', 1)}}>{{l['@rel']|replace('/opds', '/html', 1)}}</a>
         {% endfor %}

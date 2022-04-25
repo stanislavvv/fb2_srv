@@ -95,6 +95,22 @@ def get_genre_books(gen_id, page=0):
             }
         )
     else:
+        if page == 1:
+            ret["feed"]["link"].append(
+                {
+                    "@href": "/opds/genres/" + gen_id,
+                    "@rel": "prev",
+                    "@type": "application/atom+xml;profile=opds-catalog"
+                }
+            )
+        else:
+            ret["feed"]["link"].append(
+                {
+                    "@href": "/opds/genres/" + gen_id + "/" + str(page - 1),
+                    "@rel": "prev",
+                    "@type": "application/atom+xml;profile=opds-catalog"
+                }
+            )
         ret["feed"]["link"].append(
             {
                 "@href": "/opds/genres/" + gen_id,
@@ -102,13 +118,6 @@ def get_genre_books(gen_id, page=0):
                 "@type": "application/atom+xml;profile=opds-catalog"
             }
         )
-    ret["feed"]["link"].append(
-        {
-            "@href": "/opds/genres/" + gen_id + "/" + str(page + 1),
-            "@rel": "next",
-            "@type": "application/atom+xml;profile=opds-catalog"
-        }
-    )
 
     REQ0 = "SELECT zipfile, filename, genres, author_ids, sequence_ids,"
     REQ0 = REQ0 + " book_id, book_title, lang, size, date_time, annotation"
@@ -119,6 +128,15 @@ def get_genre_books(gen_id, page=0):
     REQ5 = "|%') ORDER BY book_title LIMIT " + str(BOOKS_LIMIT) + " OFFSET " + str(page * BOOKS_LIMIT) + ";"
     REQ = REQ1 + gen_id + REQ2 + gen_id + REQ3 + gen_id + REQ4 + gen_id + REQ5
     rows = conn.execute(REQ).fetchall()
+    rows_count = len(rows)
+    if rows_count >= BOOKS_LIMIT:
+        ret["feed"]["link"].append(
+            {
+                "@href": "/opds/genres/" + gen_id + "/" + str(page + 1),
+                "@rel": "next",
+                "@type": "application/atom+xml;profile=opds-catalog"
+            }
+        )
     for row in rows:
         zipfile = row["zipfile"]
         filename = row["filename"]

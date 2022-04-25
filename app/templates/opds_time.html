@@ -4,7 +4,7 @@
             {% if title is defined -%}
                 {{title}}
             {% else -%}
-                Documentation
+                Books
             {% endif -%}
         </title>
     </head>
@@ -13,12 +13,12 @@
             {% if title is defined -%}
                 {{title}}
             {% else -%}
-                Documentation
+                Books
             {% endif -%}
         </h1>
-            {% if updated is defined -%}
-                <p>{{updated}}</p>
-            {% endif -%}
+        {% for l in link %}
+            <a href={{l['@href']|replace('/opds', '/html', 1)}}>{{l['@rel']|replace('/opds', '/html', 1)}}</a>
+        {% endfor %}
         <hr>
         {% for i in entry %}
         <div>
@@ -38,7 +38,7 @@
             <p>
             Genres: 
             {% for c in i.category %}
-                {{c['@label']}}
+                <a href="/html/genres/{{c['@term']}}">{{c['@label']}}</a> 
             {% endfor %}
             </p>
             <p>
@@ -51,6 +51,14 @@
             <hr>
         </div>
         {% endfor %}
+        <p>
+        {% for l in link %}
+            <a href={{l['@href']|replace('/opds', '/html', 1)}}>{{l['@rel']|replace('/opds', '/html', 1)}}</a>
+        {% endfor %}
+        </p>
+        {% if updated is defined -%}
+            <p>{{updated}}</p>
+        {% endif -%}
     </body>
 </html>
 

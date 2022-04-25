@@ -152,19 +152,19 @@ def get_sequences(seq_root):
         REQ = REQ1 + seq_root + REQ2
         conn = get_db_connection()
         rows = conn.execute(REQ).fetchall()
-        ret["feed"]["id"] = "tag:root:sequences:" + urllib.parse.quote_plus(seq_root, encoding='utf-8')
+        ret["feed"]["id"] = "tag:root:sequences:" + urllib.parse.quote(seq_root, encoding='utf-8')
         for ch in any2alphabet("seq", rows, 3):
             ret["feed"]["entry"].append(
                 {
                     "updated": dtiso,
-                    "id": "tag:sequences:" + urllib.parse.quote_plus(ch, encoding='utf-8'),
+                    "id": "tag:sequences:" + urllib.parse.quote(ch, encoding='utf-8'),
                     "title": ch,
                     "content": {
                         "@type": "text",
                         "#text": "книги на '" + ch + "'"
                     },
                     "link": {
-                        "@href": "/opds/sequences/" + urllib.parse.quote_plus(ch, encoding='utf-8'),
+                        "@href": "/opds/sequences/" + urllib.parse.quote(ch, encoding='utf-8'),
                         "@type": "application/atom+xml;profile=opds-catalog"
                     }
                 }
@@ -175,7 +175,7 @@ def get_sequences(seq_root):
         REQ2 = '%" OR name like "%|'
         REQ3 = '%" GROUP BY name ORDER BY name;'
         REQ = REQ1 + seq_root + REQ2 + seq_root + REQ3
-        ret["feed"]["id"] = "tag:root:sequences:" + urllib.parse.quote_plus(seq_root, encoding='utf-8')
+        ret["feed"]["id"] = "tag:root:sequences:" + urllib.parse.quote(seq_root, encoding='utf-8')
         conn = get_db_connection()
         rows = conn.execute(REQ).fetchall()
         for row in rows:
@@ -184,7 +184,7 @@ def get_sequences(seq_root):
             ret["feed"]["entry"].append(
                 {
                     "updated": dtiso,
-                    "id": "tag:sequence:" + urllib.parse.quote_plus(seq_name, encoding='utf-8'),
+                    "id": "tag:sequence:" + urllib.parse.quote(seq_name, encoding='utf-8'),
                     "title": seq_name,
                     "content": {
                         "@type": "text",

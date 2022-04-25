@@ -115,7 +115,6 @@ def get_authors_list(auth_root):
         )
         ret["feed"]["updated"] = dtiso
         REQ = 'SELECT id, name FROM authors WHERE name LIKE "' + auth_root + '%" ORDER BY name;'
-        print(REQ)
         ret["feed"]["id"] = "tag:root:authors:" + urllib.parse.quote_plus(auth_root, encoding='utf-8')
         conn = get_db_connection()
         rows = conn.execute(REQ).fetchall()
@@ -380,7 +379,7 @@ def get_author_sequence(auth_id, seq_id):
             category.append(
                 {
                     "@label": v,
-                    "@term": v
+                    "@term": k
                 }
             )
         annotext = """
@@ -485,7 +484,7 @@ def get_author_sequenceless(auth_id):
             category.append(
                 {
                     "@label": v,
-                    "@term": v
+                    "@term": k
                 }
             )
         annotext = """
@@ -598,7 +597,7 @@ def get_author_by_alphabet(auth_id):
             category.append(
                 {
                     "@label": v,
-                    "@term": v
+                    "@term": k
                 }
             )
         annotext = """
@@ -635,8 +634,15 @@ def get_author_by_time(auth_id):
     auth_name = rows[0][1]
     ret = ret_hdr_author()
     ret["feed"]["id"] = "tag:author:" + auth_id + "books:alphabet:"
-    ret["feed"]["title"] = "Books of author: " + auth_name + " by aplhabet"
+    ret["feed"]["title"] = "Books of author: " + auth_name + " by time"
     ret["feed"]["updated"] = dtiso
+    ret["feed"]["link"].append(
+        {
+            "@href": "/opds/author/" + auth_id,
+            "@rel": "up",
+            "@type": "application/atom+xml;profile=opds-catalog"
+        }
+    )
 
     REQ0 = "SELECT zipfile, filename, genres, author_ids, sequence_ids,"
     REQ0 = REQ0 + " book_id, book_title, lang, size, date_time, annotation"
@@ -710,7 +716,7 @@ def get_author_by_time(auth_id):
             category.append(
                 {
                     "@label": v,
-                    "@term": v
+                    "@term": k
                 }
             )
         annotext = """
