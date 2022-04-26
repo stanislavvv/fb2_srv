@@ -8,7 +8,6 @@ from .views_dl import dl
 from .get_fb2 import init_xslt
 
 
-
 def create_app():
     global xslt
     app = Flask(__name__, static_url_path='/st')

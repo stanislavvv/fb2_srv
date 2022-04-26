@@ -5,23 +5,23 @@ import zipfile
 import xmltodict
 # import hashlib
 import sqlite3
-import codecs
+# import codecs
 import json
 
 from bs4 import BeautifulSoup
 from datetime import datetime
-from .strings import strnull, strlist, quote_identifier, rchop, get_genre_name
-from .strings import get_genres, get_genres_replace, genres_replace, check_genres
+# from .strings import strnull, strlist, quote_identifier, rchop, get_genre_name
+from .strings import get_genres, get_genres_replace, genres_replace, check_genres, rchop
 from .data import recursive_text, get_genre, get_authors, get_author_ids
 from .data import get_sequence, get_sequence_names, get_sequence_ids, get_lang
-from .data import get_struct_by_key, make_id
+from .data import get_struct_by_key, make_id, get_replace_list, replace_book
 from .db import author2db, genres2db, seq2db
 
 READ_SIZE = 20480  # description in 20kb...
 
 
 # get filename in opened zip (assume filename format as fb2), return book struct
-def fb2parse(z, filename):
+def fb2parse(z, filename, replace_data):
     file_info = z.getinfo(filename)
     fb2dt = datetime(*file_info.date_time)
     date_time = fb2dt.strftime("%F_%H:%M")
@@ -42,9 +42,11 @@ def fb2parse(z, filename):
         return None
     fb2data = get_struct_by_key('FictionBook', data)  # data['FictionBook']
     descr = get_struct_by_key('description', fb2data)  # fb2data['description']
-    # if filename == '509075.fb2':  # debug
-    #     print(json.dumps(descr, ensure_ascii=False))
     info = get_struct_by_key('title-info', descr)  # descr['title-info']
+    # if filename == '177350.fb2':  # debug
+    #     print(json.dumps(info, ensure_ascii=False))
+    if replace_data is not None:
+        info = replace_book(filename, info, replace_data)
 
     if 'genre' in info and info['genre'] is not None:
         genre = get_genre(info['genre'])
@@ -102,10 +104,11 @@ def ziplist(zip_file):
     print(zip_file)
     ret = []
     z = zipfile.ZipFile(zip_file)
+    replace_data = get_replace_list(zip_file)
     for filename in z.namelist():
         if not os.path.isdir(filename):
             print(zip_file + "/" + filename + "             ", end="\r")
-            res = fb2parse(z, filename)
+            res = fb2parse(z, filename, replace_data)
             if res is not None:
                 ret.append(res)
     print("")
@@ -156,6 +159,7 @@ def iterate_list(blist, dbfile):
 
 # wrapper over iterate_list, get .list, fill some auxiliary structs, pass .list next to iterate_list
 def booklist2db(booklist, dbfile):
+    print(booklist)
     get_genres()  # official genres from genres.list
     get_genres_replace()  # replacement for unofficial genres from genres_replace.list
     iterate_list(booklist, dbfile)

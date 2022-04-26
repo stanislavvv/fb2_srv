@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
-
-import sqlite3
+# import sqlite3
 from .strings import get_genre_name
 from .data import make_id
 

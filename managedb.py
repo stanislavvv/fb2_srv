@@ -78,7 +78,7 @@ def newdb():
     dbfile = app.config['DBSQLITE']
     if os.path.exists(dbfile):
         dropdb()
-    print("creating ", dbfile)
+    print("creating", dbfile)
     con = sqlite3.connect(dbfile)
     cur = con.cursor()
     for req in CREATE_REQ:
@@ -113,7 +113,10 @@ def update_booklist(zip_file):
 def fillall():
     dbfile = app.config['DBSQLITE']
     zipdir = app.config['ZIPS']
+    i = 0
     for zip_file in glob.glob(zipdir + '/*.zip'):
+        i += 1
+        print("[" + str(i) + "] ", end='')
         create_booklist(zip_file)
         booklist = zip_file + ".list"
         if os.path.exists(booklist):
@@ -123,17 +126,21 @@ def fillall():
 def fillnew():
     dbfile = app.config['DBSQLITE']
     zipdir = app.config['ZIPS']
+    i = 0
     for zip_file in glob.glob(zipdir + '/*.zip'):
+        i += 1
+        print("[" + str(i) + "] ", end='')
         booklist = zip_file + ".list"
-        if update_booklist(zip_file) and os.path.exists(booklist):
-            booklist = zip_file + ".list"
-            booklist2db(booklist, dbfile)
+        update_booklist(zip_file)
 
 
 def fill_lists():
     dbfile = app.config['DBSQLITE']
     zipdir = app.config['ZIPS']
+    i = 0
     for booklist in glob.glob(zipdir + '/*.zip.list'):
+        i += 1
+        print("[" + str(i) + "] ", end='')
         booklist2db(booklist, dbfile)
 
 

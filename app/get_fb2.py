@@ -12,15 +12,12 @@ from flask import current_app
 xslt = ''
 transform = ''
 
+
 def init_xslt(xsltfile):
     global xslt
     global transform
-    #x = open(xsltfile)
-    #xslt = x.read()
-    #x.close()
     xslt = ET.parse(xsltfile)
     transform = ET.XSLT(xslt)
-
 
 
 def fb2_out(zip_file, filename):
@@ -32,7 +29,6 @@ def fb2_out(zip_file, filename):
             with z.open(filename) as fb2:
                 data = io.BytesIO(fb2.read())
         return data
-        
     except Exception as e:
         print(e)
         return None
@@ -53,4 +49,3 @@ def html_out(zip_file, filename):
     except Exception as e:
         print(e)
         return None
-

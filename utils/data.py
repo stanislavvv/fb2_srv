@@ -1,8 +1,11 @@
 # -*- coding: utf-8 -*-
 
 import hashlib
+import json
+import os
 
-from .strings import strnull, strlist, quote_identifier, rchop
+# from .strings import strnull, strlist, quote_identifier, rchop
+from .strings import strlist
 
 
 # get name, strip quotes from begin/end, return md5
@@ -253,3 +256,29 @@ def get_struct_by_key(key, struct):
             if r is not None:
                 return r
     return None
+
+
+# return None or struct from .zip.replace
+def get_replace_list(zip_file):
+    ret = None
+    replace_list = zip_file + ".replace"
+    if os.path.isfile(replace_list):
+        try:
+            rl = open(replace_list)
+            r = json.load(rl)
+            rl.close()
+            ret = r
+        except Exception as e:
+            print("Can't load json from '" + filename + "':", e)
+    return ret
+
+
+# get book struct, if exists replacement, replace some fields from it
+def replace_book(filename, book, replace_data):
+    # filename = book["filename"]
+    if filename in replace_data:
+        replace = replace_data[filename]
+        for k, v in replace.items():
+            book[k] = v
+        print("replace in:", filename)
+    return book
