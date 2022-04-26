@@ -16,6 +16,7 @@ class DevelopmentConfig(Config):
     GENRES_LIST = "genres.list"
     ZIPS = "data"
     TITLE = "Home opds directory"
+    FB2_XSLT = 'fb2_to_html.xsl'
 
 
 class TestConfig(Config):
@@ -25,6 +26,7 @@ class TestConfig(Config):
     GENRES_LIST = "genres.list"
     ZIPS = "data"
     TITLE = "Home opds directory"
+    FB2_XSLT = 'fb2_to_html.xsl'
 
 
 class ProductionConfig(Config):
@@ -33,6 +35,7 @@ class ProductionConfig(Config):
     GENRES_LIST = "genres.list"
     ZIPS = "data"
     TITLE = "Home opds directory"
+    FB2_XSLT = 'fb2_to_html.xsl'
 
 
 config = {"development": DevelopmentConfig, "test": TestConfig, "prod": ProductionConfig}

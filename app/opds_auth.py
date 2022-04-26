@@ -521,7 +521,7 @@ def get_author_by_alphabet(auth_id):
         return ""
     auth_name = rows[0][1]
     ret = ret_hdr_author()
-    ret["feed"]["id"] = "tag:author:" + auth_id + "books:alphabet:"
+    ret["feed"]["id"] = "tag:author:" + auth_id + ":books:alphabet:"
     ret["feed"]["title"] = "Books of author: " + auth_name + " by aplhabet"
     ret["feed"]["updated"] = dtiso
 
@@ -633,7 +633,7 @@ def get_author_by_time(auth_id):
         return ""
     auth_name = rows[0][1]
     ret = ret_hdr_author()
-    ret["feed"]["id"] = "tag:author:" + auth_id + "books:alphabet:"
+    ret["feed"]["id"] = "tag:author:" + auth_id + ":books:time:"
     ret["feed"]["title"] = "Books of author: " + auth_name + " by time"
     ret["feed"]["updated"] = dtiso
     ret["feed"]["link"].append(

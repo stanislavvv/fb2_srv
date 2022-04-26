@@ -1,9 +1,26 @@
 # -*- coding: utf-8 -*-
 
-import os
+# import os
+# import sys
 import zipfile
-import xmltodict
+# import xmltodict
+import lxml.etree as ET
+from bs4 import BeautifulSoup
+import io
 from flask import current_app
+
+xslt = ''
+transform = ''
+
+def init_xslt(xsltfile):
+    global xslt
+    global transform
+    #x = open(xsltfile)
+    #xslt = x.read()
+    #x.close()
+    xslt = ET.parse(xsltfile)
+    transform = ET.XSLT(xslt)
+
 
 
 def fb2_out(zip_file, filename):
@@ -11,9 +28,29 @@ def fb2_out(zip_file, filename):
     zippath = zipdir + "/" + zip_file
     try:
         data = ""
-        with ZipFile(zippath) as myzip:
-            with myzip.open(filename) as myfile:
-                data = myfile.read()
+        with zipfile.ZipFile(zippath) as z:
+            with z.open(filename) as fb2:
+                data = io.BytesIO(fb2.read())
         return data
-    except:
+        
+    except Exception as e:
+        print(e)
         return None
+
+
+def html_out(zip_file, filename):
+    zipdir = current_app.config['ZIPS']
+    zippath = zipdir + "/" + zip_file
+    try:
+        with zipfile.ZipFile(zippath) as z:
+            with z.open(filename) as fb2:
+                data = io.BytesIO(fb2.read())
+                bs = BeautifulSoup(data, 'xml')
+                doc = bs.prettify()
+                dom = ET.fromstring(bytes(doc, encoding='utf8'))
+                html = transform(dom)
+                return str(html)
+    except Exception as e:
+        print(e)
+        return None
+

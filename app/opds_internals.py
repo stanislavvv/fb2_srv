@@ -9,6 +9,16 @@ from flask import current_app
 BOOKS_LIMIT = 10
 
 
+def get_db_connection():
+    conn = sqlite3.connect(current_app.config['DBSQLITE'])
+    conn.row_factory = sqlite3.Row
+    return conn
+
+
+def get_dtiso():
+    return datetime.datetime.now().astimezone().replace(microsecond=0).isoformat()
+
+
 # return [ { "name": seq_name, "id": seq_id, "count": books_count }, ...]
 def get_auth_seqs(auth_id):
     ret = []
@@ -43,16 +53,6 @@ def get_auth_seqs(auth_id):
                 ret.append({"name": seq_name, "id": seq_id, "count": seq_cnt[seq_id]})
     conn.close()
     return ret
-
-
-def get_db_connection():
-    conn = sqlite3.connect(current_app.config['DBSQLITE'])
-    conn.row_factory = sqlite3.Row
-    return conn
-
-
-def get_dtiso():
-    return datetime.datetime.now().astimezone().replace(microsecond=0).isoformat()
 
 
 def any2alphabet(field, sq3_rows, num):
