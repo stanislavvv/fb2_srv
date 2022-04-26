@@ -26,3 +26,6 @@ fillnew:
 
 fillall:
 	./managedb.py refillall
+
+listfill:
+	./managedb.py fill_lists

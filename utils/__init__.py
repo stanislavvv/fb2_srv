@@ -20,7 +20,7 @@ from .db import author2db, genres2db, seq2db
 READ_SIZE = 20480  # description in 20kb...
 
 
-# get filename in zip, print some data
+# get filename in opened zip (assume filename format as fb2), return book struct
 def fb2parse(z, filename):
     file_info = z.getinfo(filename)
     fb2dt = datetime(*file_info.date_time)
@@ -31,7 +31,6 @@ def fb2parse(z, filename):
     fb2 = z.open(filename)
     bs = BeautifulSoup(bytes(fb2.read(READ_SIZE)), 'xml')
     doc = bs.prettify()
-    # data = xmltodict.parse(doc, xml_attribs=False)
     data = xmltodict.parse(doc)
     if 'FictionBook' not in data:  # parse with namespace
         data = xmltodict.parse(
@@ -39,6 +38,8 @@ def fb2parse(z, filename):
             process_namespaces=True,
             namespaces={'http://www.gribuser.ru/xml/fictionbook/2.0': None}
         )
+    if 'FictionBook' not in data:  # not fb2
+        return None
     fb2data = get_struct_by_key('FictionBook', data)  # data['FictionBook']
     descr = get_struct_by_key('description', fb2data)  # fb2data['description']
     # if filename == '509075.fb2':  # debug
@@ -96,7 +97,7 @@ def fb2parse(z, filename):
     return out
 
 
-# zip/fb2 list proc
+# iterate over files in zip, return array of book struct
 def ziplist(zip_file):
     print(zip_file)
     ret = []
@@ -111,7 +112,7 @@ def ziplist(zip_file):
     return ret
 
 
-# main function
+# iterate over list data, send it to db
 def iterate_list(blist, dbfile):
     data = open(blist, 'r')
     zip_file = os.path.basename(rchop(blist, '.list'))
@@ -153,6 +154,7 @@ def iterate_list(blist, dbfile):
     data.close()
 
 
+# wrapper over iterate_list, get .list, fill some auxiliary structs, pass .list next to iterate_list
 def booklist2db(booklist, dbfile):
     get_genres()  # official genres from genres.list
     get_genres_replace()  # replacement for unofficial genres from genres_replace.list
