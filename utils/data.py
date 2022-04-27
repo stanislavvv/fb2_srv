@@ -85,7 +85,7 @@ def get_authors(author):
                 if 'nickname' in i and i['nickname'] is not None:
                     a_tmp.append('(' + strlist(i['nickname']) + ')')
                 a_tmp2 = " ".join(a_tmp)
-                a_tmp2 = a_tmp2.strip().strip("'").strip('"')
+                a_tmp2 = a_tmp2.strip('|').strip("'").strip('"').strip()
                 if len(a_tmp2) > 0:
                     g.append(a_tmp2.ljust(4))
         if len(g) > 0:
@@ -102,7 +102,7 @@ def get_authors(author):
             if 'nickname' in author and author['nickname'] is not None:
                 a_tmp.append('(' + strlist(author['nickname']) + ')')
         r = " ".join(a_tmp)
-        r = r.strip().strip("'").strip('"')
+        r = r.strip('|').strip("'").strip('"').strip()
         if len(r) > 0:
             ret = r.ljust(4)
     return ret
@@ -125,7 +125,7 @@ def get_author_ids(author):
                 if 'nickname' in i and i['nickname'] is not None:
                     a_tmp.append('(' + strlist(i['nickname']) + ')')
             a_tmp2 = " ".join(a_tmp)
-            a_tmp2 = a_tmp2.strip().strip("'").strip('"')
+            a_tmp2 = a_tmp2.strip('|').strip("'").strip('"').strip()
             if len(a_tmp2) > 0:
                 g.append(make_id(a_tmp2.ljust(4)))
         if len(g) > 0:
@@ -142,7 +142,7 @@ def get_author_ids(author):
             if 'nickname' in author and author['nickname'] is not None:
                 a_tmp.append('(' + strlist(author['nickname']) + ')')
         r = " ".join(a_tmp)
-        r = r.strip().strip("'").strip('"')
+        r = r.strip('|').strip("'").strip('"').strip()
         if len(r) > 0:
             ret = make_id(r.ljust(4))
     return ret
@@ -150,12 +150,12 @@ def get_author_ids(author):
 
 def get_sequence(seq):
     if isinstance(seq, str):
-        return seq, ""
+        return seq.strip('|'), ""
     if isinstance(seq, dict):
         name = None
         num = None
         if '@name' in seq:
-            name = seq['@name']
+            name = seq['@name'].strip('|')
         if '@number' in seq:
             num = seq['@number']
         if name is not None and num is not None:
@@ -171,7 +171,7 @@ def get_sequence(seq):
             name = None
             num = None
             if '@name' in s:
-                name = s['@name']
+                name = s['@name'].strip('|')
             if '@number' in s:
                 num = s['@number']
             if name is not None and num is not None:
@@ -199,7 +199,7 @@ def get_sequence_names(seq):
         for s in seq:
             name = None
             if '@name' in s:
-                name = s['@name']
+                name = s['@name'].strip('|')
                 r = "%s" % name
                 ret.append(r)
         return "|".join(ret)
@@ -213,7 +213,7 @@ def get_sequence_ids(seq):
     if isinstance(seq, dict):
         name = None
         if '@name' in seq:
-            name = seq['@name']
+            name = seq['@name'].strip('|')
             r = "%s" % name
             return make_id(r)
         ret = ""
@@ -222,8 +222,8 @@ def get_sequence_ids(seq):
         for s in seq:
             name = None
             if '@name' in s:
-                name = s['@name']
-                r = "%s" % name
+                name = s['@name'].strip('|')
+                r = "%s" % name.strip()
                 ret.append(make_id(r))
         return "|".join(ret)
     return ret
