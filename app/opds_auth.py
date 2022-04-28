@@ -62,7 +62,7 @@ def get_authors_list(auth_root):
                     "title": ch,
                     "content": {
                         "@type": "text",
-                        "#text": "Авторы на '" + ch + "'"
+                        "#text": "Authors beginnging from '" + ch + "'"
                     },
                     "link": {
                         "@href": "/opds/authorsindex/" + urllib.parse.quote(ch),
@@ -91,14 +91,14 @@ def get_authors_list(auth_root):
             ret["feed"]["entry"].append(
                 {
                     "updated": dtiso,
-                    "id": "tag:authors:" + urllib.parse.quote_plus(ch, encoding='utf-8'),
+                    "id": "tag:authors:" + urllib.parse.quote(ch, encoding='utf-8'),
                     "title": ch,
                     "content": {
                         "@type": "text",
-                        "#text": "Авторы на '" + ch + "'"
+                        "#text": "Authors beginnging from '" + ch + "'"
                     },
                     "link": {
-                        "@href": "/opds/authorsindex/" + urllib.parse.quote_plus(ch, encoding='utf-8'),
+                        "@href": "/opds/authorsindex/" + urllib.parse.quote(ch, encoding='utf-8'),
                         "@type": "application/atom+xml;profile=opds-catalog"
                     }
                 }
@@ -115,7 +115,7 @@ def get_authors_list(auth_root):
         )
         ret["feed"]["updated"] = dtiso
         REQ = 'SELECT id, name FROM authors WHERE name LIKE "' + auth_root + '%" ORDER BY name;'
-        ret["feed"]["id"] = "tag:root:authors:" + urllib.parse.quote_plus(auth_root, encoding='utf-8')
+        ret["feed"]["id"] = "tag:root:authors:" + urllib.parse.quote(auth_root, encoding='utf-8')
         conn = get_db_connection()
         rows = conn.execute(REQ).fetchall()
         for row in rows:

@@ -1,6 +1,7 @@
 # BUGS:
 
   * duplicate links in entries to authors in /html/authorsequence/<auth_id>/<seq_id>
+  * fb2parse() generate new authors from scratch
 
 # ToDo:
 
@@ -14,4 +15,4 @@
 
   * full book metadata replacement list (json like `[ "zipfile/filename": { "authors": "....", ...}, ...]`)
   * chunk fb2 downloads (for memory economy, but it will not work in /read)
-  * filter non-fb2 files in zip
+  * filter non-fb2 files in zip -- may be does not needed
