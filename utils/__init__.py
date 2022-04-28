@@ -149,7 +149,7 @@ def iterate_list(blist, dbfile):
         author2db(cur, insdata[3])
         seq2db(cur, insdata[6])
         cur.execute("INSERT INTO books VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (insdata))
-        for author in book["authors"].split("|"):  # debug
+        for author in insdata[3].split("|"):  # debug
             au.write(author + "|" + book["zipfile"] + "/" + book["filename"] + "\n")  # debug
     con.commit()
     con.close()

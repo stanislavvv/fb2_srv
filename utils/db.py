@@ -9,7 +9,7 @@ def author2db(cur, authors):
     global genres
     for author in authors.split("|"):
         if author is not None and author != "":
-            author = author.strip()
+            author = author
             author_id = make_id(author)
             REQ = 'SELECT count(*) FROM authors WHERE id = "%s"' % author_id
             cur.execute(REQ)

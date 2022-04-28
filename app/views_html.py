@@ -160,7 +160,6 @@ def html_author_time(auth=None):
     updated = data['feed']['updated']
     entry = data['feed']['entry']
     link = data['feed']['link']
-    print(json.dumps(data, indent=4, ensure_ascii=False))
     page = render_template('opds_time.html', title=title, updated=updated, link=link, entry=entry)
     return Response(page, mimetype='text/html')
 
