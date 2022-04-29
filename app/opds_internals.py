@@ -9,8 +9,27 @@ from flask import current_app
 BOOKS_LIMIT = 10
 
 
+# Custom collation, maybe it is more efficient
+# to store strings
+def unicode_nocase_collation(a: str, b: str):
+    if a.casefold() == b.casefold():
+        return 0
+    if a.casefold() < b.casefold():
+        return -1
+    return 1
+
+
+# custom UPPER for sqlite
+def unicode_upper(s: str):
+    return s.upper()
+
+
 def get_db_connection():
     conn = sqlite3.connect(current_app.config['DBSQLITE'])
+    conn.create_collation(
+        "UNICODE_NOCASE", unicode_nocase_collation
+    )
+    conn.create_function("U_UPPER", 1, unicode_upper)
     conn.row_factory = sqlite3.Row
     return conn
 

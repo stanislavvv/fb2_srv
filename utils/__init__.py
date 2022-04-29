@@ -3,19 +3,16 @@
 import os
 import zipfile
 import xmltodict
-# import hashlib
 import sqlite3
-# import codecs
 import json
 
 from bs4 import BeautifulSoup
 from datetime import datetime
-# from .strings import strnull, strlist, quote_identifier, rchop, get_genre_name
 from .strings import get_genres, get_genres_replace, genres_replace, check_genres, rchop
 from .data import recursive_text, get_genre, get_authors, get_author_ids
 from .data import get_sequence, get_sequence_names, get_sequence_ids, get_lang
 from .data import get_struct_by_key, make_id, get_replace_list, replace_book
-from .db import author2db, genres2db, seq2db
+from .db import author2db, genres2db, seq2db, unicode_nocase_collation
 
 READ_SIZE = 20480  # description in 20kb...
 
@@ -120,6 +117,9 @@ def iterate_list(blist, dbfile):
     data = open(blist, 'r')
     zip_file = os.path.basename(rchop(blist, '.list'))
     con = sqlite3.connect(dbfile)
+    con.create_collation(
+        "UNICODE_NOCASE", unicode_nocase_collation
+    )
     cur = con.cursor()
     cur.execute("DELETE FROM books WHERE zipfile = ?", [zip_file])
     authors_list = blist + ".authors"  # debug

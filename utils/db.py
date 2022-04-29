@@ -5,6 +5,16 @@ from .strings import get_genre_name
 from .data import make_id
 
 
+# Custom collation, maybe it is more efficient
+# to store strings
+def unicode_nocase_collation(a: str, b: str):
+    if a.casefold() == b.casefold():
+        return 0
+    if a.casefold() < b.casefold():
+        return -1
+    return 1
+
+
 def author2db(cur, authors):
     global genres
     for author in authors.split("|"):

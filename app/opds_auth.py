@@ -50,7 +50,7 @@ def get_authors_list(auth_root):
                 "@type": "application/atom+xml;profile=opds-catalog"
             }
         )
-        ALL_AUTHORS = 'SELECT substr(name, 1, 1) as nm FROM authors GROUP BY nm ORDER BY nm ;'
+        ALL_AUTHORS = 'SELECT U_UPPER(substr(name, 1, 1)) as nm FROM authors GROUP BY nm ORDER BY nm ;'
         conn = get_db_connection()
         rows = conn.execute(ALL_AUTHORS).fetchall()
         for row in rows:
@@ -81,7 +81,7 @@ def get_authors_list(auth_root):
             }
         )
         ret["feed"]["updated"] = dtiso
-        REQ = 'SELECT substr(name,1,3) as nm FROM authors WHERE name like "' + auth_root + '%" GROUP BY nm ORDER BY nm;'
+        REQ = 'SELECT U_UPPER(substr(name,1,3)) as nm FROM authors WHERE name like "' + auth_root + '%" GROUP BY nm ORDER BY nm;'
         conn = get_db_connection()
         rows = conn.execute(REQ).fetchall()
         ret["feed"]["id"] = "tag:root:authors:" + auth_root
@@ -114,7 +114,7 @@ def get_authors_list(auth_root):
             }
         )
         ret["feed"]["updated"] = dtiso
-        REQ = 'SELECT id, name FROM authors WHERE name LIKE "' + auth_root + '%" ORDER BY name;'
+        REQ = 'SELECT id, name FROM authors WHERE U_UPPER(name) LIKE "' + auth_root + '%" ORDER BY name;'
         ret["feed"]["id"] = "tag:root:authors:" + urllib.parse.quote(auth_root, encoding='utf-8')
         conn = get_db_connection()
         rows = conn.execute(REQ).fetchall()

@@ -9,6 +9,7 @@ import json
 
 from app import create_app
 from utils import ziplist, booklist2db
+from utils.db import unicode_nocase_collation
 
 CREATE_REQ = [
     """
@@ -16,41 +17,41 @@ CREATE_REQ = [
         'zipfile'	TEXT NOT NULL,
         'filename'	TEXT NOT NULL,
         'genres'	TEXT,
-        'authors'	TEXT COLLATE NOCASE,
+        'authors'	TEXT COLLATE UNICODE_NOCASE,
         'author_ids'	NUMERIC,
-        'sequence'	TEXT,
-        'sequence_names'	TEXT COLLATE NOCASE,
+        'sequence'	TEXT COLLATE UNICODE_NOCASE,
+        'sequence_names'	TEXT COLLATE UNICODE_NOCASE,
         'sequence_ids'	TEXT,
-        'book_title'	TEXT COLLATE NOCASE,
+        'book_title'	TEXT COLLATE UNICODE_NOCASE,
         'book_id'	TEXT,
         'lang'	TEXT,
         'date_time'	TEXT,
         'size'	INTEGER,
-        'annotation'	TEXT COLLATE NOCASE,
+        'annotation'	TEXT COLLATE UNICODE_NOCASE,
         PRIMARY KEY('zipfile','filename','authors','book_title')
     );
     """,
     """
     CREATE TABLE 'authors' (
         'id'    TEXT UNIQUE,
-        'name'  TEXT COLLATE NOCASE,
-        'info'  TEXT,
+        'name'  TEXT COLLATE UNICODE_NOCASE,
+        'info'  TEXT COLLATE UNICODE_NOCASE,
         PRIMARY KEY('id')
     );
     """,
     """
     CREATE TABLE 'sequences' (
         'id'    TEXT UNIQUE,
-        'name'  TEXT COLLATE NOCASE,
-        'info'  TEXT,
+        'name'  TEXT COLLATE UNICODE_NOCASE,
+        'info'  TEXT COLLATE UNICODE_NOCASE,
         PRIMARY KEY('id')
     );
     """,
     """
     CREATE TABLE 'genres' (
         'id'	TEXT UNIQUE,
-        'description'	TEXT COLLATE NOCASE,
-        'group'	TEXT,
+        'description'	TEXT COLLATE UNICODE_NOCASE,
+        'group'	TEXT COLLATE UNICODE_NOCASE,
         PRIMARY KEY('id')
     );
     """
@@ -80,6 +81,9 @@ def newdb():
         dropdb()
     print("creating", dbfile)
     con = sqlite3.connect(dbfile)
+    con.create_collation(
+        "UNICODE_NOCASE", unicode_nocase_collation
+    )
     cur = con.cursor()
     for req in CREATE_REQ:
         cur.execute(req)

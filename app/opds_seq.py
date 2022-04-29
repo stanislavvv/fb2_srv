@@ -126,7 +126,7 @@ def get_sequences(seq_root):
         }
     }
     if seq_root is None or seq_root == "" or seq_root == "/" or not isinstance(seq_root, str):
-        ALL_SEQUENCES = 'SELECT name FROM sequences GROUP BY name ORDER BY name;'
+        ALL_SEQUENCES = 'SELECT U_UPPER(name) as name FROM sequences GROUP BY name ORDER BY name;'
         conn = get_db_connection()
         rows = conn.execute(ALL_SEQUENCES).fetchall()
         for ch in any2alphabet("name", rows, 1):
@@ -147,7 +147,7 @@ def get_sequences(seq_root):
             )
         conn.close()
     elif len(seq_root) < 2:
-        REQ1 = 'SELECT name as seq FROM sequences WHERE UPPER(name) like "'
+        REQ1 = 'SELECT U_UPPER(name) as seq FROM sequences WHERE U_UPPER(name) like "'
         REQ2 = '%" GROUP BY seq ORDER BY seq;'
         REQ = REQ1 + seq_root + REQ2
         conn = get_db_connection()
@@ -171,8 +171,8 @@ def get_sequences(seq_root):
             )
         conn.close()
     else:
-        REQ1 = 'SELECT id, name FROM sequences WHERE name like "'
-        REQ2 = '%" OR name like "%|'
+        REQ1 = 'SELECT id, name FROM sequences WHERE U_UPPER(name) like "'
+        REQ2 = '%" OR U_UPPER(name) like "%|'
         REQ3 = '%" GROUP BY name ORDER BY name;'
         REQ = REQ1 + seq_root + REQ2 + seq_root + REQ3
         ret["feed"]["id"] = "tag:root:sequences:" + urllib.parse.quote(seq_root, encoding='utf-8')
