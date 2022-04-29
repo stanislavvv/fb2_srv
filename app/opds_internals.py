@@ -2,6 +2,8 @@
 
 import datetime
 import sqlite3
+import urllib.parse
+
 from flask import current_app
 
 
@@ -134,3 +136,28 @@ def sizeof_fmt(num, suffix="B"):
             return f"{num:3.1f}{unit}{suffix}"
         num /= 1024.0
     return f"{num:.1f}Yi{suffix}"
+
+
+# urlencode string (quote + replace some characters to %NN)
+def url_str(s):
+    tr = {
+        '/': '%2F'
+    }
+    ret = ''
+    if s is not None:
+        for c in s:
+            if c in tr:
+                c = tr[c]
+            ret = ret + c
+    return urllib.parse.quote(ret, encoding='utf-8')
+
+
+def unurl(s):
+    tr = {
+        '%2F': '/'
+    }
+    ret = s
+    if ret is not None:
+        for r, v in tr.items():
+            ret = ret.replace(r, v)
+    return ret

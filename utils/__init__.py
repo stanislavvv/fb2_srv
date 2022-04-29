@@ -104,11 +104,11 @@ def ziplist(zip_file):
     replace_data = get_replace_list(zip_file)
     for filename in z.namelist():
         if not os.path.isdir(filename):
-            print(zip_file + "/" + filename + "             ", end="\r")
+            # print(zip_file + "/" + filename + "             ", end="\r")
             res = fb2parse(z, filename, replace_data)
             if res is not None:
                 ret.append(res)
-    print("")
+    # print("")
     return ret
 
 

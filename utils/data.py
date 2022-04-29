@@ -269,7 +269,7 @@ def get_replace_list(zip_file):
             rl.close()
             ret = r
         except Exception as e:
-            print("Can't load json from '" + filename + "':", e)
+            print("Can't load json from '" + replace_list + "':", e)
     return ret
 
 

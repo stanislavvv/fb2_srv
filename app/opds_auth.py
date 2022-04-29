@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 
-import urllib.parse
 from .opds_internals import get_db_connection, get_dtiso, get_authors, get_genres_names
-from .opds_internals import get_auth_seqs, get_seqs, sizeof_fmt
+from .opds_internals import get_auth_seqs, get_seqs, sizeof_fmt, url_str, unurl
 
 
 def ret_hdr_author():  # python does not have constants
@@ -40,7 +39,8 @@ def ret_hdr_author():  # python does not have constants
 
 def get_authors_list(auth_root):
     dtiso = get_dtiso()
-    if auth_root is None or auth_root == "" or auth_root == "/" or not isinstance(auth_root, str):
+    a_root = unurl(auth_root)
+    if a_root is None or a_root == "" or a_root == "/" or not isinstance(a_root, str):
         ret = ret_hdr_author()
         ret["feed"]["updated"] = dtiso
         ret["feed"]["link"].append(
@@ -65,13 +65,13 @@ def get_authors_list(auth_root):
                         "#text": "Authors beginnging from '" + ch + "'"
                     },
                     "link": {
-                        "@href": "/opds/authorsindex/" + urllib.parse.quote(ch),
+                        "@href": "/opds/authorsindex/" + url_str(ch),
                         "@type": "application/atom+xml;profile=opds-catalog"
                     }
                 }
             )
         conn.close()
-    elif len(auth_root) < 2:
+    elif len(a_root) < 2:
         ret = ret_hdr_author()
         ret["feed"]["link"].append(
             {
@@ -81,30 +81,31 @@ def get_authors_list(auth_root):
             }
         )
         ret["feed"]["updated"] = dtiso
-        REQ = 'SELECT U_UPPER(substr(name,1,3)) as nm FROM authors WHERE name like "' + auth_root + '%" GROUP BY nm ORDER BY nm;'
+        REQ = 'SELECT U_UPPER(substr(name,1,3)) as nm FROM authors WHERE name like "' + a_root + '%" GROUP BY nm ORDER BY nm;'
         conn = get_db_connection()
         rows = conn.execute(REQ).fetchall()
-        ret["feed"]["id"] = "tag:root:authors:" + auth_root
+        ret["feed"]["id"] = "tag:root:authors:" + a_root
         # for ch in any2alphabet("name", rows, 3):
         for row in rows:
             ch = row["nm"]
             ret["feed"]["entry"].append(
                 {
                     "updated": dtiso,
-                    "id": "tag:authors:" + urllib.parse.quote(ch, encoding='utf-8'),
+                    "id": "tag:authors:" + url_str(ch),
                     "title": ch,
                     "content": {
                         "@type": "text",
                         "#text": "Authors beginnging from '" + ch + "'"
                     },
                     "link": {
-                        "@href": "/opds/authorsindex/" + urllib.parse.quote(ch, encoding='utf-8'),
+                        "@href": "/opds/authorsindex/" + url_str(ch),
                         "@type": "application/atom+xml;profile=opds-catalog"
                     }
                 }
             )
         conn.close()
     else:
+        print(a_root)
         ret = ret_hdr_author()
         ret["feed"]["link"].append(
             {
@@ -114,8 +115,9 @@ def get_authors_list(auth_root):
             }
         )
         ret["feed"]["updated"] = dtiso
-        REQ = 'SELECT id, name FROM authors WHERE U_UPPER(name) LIKE "' + auth_root + '%" ORDER BY name;'
-        ret["feed"]["id"] = "tag:root:authors:" + urllib.parse.quote(auth_root, encoding='utf-8')
+        REQ = 'SELECT id, name FROM authors WHERE U_UPPER(name) LIKE "' + a_root + '%" ORDER BY name;'
+        print(REQ)
+        ret["feed"]["id"] = "tag:root:authors:" + url_str(a_root)
         conn = get_db_connection()
         rows = conn.execute(REQ).fetchall()
         for row in rows:
@@ -137,6 +139,7 @@ def get_authors_list(auth_root):
                 }
             )
         conn.close()
+        print(ret)
     return ret
 
 
