@@ -55,15 +55,9 @@ def fb2parse(z, filename, replace_data):
         author = get_authors(info['author'])
     if 'author' in info and info['author'] is not None:
         author_ids = get_author_ids(info['author'])
-    sequence = ''
+    sequence = None
     if 'sequence' in info and info['sequence'] is not None:
         sequence = get_sequence(info['sequence'])
-    sequence_names = ''
-    if 'sequence' in info and info['sequence'] is not None:
-        sequence_names = get_sequence_names(info['sequence'])
-    sequence_ids = ''
-    if 'sequence' in info and info['sequence'] is not None:
-        sequence_ids = get_sequence_ids(info['sequence'])
     book_title = ''
     if 'book-title' in info and info['book-title'] is not None:
         book_title = info['book-title']
@@ -82,8 +76,6 @@ def fb2parse(z, filename, replace_data):
         "authors": author,
         "author_ids": author_ids,
         "sequences": sequence,
-        "sequence_names": sequence_names,
-        "sequence_ids": sequence_ids,
         "book_title": str(book_title),
         "book_id": book_id,
         "lang": str(lang),
@@ -147,7 +139,7 @@ def iterate_list(blist, dbfile):
         check_genres(insdata[:3])
         genres2db(cur, insdata[2])
         author2db(cur, insdata[3])
-        seq2db(cur, insdata[6])
+        seq2db(cur, insdata[6], insdata[0], insdata[1])
         cur.execute("INSERT INTO books VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (insdata))
         for author in insdata[3].split("|"):  # debug
             au.write(author + "|" + book["zipfile"] + "/" + book["filename"] + "\n")  # debug

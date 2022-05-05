@@ -30,7 +30,7 @@ def author2db(cur, authors):
                 cur.execute("INSERT INTO authors VALUES (?, ?, ?)", (author_data))
 
 
-def seq2db(cur, seqs):
+def seq2db(cur, seqs, zip_file, filename):
     for seq in seqs.split("|"):
         if seq is not None and seq != "":
             seq_id = make_id(seq)
@@ -41,6 +41,7 @@ def seq2db(cur, seqs):
             if cnt == 0:
                 seq_data = [seq_id, seq, ""]
                 cur.execute("INSERT INTO sequences VALUES (?, ?, ?)", (seq_data))
+            #REQ = 'SELECT count(*) FROM seq_books WHERE seq_id = "%s" AND ' % (seq_id, zip_file, filename)
 
 
 def genres2db(cur, genrs):

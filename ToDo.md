@@ -1,15 +1,12 @@
 # BUGS:
 
-  * duplicate links in entries to authors in /html/authorsequence/<auth_id>/<seq_id>
-  * fb2parse() generate new authors from scratch (from name 'aaa & bbb' generate 'aaa' + 'bbb')
-  * 404 in case '/' inside author names
+  * [minor] duplicate links in entries to authors in /html/authorsequence/<auth_id>/<seq_id>
+  * [normal] fb2parse() generate new authors from scratch (from name 'aaa & bbb' generate 'aaa' + 'bbb') -- need testing
 
 # ToDo:
 
-  * sequences with numbers in annotation and sort by sequence numbers in sequence view
-  * replace empty author to 'unknown' -- in progress
-  * better show authors with quotes in name like 'Аквариум' (may be strip quotes from begin and end) -- in progress
-  * refactor utils/__init__.py and managedb,py - too many functions in one file -- in progress
+  * sequences with numbers in annotation and sort by sequence numbers in sequence view -- in progress
+  * refactor utils/__init__.py and managedb,py - too many functions in one file -- in progress (stalled)
   * replace 'H' (latin) to 'Н' (cyrillic) in cyrillic names
 
 # ToDo sometime:

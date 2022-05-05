@@ -54,6 +54,15 @@ CREATE_REQ = [
         'group'	TEXT COLLATE UNICODE_NOCASE,
         PRIMARY KEY('id')
     );
+    """,
+    """
+    CREATE TABLE 'seq_books' (
+        'seq_id'	TEXT NOT NULL,
+        'zipfile'	TEXT NOT NULL,
+        'filename'	TEXT NOT NULL,
+        'seq_num'	INTEGER,
+        PRIMARY KEY('seq_id', 'zipfile', 'filename')
+    );
     """
 ]
 
@@ -66,7 +75,8 @@ def usage():
     print(" newdb      -- [re]create database from scratch")
     print(" fillnew    -- add new data to database")
     print(" refillall  -- pass over all zips, del from db, recreate file lists and fill them to db")
-    print(" fill_lists -- as refillall, but does not recreate lists, only refill data to db", " UNIMPLEMENTED")
+    print(" fill_lists -- as refillall, but does not recreate lists, only refill data to db")
+    print(" new_lists  -- as refillall, but recreate lists, no refill any data to db")
 
 
 def dropdb():
@@ -148,6 +158,15 @@ def fill_lists():
         booklist2db(booklist, dbfile)
 
 
+def new_lists():
+    zipdir = app.config['ZIPS']
+    i = 0
+    for zip_file in glob.glob(zipdir + '/*.zip'):
+        i += 1
+        print("[" + str(i) + "] ", end='')
+        create_booklist(zip_file)
+
+
 if __name__ == "__main__":
     app = create_app()
     if len(sys.argv) > 1:
@@ -163,6 +182,8 @@ if __name__ == "__main__":
             fillall()
         elif sys.argv[1] == "fill_lists":
             fill_lists()
+        elif sys.argv[1] == "new_lists":
+            new_lists()
         else:
             usage()
     else:

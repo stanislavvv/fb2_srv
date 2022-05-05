@@ -148,40 +148,51 @@ def get_author_ids(author):
     return ret
 
 
+def num2int(num: str):
+    try:
+        ret = int(num)
+        return ret
+    except:
+        return 0
+
+
 def get_sequence(seq):
+    ret = []
     if isinstance(seq, str):
-        return seq.strip('|'), ""
-    if isinstance(seq, dict):
+        id = make_id(seq)
+        ret.append({"name": seq, "id": id})
+    elif isinstance(seq, dict):
         name = None
         num = None
         if '@name' in seq:
             name = seq['@name'].strip('|')
+            id = make_id(name)
         if '@number' in seq:
             num = seq['@number']
         if name is not None and num is not None:
-            return "%s:%s" % (name, num)
+            ret.append({"name": name, "id": id, "num": num2int(num)})
         elif name is not None:
-            return "%s" % name
+            ret.append({"name": name, "id": id})
         elif num is not None:
-            return ":%s" % num
-        return ""
+            ret.append({"num": num2int(num)})
     elif isinstance(seq, list):
-        ret = []
         for s in seq:
             name = None
             num = None
             if '@name' in s:
                 name = s['@name'].strip('|')
+                id = make_id(name)
             if '@number' in s:
                 num = s['@number']
             if name is not None and num is not None:
-                ret.append("%s:%s" % (name, num))
+                ret.append({"name": name, "id": id, "num": num2int(num)})
             elif name is not None:
-                ret.append("%s" % name)
+                ret.append({"name": name, "id": id})
             elif num is not None:
-                ret.append(":%s" % num)
-        return "|".join(ret)
-    return str(seq)
+                ret.append({"num": num2int(num)})
+    else:
+        ret.append(str(seq))
+    return ret
 
 
 def get_sequence_names(seq):
