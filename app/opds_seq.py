@@ -238,14 +238,18 @@ def get_books_in_seq(seq_id):
             "entry": []
         }
     }
-    REQ1 = 'SELECT zipfile, filename, genres, author_ids, seq_ids as sequence_ids,'
+    REQ1 = '''SELECT books.zipfile as zipfile, books.filename as filename,
+    books.genres as genres, books.author_ids as author_ids, books.seq_ids as sequence_ids,
+    '''
     REQ1 = REQ1 + ' book_id, book_title, lang, size, date_time, annotation'
-    REQ1 = REQ1 + ' FROM books WHERE sequence_ids = "'  # fix E501 line too long
+    REQ1 = REQ1 + ', seq_books.seq_num as s_num FROM books, seq_books WHERE (sequence_ids = "'
     REQ2 = '" OR sequence_ids like "%|'
     REQ3 = '" OR sequence_ids like "'
     REQ4 = '|%" OR sequence_ids like "%|'
-    REQ5 = '%" GROUP BY authors, book_title ORDER BY authors, book_title'
-    REQ = REQ1 + seq_id + REQ2 + seq_id + REQ3 + seq_id + REQ4 + seq_id + REQ5
+    REQ5 = '%") AND seq_books.seq_id = "'
+    REQ6 = '" AND books.zipfile = seq_books.zipfile AND books.filename = seq_books.filename'
+    REQ6 = REQ6 + ' ORDER BY s_num, authors, book_title'
+    REQ = REQ1 + seq_id + REQ2 + seq_id + REQ3 + seq_id + REQ4 + seq_id + REQ5 + seq_id + REQ6
     conn = get_db_connection()
     rows = conn.execute(REQ).fetchall()
     for row in rows:
@@ -260,6 +264,7 @@ def get_books_in_seq(seq_id):
         size = row["size"]
         date_time = row["date_time"]
         annotation = row["annotation"]
+        seq_num = row["s_num"]
 
         authors = []
         links = []
@@ -319,8 +324,8 @@ def get_books_in_seq(seq_id):
             )
         annotext = """
         <p class=\"book\"> %s </p>\n<br/>Format: fb2<br/>Lang: ru<br/>
-        Size: %s<br/>Sequence: %s<br/>
-        """ % (annotation, sizeof_fmt(size), seq)
+        Size: %s<br/>Sequence: %s, Number: %s<br/>
+        """ % (annotation, sizeof_fmt(size), seq, str(seq_num))
         ret["feed"]["entry"].append(
             {
                 "updated": date_time,

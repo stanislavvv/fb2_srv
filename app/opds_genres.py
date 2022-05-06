@@ -205,8 +205,8 @@ def get_genre_books(gen_id, page=0):
             )
         annotext = """
         <p class=\"book\"> %s </p>\n<br/>Format: fb2<br/>Lang: ru<br/>
-        Size: %s<br/>Sequence: %s<br/>
-        """ % (annotation, sizeof_fmt(size), "")
+        Size: %s<br/>
+        """ % (annotation, sizeof_fmt(size))
         ret["feed"]["entry"].append(
             {
                 "updated": date_time,

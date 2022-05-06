@@ -106,7 +106,6 @@ def get_authors_list(auth_root):
             )
         conn.close()
     else:
-        print(a_root)
         ret = ret_hdr_author()
         ret["feed"]["link"].append(
             {
@@ -304,9 +303,10 @@ def get_author_sequence(auth_id, seq_id):
         }
     )
 
-    REQ0 = "SELECT zipfile, filename, genres, author_ids, seq_ids as sequence_ids, book_id, book_title,"
-    REQ0 = REQ0 + "lang, size, date_time, annotation"  # fix E501 line too long
-    REQ1 = REQ0 + " FROM books WHERE (author_ids = '"  # fix E501 line too long
+    REQ0 = "SELECT books.zipfile as zipfile, books.filename as filename, genres, "
+    REQ0 = REQ0 + "author_ids, seq_ids as sequence_ids, book_id, book_title,"
+    REQ0 = REQ0 + "lang, size, date_time, annotation, seq_books.seq_num as s_num"
+    REQ1 = REQ0 + " FROM books, seq_books WHERE (author_ids = '"  # fix E501 line too long
     REQ2 = "' OR author_ids LIKE '"
     REQ3 = "|%' OR author_ids LIKE '%|"
     REQ4 = "' OR author_ids LIKE '%|"
@@ -314,9 +314,11 @@ def get_author_sequence(auth_id, seq_id):
     REQ6 = "' OR sequence_ids LIKE '"
     REQ7 = "|%' OR sequence_ids LIKE '%|"
     REQ8 = "' OR sequence_ids LIKE '%|"
-    REQ9 = "|%');"
-    REQ = REQ1 + auth_id + REQ2 + auth_id + REQ3 + auth_id + REQ4 + auth_id + REQ5 + seq_id + REQ6 + seq_id + REQ7
-    REQ = REQ + seq_id + REQ8 + seq_id + REQ9  # fix E501 line too long
+    REQ9 = "|%') AND seq_books.seq_id = '"
+    REQ10 = "' AND seq_books.zipfile = books.zipfile AND seq_books.filename = books.filename"
+    REQ10 = REQ10 + " ORDER BY s_num, book_title;"
+    REQ = REQ1 + auth_id + REQ2 + auth_id + REQ3 + auth_id + REQ4 + auth_id + REQ5 + seq_id
+    REQ = REQ + REQ6 + seq_id + REQ7 + seq_id + REQ8 + seq_id + REQ9 + seq_id + REQ10
     rows = conn.execute(REQ).fetchall()
     for row in rows:
         zipfile = row["zipfile"]
@@ -330,6 +332,7 @@ def get_author_sequence(auth_id, seq_id):
         size = row["size"]
         date_time = row["date_time"]
         annotation = row["annotation"]
+        seq_num = row["s_num"]
 
         authors = []
         links = []
@@ -388,8 +391,8 @@ def get_author_sequence(auth_id, seq_id):
             )
         annotext = """
         <p class=\"book\"> %s </p>\n<br/>Format: fb2<br/>Lang: ru<br/>
-        Size: %s<br/>Sequence: %s<br/>
-        """ % (annotation, sizeof_fmt(size), seq_name)
+        Size: %s<br/>Sequence: %s, Number: %s<br/>
+        """ % (annotation, sizeof_fmt(size), seq_name, str(seq_num))
         ret["feed"]["entry"].append(
             {
                 "updated": date_time,

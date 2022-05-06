@@ -17,40 +17,40 @@ CREATE_REQ = [
         'zipfile'	TEXT NOT NULL,
         'filename'	TEXT NOT NULL,
         'genres'	TEXT,
-        'authors'	TEXT COLLATE UNICODE_NOCASE,
+        'authors'	TEXT,
         'author_ids'	NUMERIC,
-        'seq_names'	TEXT COLLATE UNICODE_NOCASE,
+        'seq_names'	TEXT,
         'seq_ids'	TEXT,
-        'book_title'	TEXT COLLATE UNICODE_NOCASE,
+        'book_title'	TEXT,
         'book_id'	TEXT,
         'lang'	TEXT,
         'date_time'	TEXT,
         'size'	INTEGER,
-        'annotation'	TEXT COLLATE UNICODE_NOCASE,
+        'annotation'	TEXT,
         PRIMARY KEY('zipfile','filename','authors','book_title')
     );
     """,
     """
     CREATE TABLE 'authors' (
         'id'    TEXT UNIQUE,
-        'name'  TEXT COLLATE UNICODE_NOCASE,
-        'info'  TEXT COLLATE UNICODE_NOCASE,
+        'name'  TEXT,
+        'info'  TEXT,
         PRIMARY KEY('id')
     );
     """,
     """
     CREATE TABLE 'sequences' (
         'id'    TEXT UNIQUE,
-        'name'  TEXT COLLATE UNICODE_NOCASE,
-        'info'  TEXT COLLATE UNICODE_NOCASE,
+        'name'  TEXT,
+        'info'  TEXT,
         PRIMARY KEY('id')
     );
     """,
     """
     CREATE TABLE 'genres' (
         'id'	TEXT UNIQUE,
-        'description'	TEXT COLLATE UNICODE_NOCASE,
-        'group'	TEXT COLLATE UNICODE_NOCASE,
+        'description'	TEXT,
+        'group'	TEXT,
         PRIMARY KEY('id')
     );
     """,
