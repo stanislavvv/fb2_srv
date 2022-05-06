@@ -137,13 +137,11 @@ def fillall():
 
 
 def fillnew():
-    dbfile = app.config['DBSQLITE']
     zipdir = app.config['ZIPS']
     i = 0
     for zip_file in glob.glob(zipdir + '/*.zip'):
         i += 1
         print("[" + str(i) + "] ", end='')
-        booklist = zip_file + ".list"
         update_booklist(zip_file)
 
 

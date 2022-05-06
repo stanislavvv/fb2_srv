@@ -152,7 +152,8 @@ def num2int(num: str):
     try:
         ret = int(num)
         return ret
-    except:
+    except Exception as e:
+        print(e)
         return 0
 
 

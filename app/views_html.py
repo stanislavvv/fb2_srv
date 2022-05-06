@@ -1,13 +1,10 @@
 # -*- coding: utf-8 -*-
 
-# from flask import request, redirect, Blueprint, Response, url_for
 from flask import redirect, Blueprint, Response, url_for, render_template
 from .opds_seq import main_opds, get_sequences, get_books_in_seq
 from .opds_auth import get_authors_list, get_author_list, get_author_sequences, get_author_sequence
 from .opds_auth import get_author_sequenceless, get_author_by_alphabet, get_author_by_time
 from .opds_genres import get_genres_list, get_genre_books
-
-import json
 
 html = Blueprint("html", __name__, template_folder='templates')
 

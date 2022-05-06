@@ -81,7 +81,8 @@ def get_authors_list(auth_root):
             }
         )
         ret["feed"]["updated"] = dtiso
-        REQ = 'SELECT U_UPPER(substr(name,1,3)) as nm FROM authors WHERE name like "' + a_root + '%" GROUP BY nm ORDER BY nm;'
+        REQ = 'SELECT U_UPPER(substr(name,1,3)) as nm FROM authors WHERE name like "'
+        REQ = REQ + a_root + '%" GROUP BY nm ORDER BY nm;'
         conn = get_db_connection()
         rows = conn.execute(REQ).fetchall()
         ret["feed"]["id"] = "tag:root:authors:" + a_root
