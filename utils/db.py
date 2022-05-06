@@ -31,17 +31,34 @@ def author2db(cur, authors):
 
 
 def seq2db(cur, seqs, zip_file, filename):
-    for seq in seqs.split("|"):
+    if seqs is None:
+        return
+    for seq in seqs:
         if seq is not None and seq != "":
-            seq_id = make_id(seq)
+            seq_id = seq["id"]
+            seq_name = seq["name"]
+            seq_num = 0
+            if "num" in seq:
+                seq_num = seq["num"]
             REQ = 'SELECT count(*) FROM sequences WHERE id = "%s"' % seq_id
             cur.execute(REQ)
             rows = cur.fetchall()
             cnt = rows[0][0]
             if cnt == 0:
-                seq_data = [seq_id, seq, ""]
+                seq_data = [seq_id, seq_name, ""]
                 cur.execute("INSERT INTO sequences VALUES (?, ?, ?)", (seq_data))
-            #REQ = 'SELECT count(*) FROM seq_books WHERE seq_id = "%s" AND ' % (seq_id, zip_file, filename)
+            REQ = 'SELECT count(*) FROM seq_books WHERE '
+            REQ = REQ + 'seq_id = "%s" AND zipfile = "%s" AND filename = "%s";' % (
+                seq_id,
+                zip_file,
+                filename
+            )
+            cur.execute(REQ)
+            rows = cur.fetchall()
+            cnt = rows[0][0]
+            if cnt == 0:
+                seq_data = [seq_id, zip_file, filename, seq_num]
+                cur.execute("INSERT INTO seq_books VALUES (?, ?, ?, ?)", (seq_data))
 
 
 def genres2db(cur, genrs):

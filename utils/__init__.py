@@ -58,6 +58,12 @@ def fb2parse(z, filename, replace_data):
     sequence = None
     if 'sequence' in info and info['sequence'] is not None:
         sequence = get_sequence(info['sequence'])
+    seq_names = ''
+    if 'sequence' in info and info['sequence'] is not None:
+        seq_names = get_sequence_names(info['sequence'])
+    seq_ids = ''
+    if 'sequence' in info and info['sequence'] is not None:
+        seq_ids = get_sequence_ids(info['sequence'])
     book_title = ''
     if 'book-title' in info and info['book-title'] is not None:
         book_title = info['book-title']
@@ -76,6 +82,8 @@ def fb2parse(z, filename, replace_data):
         "authors": author,
         "author_ids": author_ids,
         "sequences": sequence,
+        "seq_names": seq_names,
+        "seq_ids": seq_ids,
         "book_title": str(book_title),
         "book_id": book_id,
         "lang": str(lang),
@@ -124,9 +132,8 @@ def iterate_list(blist, dbfile):
             book["genres"],
             book["authors"].replace("'", "''"),
             book["author_ids"],
-            book["sequences"].replace("'", "''"),
-            book["sequence_names"].replace("'", "''"),
-            book["sequence_ids"],
+            book["seq_names"].replace("'", "''"),
+            book["seq_ids"],
             book["book_title"].replace("'", "''"),
             book["book_id"],
             book["lang"],
@@ -139,8 +146,8 @@ def iterate_list(blist, dbfile):
         check_genres(insdata[:3])
         genres2db(cur, insdata[2])
         author2db(cur, insdata[3])
-        seq2db(cur, insdata[6], insdata[0], insdata[1])
-        cur.execute("INSERT INTO books VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (insdata))
+        seq2db(cur, book["sequences"], insdata[0], insdata[1])
+        cur.execute("INSERT INTO books VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (insdata))
         for author in insdata[3].split("|"):  # debug
             au.write(author + "|" + book["zipfile"] + "/" + book["filename"] + "\n")  # debug
     con.commit()

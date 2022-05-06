@@ -119,7 +119,7 @@ def get_genre_books(gen_id, page=0):
             }
         )
 
-    REQ0 = "SELECT zipfile, filename, genres, author_ids, sequence_ids,"
+    REQ0 = "SELECT zipfile, filename, genres, author_ids, seq_ids as sequence_ids,"
     REQ0 = REQ0 + " book_id, book_title, lang, size, date_time, annotation"
     REQ1 = REQ0 + " FROM books WHERE (genres = '"  # fix E501 line too long
     REQ2 = "' OR genres LIKE '"

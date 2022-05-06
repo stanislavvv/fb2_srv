@@ -156,6 +156,7 @@ def num2int(num: str):
         return 0
 
 
+# return struct: [{"name": "SomeName", "id": "id...", num: 3}, ...]
 def get_sequence(seq):
     ret = []
     if isinstance(seq, str):

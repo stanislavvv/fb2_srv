@@ -238,7 +238,7 @@ def get_books_in_seq(seq_id):
             "entry": []
         }
     }
-    REQ1 = 'SELECT zipfile, filename, genres, author_ids, sequence_ids,'
+    REQ1 = 'SELECT zipfile, filename, genres, author_ids, seq_ids as sequence_ids,'
     REQ1 = REQ1 + ' book_id, book_title, lang, size, date_time, annotation'
     REQ1 = REQ1 + ' FROM books WHERE sequence_ids = "'  # fix E501 line too long
     REQ2 = '" OR sequence_ids like "%|'
