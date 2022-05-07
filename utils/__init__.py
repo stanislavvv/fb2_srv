@@ -40,8 +40,6 @@ def fb2parse(z, filename, replace_data):
     fb2data = get_struct_by_key('FictionBook', data)  # data['FictionBook']
     descr = get_struct_by_key('description', fb2data)  # fb2data['description']
     info = get_struct_by_key('title-info', descr)  # descr['title-info']
-    # if filename == '177350.fb2':  # debug
-    #     print(json.dumps(info, ensure_ascii=False))
     if replace_data is not None:
         info = replace_book(filename, info, replace_data)
 
@@ -91,8 +89,6 @@ def fb2parse(z, filename, replace_data):
         "size": str(size),
         "annotation": str(annotext.replace('\n', " ").replace('|', " "))
     }
-    # print(json.dumps(out, indent=2))  # debug
-    # print('|'.join(out))
     return out
 
 

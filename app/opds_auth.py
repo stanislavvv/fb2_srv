@@ -116,7 +116,6 @@ def get_authors_list(auth_root):
         )
         ret["feed"]["updated"] = dtiso
         REQ = 'SELECT id, name FROM authors WHERE U_UPPER(name) LIKE "' + a_root + '%" ORDER BY name;'
-        print(REQ)
         ret["feed"]["id"] = "tag:root:authors:" + url_str(a_root)
         conn = get_db_connection()
         rows = conn.execute(REQ).fetchall()
@@ -139,7 +138,6 @@ def get_authors_list(auth_root):
                 }
             )
         conn.close()
-        print(ret)
     return ret
 
 
