@@ -34,7 +34,7 @@ def seq2db(cur, seqs, zip_file, filename):
     if seqs is None:
         return
     for seq in seqs:
-        if seq is not None and seq != "":
+        if seq is not None and seq != "" and "id" in seq and "name" in seq:
             seq_id = seq["id"]
             seq_name = seq["name"]
             seq_num = 0
@@ -59,7 +59,8 @@ def seq2db(cur, seqs, zip_file, filename):
             if cnt == 0:
                 seq_data = [seq_id, zip_file, filename, seq_num]
                 cur.execute("INSERT INTO seq_books VALUES (?, ?, ?, ?)", (seq_data))
-
+        else:
+            print("Bad seq info in: %s/%s, seq info:" % (zip_file, filename), str(seq))
 
 def genres2db(cur, genrs):
     for genre_id in genrs.split("|"):
