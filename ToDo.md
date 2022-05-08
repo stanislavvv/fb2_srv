@@ -2,6 +2,8 @@
 
   * [minor] duplicate links in entries to authors in /html/authorsequence/<auth_id>/<seq_id>
   * [normal] fb2parse() generate new authors from scratch (from name 'aaa & bbb' generate 'aaa' + 'bbb') -- need testing
+  * [normal] quote /'"`/ and similar symbols
+  * [normal] author names in pine-quotes like '«Адам Смит»' must be stripped
 
 # ToDo:
 
