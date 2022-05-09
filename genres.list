@@ -8,7 +8,7 @@ adv_maritime|Морские приключения
 adv_modern|Приключения в современном мире
 adv_story|Авантюрный роман
 adv_western|Вестерн
-antique|antique
+antique|Старинное
 antique_ant|Античная литература
 antique_east|Древневосточная литература
 antique_european|Европейская старинная литература
@@ -77,7 +77,7 @@ fantasy_fight|Героическое фэнтези
 folklore|Фольклор, загадки folklore
 folk_songs|Народные песни
 folk_tale|Народные сказки
-foreign_action
+foreign_action|Иностранный экшн
 foreign_adventure|Иностранная приключенческая литература
 foreign_antique|Средневековая классическая проза
 foreign_business|Иностранная литература по бизнесу
@@ -87,7 +87,7 @@ foreign_detective|Иностранный детектив
 foreign_dramaturgy|Иностранная драматургия
 foreign_edu|Иностранная образовательная литература
 foreign_fantasy|Иностранное фэнтези
-foreign_home|foreign_home???
+foreign_home|Иностранная литература про дом/семью
 foreign_love|Иностранные любовные романы
 foreign_poetry|Зарубежная поэзия
 foreign_prose|Зарубежная классическая проза
