@@ -17,6 +17,7 @@ class DevelopmentConfig(Config):
     ZIPS = "data"
     TITLE = "Home opds directory"
     FB2_XSLT = 'fb2_to_html.xsl'
+    APPLICATION_ROOT = ''
 
 
 class TestConfig(Config):
@@ -27,6 +28,7 @@ class TestConfig(Config):
     ZIPS = "data"
     TITLE = "Home opds directory"
     FB2_XSLT = 'fb2_to_html.xsl'
+    APPLICATION_ROOT = '/books'
 
 
 class ProductionConfig(Config):
@@ -36,6 +38,7 @@ class ProductionConfig(Config):
     ZIPS = "data"
     TITLE = "Home opds directory"
     FB2_XSLT = 'fb2_to_html.xsl'
+    APPLICATION_ROOT = '/books'
 
 
 config = {"development": DevelopmentConfig, "test": TestConfig, "prod": ProductionConfig}

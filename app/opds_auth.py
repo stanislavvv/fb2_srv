@@ -2,6 +2,7 @@
 
 from .opds_internals import get_db_connection, get_dtiso, get_authors, get_genres_names
 from .opds_internals import get_auth_seqs, get_seqs, sizeof_fmt, url_str, unurl
+from flask import current_app
 
 
 def ret_hdr_author():  # python does not have constants
@@ -27,7 +28,7 @@ def ret_hdr_author():  # python does not have constants
                     # "@type": "application/atom+xml"
                 # },
                 {
-                    "@href": "/opds/",
+                    "@href": current_app.config['APPLICATION_ROOT'] + "/opds/",
                     "@rel": "start",
                     "@type": "application/atom+xml;profile=opds-catalog"
                 }
@@ -45,7 +46,7 @@ def get_authors_list(auth_root):
         ret["feed"]["updated"] = dtiso
         ret["feed"]["link"].append(
             {
-                "@href": "/opds/",
+                "@href": current_app.config['APPLICATION_ROOT'] + "/opds/",
                 "@rel": "up",
                 "@type": "application/atom+xml;profile=opds-catalog"
             }
@@ -65,7 +66,7 @@ def get_authors_list(auth_root):
                         "#text": "Authors beginnging from '" + ch + "'"
                     },
                     "link": {
-                        "@href": "/opds/authorsindex/" + url_str(ch),
+                        "@href": current_app.config['APPLICATION_ROOT'] + "/opds/authorsindex/" + url_str(ch),
                         "@type": "application/atom+xml;profile=opds-catalog"
                     }
                 }
@@ -75,7 +76,7 @@ def get_authors_list(auth_root):
         ret = ret_hdr_author()
         ret["feed"]["link"].append(
             {
-                "@href": "/opds/authorsindex/",
+                "@href": current_app.config['APPLICATION_ROOT'] + "/opds/authorsindex/",
                 "@rel": "up",
                 "@type": "application/atom+xml;profile=opds-catalog"
             }
@@ -99,7 +100,7 @@ def get_authors_list(auth_root):
                         "#text": "Authors beginnging from '" + ch + "'"
                     },
                     "link": {
-                        "@href": "/opds/authorsindex/" + url_str(ch),
+                        "@href": current_app.config['APPLICATION_ROOT'] + "/opds/authorsindex/" + url_str(ch),
                         "@type": "application/atom+xml;profile=opds-catalog"
                     }
                 }
@@ -109,7 +110,7 @@ def get_authors_list(auth_root):
         ret = ret_hdr_author()
         ret["feed"]["link"].append(
             {
-                "@href": "/opds/authorsindex/",
+                "@href": current_app.config['APPLICATION_ROOT'] + "/opds/authorsindex/",
                 "@rel": "up",
                 "@type": "application/atom+xml;profile=opds-catalog"
             }
@@ -132,7 +133,7 @@ def get_authors_list(auth_root):
                         "#text": "Books of author: " + auth_name
                     },
                     "link": {
-                        "@href": "/opds/author/" + auth_id,
+                        "@href": current_app.config['APPLICATION_ROOT'] + "/opds/author/" + auth_id,
                         "@type": "application/atom+xml;profile=opds-catalog"
                     }
                 }
@@ -156,7 +157,7 @@ def get_author_list(auth_id):
     ret["feed"]["updated"] = dtiso
     ret["feed"]["link"].append(
         {
-            "@href": "/opds/authorsindex/",
+            "@href": current_app.config['APPLICATION_ROOT'] + "/opds/authorsindex/",
             "@rel": "up",
             "@type": "application/atom+xml;profile=opds-catalog"
         }
@@ -174,13 +175,13 @@ def get_author_list(auth_id):
                         #     "@type": "text/html"
                         # },
                         {
-                            "@href": "/opds/author/" + auth_id + "/sequences",
+                            "@href": current_app.config['APPLICATION_ROOT'] + "/opds/author/" + auth_id + "/sequences",
                             "@rel": "http://www.feedbooks.com/opds/facet",
                             "@title": "Books of author by sequences",
                             "@type": "application/atom+xml;profile=opds-catalog"
                         },
                         {
-                            "@href": "/opds/author/" + auth_id + "/sequenceless",
+                            "@href": current_app.config['APPLICATION_ROOT'] + "/opds/author/" + auth_id + "/sequenceless",
                             "@rel": "http://www.feedbooks.com/opds/facet",
                             "@title": "Sequenceless books of author",
                             "@type": "application/atom+xml;profile=opds-catalog"
@@ -196,7 +197,7 @@ def get_author_list(auth_id):
                     "id": "tag:author:" + auth_id + ":sequences",
                     "title": "Books by sequences",
                     "link": {
-                        "@href": "/opds/author/" + auth_id + "/sequences",
+                        "@href": current_app.config['APPLICATION_ROOT'] + "/opds/author/" + auth_id + "/sequences",
                         "@type": "application/atom+xml;profile=opds-catalog"
                     }
                 },
@@ -205,7 +206,7 @@ def get_author_list(auth_id):
                     "id": "tag:author:" + auth_id + ":sequenceless",
                     "title": "Books outside of sequences",
                     "link": {
-                        "@href": "/opds/author/" + auth_id + "/sequenceless",
+                        "@href": current_app.config['APPLICATION_ROOT'] + "/opds/author/" + auth_id + "/sequenceless",
                         "@type": "application/atom+xml;profile=opds-catalog"
                     }
                 },
@@ -214,7 +215,7 @@ def get_author_list(auth_id):
                     "id": "tag:author:" + auth_id + ":alphabet",
                     "title": "Books by alphabet",
                     "link": {
-                        "@href": "/opds/author/" + auth_id + "/alphabet",
+                        "@href": current_app.config['APPLICATION_ROOT'] + "/opds/author/" + auth_id + "/alphabet",
                         "@type": "application/atom+xml;profile=opds-catalog"
                     }
                 },
@@ -223,7 +224,7 @@ def get_author_list(auth_id):
                     "id": "tag:author:" + auth_id + ":time",
                     "title": "Books by entry date",
                     "link": {
-                        "@href": "/opds/author/" + auth_id + "/time",
+                        "@href": current_app.config['APPLICATION_ROOT'] + "/opds/author/" + auth_id + "/time",
                         "@type": "application/atom+xml;profile=opds-catalog"
                     }
                 }
@@ -246,7 +247,7 @@ def get_author_sequences(auth_id):
     ret["feed"]["updated"] = dtiso
     ret["feed"]["link"].append(
         {
-            "@href": "/opds/author/" + auth_id,
+            "@href": current_app.config['APPLICATION_ROOT'] + "/opds/author/" + auth_id,
             "@rel": "up",
             "@type": "application/atom+xml;profile=opds-catalog"
         }
@@ -266,7 +267,7 @@ def get_author_sequences(auth_id):
                     "#text": str(seq_cnt) + " book(s) in sequence"
                 },
                 "link": {
-                    "@href": "/opds/authorsequence/" + auth_id + "/" + seq_id,
+                    "@href": current_app.config['APPLICATION_ROOT'] + "/opds/authorsequence/" + auth_id + "/" + seq_id,
                     "@type": "application/atom+xml;profile=opds-catalog"
                 }
             },
@@ -295,7 +296,7 @@ def get_author_sequence(auth_id, seq_id):
     ret["feed"]["updated"] = dtiso
     ret["feed"]["link"].append(
         {
-            "@href": "/opds/author/" + auth_id,
+            "@href": current_app.config['APPLICATION_ROOT'] + "/opds/author/" + auth_id,
             "@rel": "up",
             "@type": "application/atom+xml;profile=opds-catalog"
         }
@@ -344,7 +345,7 @@ def get_author_sequence(auth_id, seq_id):
             )
             links.append(
                 {
-                    "@href": "/opds/author/" + k,
+                    "@href": current_app.config['APPLICATION_ROOT'] + "/opds/author/" + k,
                     "@rel": "related",
                     "@title": v,
                     "@type": "application/atom+xml"
@@ -354,7 +355,7 @@ def get_author_sequence(auth_id, seq_id):
         for k, v in seq_data.items():
             links.append(
                 {
-                    "@href": "/opds/sequencebooks/" + k,
+                    "@href": current_app.config['APPLICATION_ROOT'] + "/opds/sequencebooks/" + k,
                     "@rel": "related",
                     "@title": "All books in sequence '" + v + "'",
                     "@type": "application/atom+xml"
@@ -363,7 +364,7 @@ def get_author_sequence(auth_id, seq_id):
 
         links.append(
             {
-                "@href": "/fb2/" + zipfile + "/" + filename,
+                "@href": current_app.config['APPLICATION_ROOT'] + "/fb2/" + zipfile + "/" + filename,
                 "@rel": "http://opds-spec.org/acquisition/open-access",
                 "@title": "Download",
                 "@type": "application/fb2+zip"
@@ -371,7 +372,7 @@ def get_author_sequence(auth_id, seq_id):
         )
         links.append(
             {
-                "@href": "/read/" + zipfile + "/" + filename,
+                "@href": current_app.config['APPLICATION_ROOT'] + "/read/" + zipfile + "/" + filename,
                 "@rel": "alternate",
                 "@title": "Read in browser",
                 "@type": "text/html"
@@ -457,26 +458,26 @@ def get_author_sequenceless(auth_id):
 
         links = [
                     # {  # ToDo for over authors
-                    # "@href": "/opds/author/" + author_id,
+                    # "@href": current_app.config['APPLICATION_ROOT'] + "/opds/author/" + author_id,
                     # "@rel": "related",
                     # "@title": "All books of author: '" + authors,  # ToDo: имя автора
                     # "@type": "application/atom+xml"
                     # }
                     # {  # ToDo for over sequences
-                    # "@href": "/opds/sequencebooks/63116",
+                    # "@href": current_app.config['APPLICATION_ROOT'] + "/opds/sequencebooks/63116",
                     # "@rel": "related",
                     # "@title": "Все книги серии \"AYENA\"",
                     # "@type": "application/atom+xml"
                     # },
 
                     {
-                        "@href": "/fb2/" + zipfile + "/" + filename,
+                        "@href": current_app.config['APPLICATION_ROOT'] + "/fb2/" + zipfile + "/" + filename,
                         "@rel": "http://opds-spec.org/acquisition/open-access",
                         "@title": "Download",
                         "@type": "application/fb2+zip"
                     },
                     {
-                        "@href": "/read/" + zipfile + "/" + filename,
+                        "@href": current_app.config['APPLICATION_ROOT'] + "/read/" + zipfile + "/" + filename,
                         "@rel": "alternate",
                         "@title": "Read in browser",
                         "@type": "text/html"
@@ -566,7 +567,7 @@ def get_author_by_alphabet(auth_id):
         for k, v in seq_data.items():
             links.append(
                 {
-                    "@href": "/opds/sequencebooks/" + k,
+                    "@href": current_app.config['APPLICATION_ROOT'] + "/opds/sequencebooks/" + k,
                     "@rel": "related",
                     "@title": "All books in sequence '" + v + "'",
                     "@type": "application/atom+xml"
@@ -575,7 +576,7 @@ def get_author_by_alphabet(auth_id):
 
         links.append(
             {
-                "@href": "/fb2/" + zipfile + "/" + filename,
+                "@href": current_app.config['APPLICATION_ROOT'] + "/fb2/" + zipfile + "/" + filename,
                 "@rel": "http://opds-spec.org/acquisition/open-access",
                 "@title": "Download",
                 "@type": "application/fb2+zip"
@@ -583,14 +584,14 @@ def get_author_by_alphabet(auth_id):
         )
         links.append(
             {
-                "@href": "/read/" + zipfile + "/" + filename,
+                "@href": current_app.config['APPLICATION_ROOT'] + "/read/" + zipfile + "/" + filename,
                 "@rel": "alternate",
                 "@title": "Read in browser",
                 "@type": "text/html"
             }
         )
         # {  # ToDo for over authors
-        # "@href": "/opds/author/" + author_id,
+        # "@href": current_app.config['APPLICATION_ROOT'] + "/opds/author/" + author_id,
         # "@rel": "related",
         # "@title": "All books of author: '" + authors,  # ToDo: имя автора
         # "@type": "application/atom+xml"
@@ -643,7 +644,7 @@ def get_author_by_time(auth_id):
     ret["feed"]["updated"] = dtiso
     ret["feed"]["link"].append(
         {
-            "@href": "/opds/author/" + auth_id,
+            "@href": current_app.config['APPLICATION_ROOT'] + "/opds/author/" + auth_id,
             "@rel": "up",
             "@type": "application/atom+xml;profile=opds-catalog"
         }
@@ -685,7 +686,7 @@ def get_author_by_time(auth_id):
         for k, v in seq_data.items():
             links.append(
                 {
-                    "@href": "/opds/sequencebooks/" + k,
+                    "@href": current_app.config['APPLICATION_ROOT'] + "/opds/sequencebooks/" + k,
                     "@rel": "related",
                     "@title": "All books in sequence '" + v + "'",
                     "@type": "application/atom+xml"
@@ -694,7 +695,7 @@ def get_author_by_time(auth_id):
 
         links.append(
             {
-                "@href": "/fb2/" + zipfile + "/" + filename,
+                "@href": current_app.config['APPLICATION_ROOT'] + "/fb2/" + zipfile + "/" + filename,
                 "@rel": "http://opds-spec.org/acquisition/open-access",
                 "@title": "Download",
                 "@type": "application/fb2+zip"
@@ -702,14 +703,14 @@ def get_author_by_time(auth_id):
         )
         links.append(
             {
-                "@href": "/read/" + zipfile + "/" + filename,
+                "@href": current_app.config['APPLICATION_ROOT'] + "/read/" + zipfile + "/" + filename,
                 "@rel": "alternate",
                 "@title": "Read in browser",
                 "@type": "text/html"
             }
         )
         # {  # ToDo for over authors
-        # "@href": "/opds/author/" + author_id,
+        # "@href": current_app.config['APPLICATION_ROOT'] + "/opds/author/" + author_id,
         # "@rel": "related",
         # "@title": "All books of author: '" + authors,  # ToDo: имя автора
         # "@type": "application/atom+xml"

@@ -25,22 +25,22 @@ def main_opds():
             "icon": "/favicon.ico",
             "link": [
                 # {
-                    # "@href": "/opds-opensearch.xml",
+                    # "@href": current_app.config['APPLICATION_ROOT'] + "/opds-opensearch.xml",
                     # "@rel": "search",
                     # "@type": "application/opensearchdescription+xml"
                 # },
                 # {
-                    # "@href": "/opds/search?searchTerm={searchTerms}",
+                    # "@href": current_app.config['APPLICATION_ROOT'] + "/opds/search?searchTerm={searchTerms}",
                     # "@rel": "search",
                     # "@type": "application/atom+xml"
                 # },
                 {
-                    "@href": "/opds/",
+                    "@href": current_app.config['APPLICATION_ROOT'] + "/opds/",
                     "@rel": "start",
                     "@type": "application/atom+xml;profile=opds-catalog"
                 },
                 {
-                    "@href": "/opds/",
+                    "@href": current_app.config['APPLICATION_ROOT'] + "/opds/",
                     "@rel": "self",
                     "@type": "application/atom+xml;profile=opds-catalog"
                 }
@@ -55,7 +55,7 @@ def main_opds():
                         "#text": "Поиск книг по авторам"
                     },
                     "link": {
-                        "@href": "/opds/authorsindex",
+                        "@href": current_app.config['APPLICATION_ROOT'] + "/opds/authorsindex",
                         "@type": "application/atom+xml;profile=opds-catalog"
                     }
                 },
@@ -68,7 +68,7 @@ def main_opds():
                         "#text": "Поиск книг по сериям"
                     },
                     "link": {
-                        "@href": "/opds/sequencesindex",
+                        "@href": current_app.config['APPLICATION_ROOT'] + "/opds/sequencesindex",
                         "@type": "application/atom+xml;profile=opds-catalog"
                     }
                 },
@@ -81,7 +81,7 @@ def main_opds():
                         "#text": "Поиск книг по жанрам"
                     },
                     "link": {
-                        "@href": "/opds/genres",
+                        "@href": current_app.config['APPLICATION_ROOT'] + "/opds/genres",
                         "@type": "application/atom+xml;profile=opds-catalog"
                     }
                 }
@@ -107,17 +107,17 @@ def get_sequences(seq_root):
             "icon": "/favicon.ico",
             "link": [
                 # {
-                    # "@href": "/opds-opensearch.xml",
+                    # "@href": current_app.config['APPLICATION_ROOT'] + "/opds-opensearch.xml",
                     # "@rel": "search",
                     # "@type": "application/opensearchdescription+xml"
                 # },
                 # {
-                    # "@href": "/opds/search?searchTerm={searchTerms}",
+                    # "@href": current_app.config['APPLICATION_ROOT'] + "/opds/search?searchTerm={searchTerms}",
                     # "@rel": "search",
                     # "@type": "application/atom+xml"
                 # },
                 {
-                    "@href": "/opds/",
+                    "@href": current_app.config['APPLICATION_ROOT'] + "/opds/",
                     "@rel": "start",
                     "@type": "application/atom+xml;profile=opds-catalog"
                 }
@@ -140,7 +140,7 @@ def get_sequences(seq_root):
                         "#text": "книги на '" + ch + "'"
                     },
                     "link": {
-                        "@href": "/opds/sequences/" + urllib.parse.quote(ch),
+                        "@href": current_app.config['APPLICATION_ROOT'] + "/opds/sequences/" + urllib.parse.quote(ch),
                         "@type": "application/atom+xml;profile=opds-catalog"
                     }
                 }
@@ -164,7 +164,7 @@ def get_sequences(seq_root):
                         "#text": "книги на '" + ch + "'"
                     },
                     "link": {
-                        "@href": "/opds/sequences/" + urllib.parse.quote(ch, encoding='utf-8'),
+                        "@href": current_app.config['APPLICATION_ROOT'] + "/opds/sequences/" + urllib.parse.quote(ch, encoding='utf-8'),
                         "@type": "application/atom+xml;profile=opds-catalog"
                     }
                 }
@@ -191,7 +191,7 @@ def get_sequences(seq_root):
                         "#text": "книги на '" + seq_name + "'"
                     },
                     "link": {
-                        "@href": "/opds/sequencebooks/" + seq_id,
+                        "@href": current_app.config['APPLICATION_ROOT'] + "/opds/sequencebooks/" + seq_id,
                         "@type": "application/atom+xml;profile=opds-catalog"
                     }
                 }
@@ -220,17 +220,17 @@ def get_books_in_seq(seq_id):
             "icon": "/favicon.ico",
             "link": [
                 # {
-                    # "@href": "/opds-opensearch.xml",
+                    # "@href": current_app.config['APPLICATION_ROOT'] + "/opds-opensearch.xml",
                     # "@rel": "search",
                     # "@type": "application/opensearchdescription+xml"
                 # },
                 # {
-                    # "@href": "/opds/search?searchTerm={searchTerms}",
+                    # "@href": current_app.config['APPLICATION_ROOT'] + "/opds/search?searchTerm={searchTerms}",
                     # "@rel": "search",
                     # "@type": "application/atom+xml"
                 # },
                 {
-                    "@href": "/opds/",
+                    "@href": current_app.config['APPLICATION_ROOT'] + "/opds/",
                     "@rel": "start",
                     "@type": "application/atom+xml;profile=opds-catalog"
                 }
@@ -278,7 +278,7 @@ def get_books_in_seq(seq_id):
             )
             links.append(
                 {
-                    "@href": "/opds/author/" + k,
+                    "@href": current_app.config['APPLICATION_ROOT'] + "/opds/author/" + k,
                     "@rel": "related",
                     "@title": v,
                     "@type": "application/atom+xml"
@@ -289,7 +289,7 @@ def get_books_in_seq(seq_id):
         for k, v in seq_data.items():
             links.append(
                 {
-                    "@href": "/opds/sequencebooks/" + k,
+                    "@href": current_app.config['APPLICATION_ROOT'] + "/opds/sequencebooks/" + k,
                     "@rel": "related",
                     "@title": "All books in sequence '" + v + "'",
                     "@type": "application/atom+xml"
@@ -298,7 +298,7 @@ def get_books_in_seq(seq_id):
 
         links.append(
             {
-                "@href": "/fb2/" + zipfile + "/" + filename,
+                "@href": current_app.config['APPLICATION_ROOT'] + "/fb2/" + zipfile + "/" + filename,
                 "@rel": "http://opds-spec.org/acquisition/open-access",
                 "@title": "Download",
                 "@type": "application/fb2+zip"
@@ -306,7 +306,7 @@ def get_books_in_seq(seq_id):
         )
         links.append(
             {
-                "@href": "/read/" + zipfile + "/" + filename,
+                "@href": current_app.config['APPLICATION_ROOT'] + "/read/" + zipfile + "/" + filename,
                 "@rel": "alternate",
                 "@title": "Read in browser",
                 "@type": "text/html"
