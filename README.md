@@ -61,3 +61,8 @@ NIH-проект
   * `genres_unknown` -- жанры, неучтённые в `genres.list` или `genres_replace.list` (например, жанры с опечаткой)
   * `data/*.zip.list` -- списки метаданных книг в json. Дата обновления файла является флагом для `managedb.py fillnew`
   * `data/*.zip.list.authors` -- отладочные данные, будет удалено
+
+## Необязательные удобства:
+
+  * `Makefile` -- Запускаем `make <команда>`, получаем результат. Команды - `make help` или автодополнение в шелле после `make<TAB>`
+  * `other_tools/xmltojson.py` -- утилита, преобразующая xml в json.

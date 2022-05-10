@@ -9,6 +9,7 @@ help:
 	@echo "  newdb    - [re]create database"
 	@echo "  fillnew  - fill new data"
 	@echo "  fillall  - refill all data"
+	@echo "  listfill - refill all data from .lists"
 	@echo "  help     - this text"
 
 # убрать временные файлы
