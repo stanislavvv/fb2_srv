@@ -62,6 +62,7 @@ def seq2db(cur, seqs, zip_file, filename):
         else:
             print("Bad seq info in: %s/%s, seq info:" % (zip_file, filename), str(seq))
 
+
 def genres2db(cur, genrs):
     for genre_id in genrs.split("|"):
         if genre_id is not None and genre_id != "":
@@ -84,8 +85,8 @@ def bookinfo2db(cur, book_id, book_title, annotation):
         descr = str(annotation)
     if book_id is not None:
         book_data = [book_id, b_title, descr]
-        cur.execute("SELECT * FROM books_descr WHERE book_id = '" + book_id +"'")
+        cur.execute("SELECT * FROM books_descr WHERE book_id = '%s'" % book_id)
         rows = cur.fetchall()
         if len(rows) > 0:
-            cur.execute("DELETE FROM books_descr WHERE book_id = '" + book_id + "'")
+            cur.execute("DELETE FROM books_descr WHERE book_id = '%s'" % book_id)
         cur.execute("INSERT INTO books_descr VALUES (?, ?, ?)", (book_data))

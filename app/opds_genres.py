@@ -76,7 +76,7 @@ def get_genre_books(gen_id, page=0):
     dtiso = get_dtiso()
     ret = ret_hdr_genre()
 
-    REQ = 'SELECT id, description FROM genres WHERE id = "' + gen_id + '"'
+    REQ = 'SELECT id, description FROM genres WHERE id = "%s"' % gen_id
     conn = get_db_connection()
     rows = conn.execute(REQ).fetchall()
     if len(rows) == 0:
@@ -119,14 +119,30 @@ def get_genre_books(gen_id, page=0):
             }
         )
 
-    REQ1 = """SELECT zipfile, filename, genres, author_ids, seq_ids as sequence_ids,
-    books.book_id as book_id, book_title, lang, size, date_time, annotation
-    FROM books, books_descr WHERE (genres = '"""
-    REQ2 = "' OR genres LIKE '"
-    REQ3 = "|%' OR genres LIKE '%|"
-    REQ4 = "' OR genres LIKE '%|"
-    REQ5 = "|%') AND books.book_id = books_descr.book_id ORDER BY book_title LIMIT " + str(BOOKS_LIMIT) + " OFFSET " + str(page * BOOKS_LIMIT) + ";"
-    REQ = REQ1 + gen_id + REQ2 + gen_id + REQ3 + gen_id + REQ4 + gen_id + REQ5
+    REQ = """
+    SELECT
+        zipfile,
+        filename,
+        genres,
+        author_ids,
+        seq_ids as sequence_ids,
+        books.book_id as book_id,
+        book_title,
+        lang,
+        size,
+        date_time,
+        annotation
+    FROM books, books_descr
+    WHERE (genres = '%s'
+            OR genres LIKE '%s|%%'
+            OR genres LIKE '%%|%s'
+            OR genres LIKE '%%|%s|%%'
+        )
+        AND books.book_id = books_descr.book_id
+        ORDER BY book_title
+        LIMIT "%s"
+        OFFSET "%s";
+    """ % (gen_id, gen_id, gen_id, gen_id, str(BOOKS_LIMIT), str(page * BOOKS_LIMIT))
     rows = conn.execute(REQ).fetchall()
     rows_count = len(rows)
     if rows_count >= BOOKS_LIMIT:
@@ -187,12 +203,6 @@ def get_genre_books(gen_id, page=0):
                 "@type": "text/html"
             }
         )
-        # {  # ToDo for over authors
-        # "@href": current_app.config['APPLICATION_ROOT'] + "/opds/author/" + author_id,
-        # "@rel": "related",
-        # "@title": "All books of author: '" + authors,  # ToDo: имя автора
-        # "@type": "application/atom+xml"
-        # }
 
         category = []
         category_data = get_genres_names(genres)

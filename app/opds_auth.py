@@ -51,7 +51,11 @@ def get_authors_list(auth_root):
                 "@type": "application/atom+xml;profile=opds-catalog"
             }
         )
-        ALL_AUTHORS = 'SELECT U_UPPER(substr(name, 1, 1)) as nm FROM authors GROUP BY nm ORDER BY nm ;'
+        ALL_AUTHORS = '''
+        SELECT U_UPPER(substr(name, 1, 1)) as nm
+        FROM authors
+        GROUP BY nm
+        ORDER BY nm;'''
         conn = get_db_connection()
         rows = conn.execute(ALL_AUTHORS).fetchall()
         for row in rows:
@@ -82,8 +86,10 @@ def get_authors_list(auth_root):
             }
         )
         ret["feed"]["updated"] = dtiso
-        REQ = 'SELECT U_UPPER(substr(name,1,3)) as nm FROM authors WHERE name like "'
-        REQ = REQ + a_root + '%" GROUP BY nm ORDER BY nm;'
+        REQ = '''SELECT U_UPPER(substr(name,1,3)) as nm
+        FROM authors
+        WHERE name like "%s%%"
+        GROUP BY nm ORDER BY nm;''' % a_root
         conn = get_db_connection()
         rows = conn.execute(REQ).fetchall()
         ret["feed"]["id"] = "tag:root:authors:" + a_root
@@ -115,7 +121,12 @@ def get_authors_list(auth_root):
             }
         )
         ret["feed"]["updated"] = dtiso
-        REQ = 'SELECT id, name FROM authors WHERE U_UPPER(name) LIKE "' + a_root + '%" ORDER BY name;'
+        REQ = '''
+        SELECT id, name
+        FROM authors
+        WHERE U_UPPER(name) LIKE "%s%%"
+        ORDER BY name;
+        ''' % a_root
         ret["feed"]["id"] = "tag:root:authors:" + url_str(a_root)
         conn = get_db_connection()
         rows = conn.execute(REQ).fetchall()
@@ -143,7 +154,7 @@ def get_authors_list(auth_root):
 
 def get_author_list(auth_id):
     dtiso = get_dtiso()
-    REQ = 'SELECT id, name, info FROM authors WHERE id = "' + auth_id + '"'
+    REQ = 'SELECT id, name, info FROM authors WHERE id = "%s"' % auth_id
     conn = get_db_connection()
     rows = conn.execute(REQ).fetchall()
     if len(rows) == 0:
@@ -167,12 +178,6 @@ def get_author_list(auth_id):
                     "id": "tag:author:bio:" + auth_id,
                     "title": "About author",
                     "link": [
-                        # {
-                        #     "@href": "/a/218498",
-                        #     "@rel": "alternate",
-                        #     "@title": "Страница автора на сайте",
-                        #     "@type": "text/html"
-                        # },
                         {
                             "@href": current_app.config['APPLICATION_ROOT'] + "/opds/author/" + auth_id + "/sequences",
                             "@rel": "http://www.feedbooks.com/opds/facet",
@@ -234,7 +239,7 @@ def get_author_list(auth_id):
 
 def get_author_sequences(auth_id):
     dtiso = get_dtiso()
-    REQ = 'SELECT id, name FROM authors WHERE id = "' + auth_id + '"'
+    REQ = 'SELECT id, name FROM authors WHERE id = "%s"' % auth_id
     conn = get_db_connection()
     rows = conn.execute(REQ).fetchall()
     if len(rows) == 0:
@@ -277,13 +282,13 @@ def get_author_sequences(auth_id):
 
 def get_author_sequence(auth_id, seq_id):
     dtiso = get_dtiso()
-    REQ = 'SELECT id, name FROM authors WHERE id = "' + auth_id + '"'
+    REQ = 'SELECT id, name FROM authors WHERE id = "%s"' % auth_id
     conn = get_db_connection()
     rows = conn.execute(REQ).fetchall()
     if len(rows) == 0:
         return ""
     auth_name = rows[0][1]
-    REQ = 'SELECT id, name FROM sequences WHERE id = "' + seq_id + '"'
+    REQ = 'SELECT id, name FROM sequences WHERE id = "%s"' % seq_id
     conn = get_db_connection()
     rows = conn.execute(REQ).fetchall()
     if len(rows) == 0:
@@ -301,23 +306,35 @@ def get_author_sequence(auth_id, seq_id):
         }
     )
 
-    REQ1 = """SELECT books.zipfile as zipfile, books.filename as filename, genres, author_ids,
-    seq_ids as sequence_ids, books.book_id as book_id, books_descr.book_title as book_title,
-    lang, size, date_time, books_descr.annotation as annotation, seq_books.seq_num as s_num
-    FROM books, books_descr, seq_books WHERE (author_ids = '"""
-    REQ2 = "' OR author_ids LIKE '"
-    REQ3 = "|%' OR author_ids LIKE '%|"
-    REQ4 = "' OR author_ids LIKE '%|"
-    REQ5 = "|%') AND (sequence_ids = '"
-    REQ6 = "' OR sequence_ids LIKE '"
-    REQ7 = "|%' OR sequence_ids LIKE '%|"
-    REQ8 = "' OR sequence_ids LIKE '%|"
-    REQ9 = "|%') AND seq_books.seq_id = '"
-    REQ10 = """' AND seq_books.zipfile = books.zipfile AND seq_books.filename = books.filename
-    AND books_descr.book_id = books.book_id ORDER BY s_num, book_title;"""
-    REQ = REQ1 + auth_id + REQ2 + auth_id + REQ3 + auth_id + REQ4 + auth_id + REQ5 + seq_id
-    REQ = REQ + REQ6 + seq_id + REQ7 + seq_id + REQ8 + seq_id + REQ9 + seq_id + REQ10
-    print(REQ)
+    REQ = """SELECT
+        books.zipfile as zipfile,
+        books.filename as filename,
+        genres,
+        author_ids,
+        seq_ids as sequence_ids,
+        books.book_id as book_id,
+        books_descr.book_title as book_title,
+        lang,
+        size,
+        date_time,
+        books_descr.annotation as annotation,
+        seq_books.seq_num as s_num
+    FROM books, books_descr, seq_books
+    WHERE (author_ids = '%s'
+            OR author_ids LIKE '%s|%%'
+            OR author_ids LIKE '%%|%s'
+            OR author_ids LIKE '%%|%s|%%'
+        )
+        AND (sequence_ids = '%s'
+            OR sequence_ids LIKE '%s|%%'
+            OR sequence_ids LIKE '%%|%s'
+            OR sequence_ids LIKE '%%|%s|%%'
+        )
+        AND seq_books.seq_id = '%s'
+        AND seq_books.zipfile = books.zipfile
+        AND seq_books.filename = books.filename
+        AND books_descr.book_id = books.book_id ORDER BY s_num, book_title;
+    """ % (auth_id, auth_id, auth_id, auth_id, seq_id, seq_id, seq_id, seq_id, seq_id)
     rows = conn.execute(REQ).fetchall()
     for row in rows:
         zipfile = row["zipfile"]
@@ -415,7 +432,7 @@ def get_author_sequence(auth_id, seq_id):
 
 def get_author_sequenceless(auth_id):
     dtiso = get_dtiso()
-    REQ = 'SELECT id, name FROM authors WHERE id = "' + auth_id + '"'
+    REQ = 'SELECT id, name FROM authors WHERE id = "%s"' % auth_id
     conn = get_db_connection()
     rows = conn.execute(REQ).fetchall()
     if len(rows) == 0:
@@ -426,13 +443,27 @@ def get_author_sequenceless(auth_id):
     ret["feed"]["title"] = "Books of author: " + auth_name
     ret["feed"]["updated"] = dtiso
 
-    REQ1 = """SELECT zipfile, filename, genres, author_ids, books.book_id as book_id, book_title,
-    lang, size, date_time, annotation FROM books, books_descr WHERE (author_ids = '"""
-    REQ2 = "' OR author_ids LIKE '"
-    REQ3 = "|%' OR author_ids LIKE '%|"
-    REQ4 = "' OR author_ids LIKE '%|"
-    REQ5 = "|%') AND seq_ids = '' AND books.book_id = books_descr.book_id;"
-    REQ = REQ1 + auth_id + REQ2 + auth_id + REQ3 + auth_id + REQ4 + auth_id + REQ5
+    REQ = """
+    SELECT
+        zipfile,
+        filename,
+        genres,
+        author_ids,
+        books.book_id as book_id,
+        book_title,
+        lang,
+        size,
+        date_time,
+        annotation
+    FROM books, books_descr
+    WHERE (author_ids = '%s'
+            OR author_ids LIKE '%s|%%'
+            OR author_ids LIKE '%%|%s'
+            OR author_ids LIKE '%%|%s|%%'
+        )
+        AND seq_ids = ''
+        AND books.book_id = books_descr.book_id;
+    """ % (auth_id, auth_id, auth_id, auth_id)
     rows = conn.execute(REQ).fetchall()
     for row in rows:
         zipfile = row["zipfile"]
@@ -457,19 +488,6 @@ def get_author_sequenceless(auth_id):
             )
 
         links = [
-                    # {  # ToDo for over authors
-                    # "@href": current_app.config['APPLICATION_ROOT'] + "/opds/author/" + author_id,
-                    # "@rel": "related",
-                    # "@title": "All books of author: '" + authors,  # ToDo: имя автора
-                    # "@type": "application/atom+xml"
-                    # }
-                    # {  # ToDo for over sequences
-                    # "@href": current_app.config['APPLICATION_ROOT'] + "/opds/sequencebooks/63116",
-                    # "@rel": "related",
-                    # "@title": "Все книги серии \"AYENA\"",
-                    # "@type": "application/atom+xml"
-                    # },
-
                     {
                         "@href": current_app.config['APPLICATION_ROOT'] + "/fb2/" + zipfile + "/" + filename,
                         "@rel": "http://opds-spec.org/acquisition/open-access",
@@ -520,7 +538,7 @@ def get_author_sequenceless(auth_id):
 def get_author_by_alphabet(auth_id):
     ret = ret_hdr_author()
     dtiso = get_dtiso()
-    REQ = 'SELECT id, name FROM authors WHERE id = "' + auth_id + '"'
+    REQ = 'SELECT id, name FROM authors WHERE id = "%s"' % auth_id
     conn = get_db_connection()
     rows = conn.execute(REQ).fetchall()
     if len(rows) == 0:
@@ -531,14 +549,28 @@ def get_author_by_alphabet(auth_id):
     ret["feed"]["title"] = "Books of author: " + auth_name + " by aplhabet"
     ret["feed"]["updated"] = dtiso
 
-    REQ1 = """SELECT zipfile, filename, genres, author_ids, seq_ids as sequence_ids,
-    books.book_id as book_id, book_title, lang, size, date_time, annotation
-    FROM books, books_descr WHERE (author_ids = '"""
-    REQ2 = "' OR author_ids LIKE '"
-    REQ3 = "|%' OR author_ids LIKE '%|"
-    REQ4 = "' OR author_ids LIKE '%|"
-    REQ5 = "|%') AND books.book_id = books_descr.book_id ORDER BY book_title;"
-    REQ = REQ1 + auth_id + REQ2 + auth_id + REQ3 + auth_id + REQ4 + auth_id + REQ5
+    REQ = """
+    SELECT
+        zipfile,
+        filename,
+        genres,
+        author_ids,
+        seq_ids as sequence_ids,
+        books.book_id as book_id,
+        book_title,
+        lang,
+        size,
+        date_time,
+        annotation
+    FROM books, books_descr
+    WHERE (author_ids = '%s'
+            OR author_ids LIKE '%s|%%'
+            OR author_ids LIKE '%%|%s'
+            OR author_ids LIKE '%%|%s|%%'
+        )
+        AND books.book_id = books_descr.book_id
+        ORDER BY book_title;
+    """ % (auth_id, auth_id, auth_id, auth_id)
     rows = conn.execute(REQ).fetchall()
     for row in rows:
         zipfile = row["zipfile"]
@@ -590,12 +622,6 @@ def get_author_by_alphabet(auth_id):
                 "@type": "text/html"
             }
         )
-        # {  # ToDo for over authors
-        # "@href": current_app.config['APPLICATION_ROOT'] + "/opds/author/" + author_id,
-        # "@rel": "related",
-        # "@title": "All books of author: '" + authors,  # ToDo: имя автора
-        # "@type": "application/atom+xml"
-        # }
 
         category = []
         category_data = get_genres_names(genres)
@@ -632,7 +658,7 @@ def get_author_by_alphabet(auth_id):
 
 def get_author_by_time(auth_id):
     dtiso = get_dtiso()
-    REQ = 'SELECT id, name FROM authors WHERE id = "' + auth_id + '"'
+    REQ = 'SELECT id, name FROM authors WHERE id = "%s"' % auth_id
     conn = get_db_connection()
     rows = conn.execute(REQ).fetchall()
     if len(rows) == 0:
@@ -650,14 +676,28 @@ def get_author_by_time(auth_id):
         }
     )
 
-    REQ1 = """SELECT zipfile, filename, genres, author_ids, seq_ids as sequence_ids,
-    books_descr.book_id as book_id, book_title, lang, size, date_time, annotation
-    FROM books, books_descr WHERE (author_ids = '"""
-    REQ2 = "' OR author_ids LIKE '"
-    REQ3 = "|%' OR author_ids LIKE '%|"
-    REQ4 = "' OR author_ids LIKE '%|"
-    REQ5 = "|%') AND books.book_id = books_descr.book_id ORDER BY date_time;"
-    REQ = REQ1 + auth_id + REQ2 + auth_id + REQ3 + auth_id + REQ4 + auth_id + REQ5
+    REQ = """
+    SELECT
+        zipfile,
+        filename,
+        genres,
+        author_ids,
+        seq_ids as sequence_ids,
+        books_descr.book_id as book_id,
+        book_title,
+        lang,
+        size,
+        date_time,
+        annotation
+    FROM books, books_descr
+    WHERE (author_ids = '%s'
+            OR author_ids LIKE '%s|%%'
+            OR author_ids LIKE '%%|%s'
+            OR author_ids LIKE '%%|%s|%%'
+        )
+        AND books.book_id = books_descr.book_id
+        ORDER BY date_time;
+    """ % (auth_id, auth_id, auth_id, auth_id)
     rows = conn.execute(REQ).fetchall()
     for row in rows:
         zipfile = row["zipfile"]
@@ -709,12 +749,6 @@ def get_author_by_time(auth_id):
                 "@type": "text/html"
             }
         )
-        # {  # ToDo for over authors
-        # "@href": current_app.config['APPLICATION_ROOT'] + "/opds/author/" + author_id,
-        # "@rel": "related",
-        # "@title": "All books of author: '" + authors,  # ToDo: имя автора
-        # "@type": "application/atom+xml"
-        # }
 
         category = []
         category_data = get_genres_names(genres)

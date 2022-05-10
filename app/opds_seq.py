@@ -126,7 +126,12 @@ def get_sequences(seq_root):
         }
     }
     if seq_root is None or seq_root == "" or seq_root == "/" or not isinstance(seq_root, str):
-        ALL_SEQUENCES = 'SELECT U_UPPER(name) as name FROM sequences GROUP BY name ORDER BY name;'
+        ALL_SEQUENCES = '''
+        SELECT U_UPPER(name) as name
+        FROM sequences
+        GROUP BY name
+        ORDER BY name;
+        '''
         conn = get_db_connection()
         rows = conn.execute(ALL_SEQUENCES).fetchall()
         for ch in any2alphabet("name", rows, 1):
@@ -147,9 +152,13 @@ def get_sequences(seq_root):
             )
         conn.close()
     elif len(seq_root) < 2:
-        REQ1 = 'SELECT U_UPPER(name) as seq FROM sequences WHERE U_UPPER(name) like "'
-        REQ2 = '%" GROUP BY seq ORDER BY seq;'
-        REQ = REQ1 + seq_root + REQ2
+        REQ = '''
+        SELECT U_UPPER(name) as seq
+        FROM sequences
+        WHERE U_UPPER(name) like "%s%%"
+        GROUP BY seq
+        ORDER BY seq;
+        ''' % seq_root
         conn = get_db_connection()
         rows = conn.execute(REQ).fetchall()
         ret["feed"]["id"] = "tag:root:sequences:" + urllib.parse.quote(seq_root, encoding='utf-8')
@@ -171,10 +180,15 @@ def get_sequences(seq_root):
             )
         conn.close()
     else:
-        REQ1 = 'SELECT id, name FROM sequences WHERE U_UPPER(name) like "'
-        REQ2 = '%" OR U_UPPER(name) like "%|'
-        REQ3 = '%" GROUP BY name ORDER BY name;'
-        REQ = REQ1 + seq_root + REQ2 + seq_root + REQ3
+        REQ = '''
+        SELECT id, name
+        FROM sequences
+        WHERE
+            U_UPPER(name) like "%s%%"
+            OR U_UPPER(name) like "%%|%s%%"
+        GROUP BY name
+        ORDER BY name;
+        ''' % (seq_root, seq_root)
         ret["feed"]["id"] = "tag:root:sequences:" + urllib.parse.quote(seq_root, encoding='utf-8')
         conn = get_db_connection()
         rows = conn.execute(REQ).fetchall()
@@ -202,7 +216,7 @@ def get_sequences(seq_root):
 
 def get_books_in_seq(seq_id):
     dtiso = get_dtiso()
-    REQ = 'SELECT id, name FROM sequences WHERE id = "' + seq_id + '"'
+    REQ = 'SELECT id, name FROM sequences WHERE id = "%s"' % seq_id
     conn = get_db_connection()
     rows = conn.execute(REQ).fetchall()
     if len(rows) == 0:
@@ -238,18 +252,32 @@ def get_books_in_seq(seq_id):
             "entry": []
         }
     }
-    REQ1 = '''SELECT books.zipfile as zipfile, books.filename as filename,
-    books.genres as genres, books.author_ids as author_ids, books.seq_ids as sequence_ids,
-    '''
-    REQ1 = REQ1 + ' books.book_id as book_id, book_title, lang, size, date_time, annotation'
-    REQ1 = REQ1 + ', seq_books.seq_num as s_num FROM books, books_descr, seq_books WHERE (sequence_ids = "'
-    REQ2 = '" OR sequence_ids like "%|'
-    REQ3 = '" OR sequence_ids like "'
-    REQ4 = '|%" OR sequence_ids like "%|'
-    REQ5 = '%") AND seq_books.seq_id = "'
-    REQ6 = '" AND books.zipfile = seq_books.zipfile AND books.filename = seq_books.filename'
-    REQ6 = REQ6 + ' and books_descr.book_id = books.book_id ORDER BY s_num, authors, book_title'
-    REQ = REQ1 + seq_id + REQ2 + seq_id + REQ3 + seq_id + REQ4 + seq_id + REQ5 + seq_id + REQ6
+    REQ = '''
+    SELECT
+        books.zipfile as zipfile,
+        books.filename as filename,
+        books.genres as genres,
+        books.author_ids as author_ids,
+        books.seq_ids as sequence_ids,
+        books.book_id as book_id,
+        book_title,
+        lang,
+        size,
+        date_time,
+        annotation,
+        seq_books.seq_num as s_num
+    FROM books, books_descr, seq_books
+    WHERE (sequence_ids = "%s"
+            OR sequence_ids like "%%|%s"
+            OR sequence_ids like "%s|%%"
+            OR sequence_ids like "%%|%s|%%"
+        )
+        AND seq_books.seq_id = "%s"
+        AND books.zipfile = seq_books.zipfile
+        AND books.filename = seq_books.filename
+        AND books_descr.book_id = books.book_id
+        ORDER BY s_num, authors, book_title;
+    ''' % (seq_id, seq_id, seq_id, seq_id, seq_id)
     conn = get_db_connection()
     rows = conn.execute(REQ).fetchall()
     for row in rows:
