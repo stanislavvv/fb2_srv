@@ -21,14 +21,20 @@ CREATE_REQ = [
         'author_ids'	NUMERIC,
         'seq_names'	TEXT,
         'seq_ids'	TEXT,
-        'book_title'	TEXT,
         'book_id'	TEXT,
         'lang'	TEXT,
         'date_time'	TEXT,
         'size'	INTEGER,
-        'annotation'	TEXT,
-        PRIMARY KEY('zipfile','filename','authors','book_title')
+        PRIMARY KEY('zipfile','filename','author_ids','seq_ids')
     );
+    """,
+    """
+    CREATE TABLE `books_descr` (
+        'book_id'    TEXT NOT NULL,
+        'book_title' TEXT,
+        'annotation' TEXT,
+        PRIMARY KEY('book_id')
+    )
     """,
     """
     CREATE TABLE 'authors' (

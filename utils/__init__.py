@@ -12,7 +12,7 @@ from .strings import get_genres, get_genres_replace, genres_replace, check_genre
 from .data import recursive_text, get_genre, get_authors, get_author_ids
 from .data import get_sequence, get_sequence_names, get_sequence_ids, get_lang
 from .data import get_struct_by_key, make_id, get_replace_list, replace_book
-from .db import author2db, genres2db, seq2db, unicode_nocase_collation
+from .db import author2db, genres2db, seq2db, unicode_nocase_collation, bookinfo2db
 
 READ_SIZE = 20480  # description in 20kb...
 
@@ -130,20 +130,19 @@ def iterate_list(blist, dbfile):
             book["author_ids"],
             book["seq_names"].replace("'", "''"),
             book["seq_ids"],
-            book["book_title"].replace("'", "''"),
             book["book_id"],
             book["lang"],
             book["date_time"],
             book["size"],
-            book["annotation"]
         ]
 
         insdata[2] = genres_replace(insdata[2])
         check_genres(insdata[:3])
         genres2db(cur, insdata[2])
         author2db(cur, insdata[3])
+        bookinfo2db(cur, book["book_id"], book["book_title"], book["annotation"])
         seq2db(cur, book["sequences"], insdata[0], insdata[1])
-        cur.execute("INSERT INTO books VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (insdata))
+        cur.execute("INSERT INTO books VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (insdata))
         for author in insdata[3].split("|"):  # debug
             au.write(author + "|" + book["zipfile"] + "/" + book["filename"] + "\n")  # debug
     con.commit()

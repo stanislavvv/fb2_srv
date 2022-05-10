@@ -241,14 +241,14 @@ def get_books_in_seq(seq_id):
     REQ1 = '''SELECT books.zipfile as zipfile, books.filename as filename,
     books.genres as genres, books.author_ids as author_ids, books.seq_ids as sequence_ids,
     '''
-    REQ1 = REQ1 + ' book_id, book_title, lang, size, date_time, annotation'
-    REQ1 = REQ1 + ', seq_books.seq_num as s_num FROM books, seq_books WHERE (sequence_ids = "'
+    REQ1 = REQ1 + ' books.book_id as book_id, book_title, lang, size, date_time, annotation'
+    REQ1 = REQ1 + ', seq_books.seq_num as s_num FROM books, books_descr, seq_books WHERE (sequence_ids = "'
     REQ2 = '" OR sequence_ids like "%|'
     REQ3 = '" OR sequence_ids like "'
     REQ4 = '|%" OR sequence_ids like "%|'
     REQ5 = '%") AND seq_books.seq_id = "'
     REQ6 = '" AND books.zipfile = seq_books.zipfile AND books.filename = seq_books.filename'
-    REQ6 = REQ6 + ' ORDER BY s_num, authors, book_title'
+    REQ6 = REQ6 + ' and books_descr.book_id = books.book_id ORDER BY s_num, authors, book_title'
     REQ = REQ1 + seq_id + REQ2 + seq_id + REQ3 + seq_id + REQ4 + seq_id + REQ5 + seq_id + REQ6
     conn = get_db_connection()
     rows = conn.execute(REQ).fetchall()

@@ -119,13 +119,13 @@ def get_genre_books(gen_id, page=0):
             }
         )
 
-    REQ0 = "SELECT zipfile, filename, genres, author_ids, seq_ids as sequence_ids,"
-    REQ0 = REQ0 + " book_id, book_title, lang, size, date_time, annotation"
-    REQ1 = REQ0 + " FROM books WHERE (genres = '"  # fix E501 line too long
+    REQ1 = """SELECT zipfile, filename, genres, author_ids, seq_ids as sequence_ids,
+    books.book_id as book_id, book_title, lang, size, date_time, annotation
+    FROM books, books_descr WHERE (genres = '"""
     REQ2 = "' OR genres LIKE '"
     REQ3 = "|%' OR genres LIKE '%|"
     REQ4 = "' OR genres LIKE '%|"
-    REQ5 = "|%') ORDER BY book_title LIMIT " + str(BOOKS_LIMIT) + " OFFSET " + str(page * BOOKS_LIMIT) + ";"
+    REQ5 = "|%') AND books.book_id = books_descr.book_id ORDER BY book_title LIMIT " + str(BOOKS_LIMIT) + " OFFSET " + str(page * BOOKS_LIMIT) + ";"
     REQ = REQ1 + gen_id + REQ2 + gen_id + REQ3 + gen_id + REQ4 + gen_id + REQ5
     rows = conn.execute(REQ).fetchall()
     rows_count = len(rows)

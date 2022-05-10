@@ -87,7 +87,6 @@ def get_authors_list(auth_root):
         conn = get_db_connection()
         rows = conn.execute(REQ).fetchall()
         ret["feed"]["id"] = "tag:root:authors:" + a_root
-        # for ch in any2alphabet("name", rows, 3):
         for row in rows:
             ch = row["nm"]
             ret["feed"]["entry"].append(
@@ -302,10 +301,10 @@ def get_author_sequence(auth_id, seq_id):
         }
     )
 
-    REQ0 = "SELECT books.zipfile as zipfile, books.filename as filename, genres, "
-    REQ0 = REQ0 + "author_ids, seq_ids as sequence_ids, book_id, book_title,"
-    REQ0 = REQ0 + "lang, size, date_time, annotation, seq_books.seq_num as s_num"
-    REQ1 = REQ0 + " FROM books, seq_books WHERE (author_ids = '"  # fix E501 line too long
+    REQ1 = """SELECT books.zipfile as zipfile, books.filename as filename, genres, author_ids,
+    seq_ids as sequence_ids, books.book_id as book_id, books_descr.book_title as book_title,
+    lang, size, date_time, books_descr.annotation as annotation, seq_books.seq_num as s_num
+    FROM books, books_descr, seq_books WHERE (author_ids = '"""
     REQ2 = "' OR author_ids LIKE '"
     REQ3 = "|%' OR author_ids LIKE '%|"
     REQ4 = "' OR author_ids LIKE '%|"
@@ -314,10 +313,11 @@ def get_author_sequence(auth_id, seq_id):
     REQ7 = "|%' OR sequence_ids LIKE '%|"
     REQ8 = "' OR sequence_ids LIKE '%|"
     REQ9 = "|%') AND seq_books.seq_id = '"
-    REQ10 = "' AND seq_books.zipfile = books.zipfile AND seq_books.filename = books.filename"
-    REQ10 = REQ10 + " ORDER BY s_num, book_title;"
+    REQ10 = """' AND seq_books.zipfile = books.zipfile AND seq_books.filename = books.filename
+    AND books_descr.book_id = books.book_id ORDER BY s_num, book_title;"""
     REQ = REQ1 + auth_id + REQ2 + auth_id + REQ3 + auth_id + REQ4 + auth_id + REQ5 + seq_id
     REQ = REQ + REQ6 + seq_id + REQ7 + seq_id + REQ8 + seq_id + REQ9 + seq_id + REQ10
+    print(REQ)
     rows = conn.execute(REQ).fetchall()
     for row in rows:
         zipfile = row["zipfile"]
@@ -426,12 +426,12 @@ def get_author_sequenceless(auth_id):
     ret["feed"]["title"] = "Books of author: " + auth_name
     ret["feed"]["updated"] = dtiso
 
-    REQ0 = "SELECT zipfile, filename, genres, author_ids, book_id, book_title, lang, size, date_time, annotation"
-    REQ1 = REQ0 + " FROM books WHERE (author_ids = '"  # fix E501 line too long
+    REQ1 = """SELECT zipfile, filename, genres, author_ids, books.book_id as book_id, book_title,
+    lang, size, date_time, annotation FROM books, books_descr WHERE (author_ids = '"""
     REQ2 = "' OR author_ids LIKE '"
     REQ3 = "|%' OR author_ids LIKE '%|"
     REQ4 = "' OR author_ids LIKE '%|"
-    REQ5 = "|%') AND seq_ids = '';"
+    REQ5 = "|%') AND seq_ids = '' AND books.book_id = books_descr.book_id;"
     REQ = REQ1 + auth_id + REQ2 + auth_id + REQ3 + auth_id + REQ4 + auth_id + REQ5
     rows = conn.execute(REQ).fetchall()
     for row in rows:
@@ -531,13 +531,13 @@ def get_author_by_alphabet(auth_id):
     ret["feed"]["title"] = "Books of author: " + auth_name + " by aplhabet"
     ret["feed"]["updated"] = dtiso
 
-    REQ0 = "SELECT zipfile, filename, genres, author_ids, seq_ids as sequence_ids, book_id,"
-    REQ0 = REQ0 + " book_title, lang, size, date_time, annotation"
-    REQ1 = REQ0 + " FROM books WHERE (author_ids = '"  # fix E501 line too long
+    REQ1 = """SELECT zipfile, filename, genres, author_ids, seq_ids as sequence_ids,
+    books.book_id as book_id, book_title, lang, size, date_time, annotation
+    FROM books, books_descr WHERE (author_ids = '"""
     REQ2 = "' OR author_ids LIKE '"
     REQ3 = "|%' OR author_ids LIKE '%|"
     REQ4 = "' OR author_ids LIKE '%|"
-    REQ5 = "|%') ORDER BY book_title;"
+    REQ5 = "|%') AND books.book_id = books_descr.book_id ORDER BY book_title;"
     REQ = REQ1 + auth_id + REQ2 + auth_id + REQ3 + auth_id + REQ4 + auth_id + REQ5
     rows = conn.execute(REQ).fetchall()
     for row in rows:
@@ -650,13 +650,13 @@ def get_author_by_time(auth_id):
         }
     )
 
-    REQ0 = "SELECT zipfile, filename, genres, author_ids, seq_ids as sequence_ids,"
-    REQ0 = REQ0 + " book_id, book_title, lang, size, date_time, annotation"
-    REQ1 = REQ0 + " FROM books WHERE (author_ids = '"  # fix E501 line too long
+    REQ1 = """SELECT zipfile, filename, genres, author_ids, seq_ids as sequence_ids,
+    books_descr.book_id as book_id, book_title, lang, size, date_time, annotation
+    FROM books, books_descr WHERE (author_ids = '"""
     REQ2 = "' OR author_ids LIKE '"
     REQ3 = "|%' OR author_ids LIKE '%|"
     REQ4 = "' OR author_ids LIKE '%|"
-    REQ5 = "|%') ORDER BY date_time;"
+    REQ5 = "|%') AND books.book_id = books_descr.book_id ORDER BY date_time;"
     REQ = REQ1 + auth_id + REQ2 + auth_id + REQ3 + auth_id + REQ4 + auth_id + REQ5
     rows = conn.execute(REQ).fetchall()
     for row in rows:

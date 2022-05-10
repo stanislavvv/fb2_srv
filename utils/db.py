@@ -73,3 +73,19 @@ def genres2db(cur, genrs):
             if cnt == 0:
                 genre_data = [genre_id, genre, ""]
                 cur.execute("INSERT INTO genres VALUES (?, ?, ?)", (genre_data))
+
+
+def bookinfo2db(cur, book_id, book_title, annotation):
+    b_title = ""
+    if book_title is not None:
+        b_title = str(book_title)
+    descr = ""
+    if annotation is not None:
+        descr = str(annotation)
+    if book_id is not None:
+        book_data = [book_id, b_title, descr]
+        cur.execute("SELECT * FROM books_descr WHERE book_id = '" + book_id +"'")
+        rows = cur.fetchall()
+        if len(rows) > 0:
+            cur.execute("DELETE FROM books_descr WHERE book_id = '" + book_id + "'")
+        cur.execute("INSERT INTO books_descr VALUES (?, ?, ?)", (book_data))
