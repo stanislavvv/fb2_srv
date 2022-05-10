@@ -13,6 +13,7 @@ from .data import recursive_text, get_genre, get_authors, get_author_ids
 from .data import get_sequence, get_sequence_names, get_sequence_ids, get_lang
 from .data import get_struct_by_key, make_id, get_replace_list, replace_book
 from .db import author2db, genres2db, seq2db, unicode_nocase_collation, bookinfo2db
+import __main__
 
 READ_SIZE = 20480  # description in 20kb...
 
@@ -110,6 +111,7 @@ def ziplist(zip_file):
 
 # iterate over list data, send it to db
 def iterate_list(blist, dbfile):
+    DEBUG = __main__.DEBUG
     data = open(blist, 'r')
     zip_file = os.path.basename(rchop(blist, '.list'))
     con = sqlite3.connect(dbfile)
@@ -118,8 +120,9 @@ def iterate_list(blist, dbfile):
     )
     cur = con.cursor()
     cur.execute("DELETE FROM books WHERE zipfile = ?", [zip_file])
-    authors_list = blist + ".authors"  # debug
-    au = open(authors_list, 'w')  # debug
+    if DEBUG:
+        authors_list = blist + ".authors"  # debug
+        au = open(authors_list, 'w')  # debug
     books = json.load(data)
     for book in books:
         insdata = [
@@ -143,11 +146,13 @@ def iterate_list(blist, dbfile):
         bookinfo2db(cur, book["book_id"], book["book_title"], book["annotation"])
         seq2db(cur, book["sequences"], insdata[0], insdata[1])
         cur.execute("INSERT INTO books VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (insdata))
-        for author in insdata[3].split("|"):  # debug
-            au.write(author + "|" + book["zipfile"] + "/" + book["filename"] + "\n")  # debug
+        if DEBUG:
+            for author in insdata[3].split("|"):  # debug
+                au.write(author + "|" + book["zipfile"] + "/" + book["filename"] + "\n")  # debug
     con.commit()
     con.close()
-    au.close()
+    if DEBUG:
+        au.close()
     data.close()
 
 

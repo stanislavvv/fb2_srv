@@ -11,6 +11,9 @@ from app import create_app
 from utils import ziplist, booklist2db
 from utils.db import unicode_nocase_collation
 
+DEBUG = True
+
+
 CREATE_REQ = [
     """
     CREATE TABLE 'books' (
@@ -76,7 +79,6 @@ def usage():
     print("Usage: managedb.py <command>")
     print("Commands:")
     print(" dropdb     -- remove database from disk")
-    print(" cleandb    -- clean database tables content (not recreate db)", " NOT IMPLEMENTED")
     print(" newdb      -- [re]create database from scratch")
     print(" fillnew    -- add new data to database")
     print(" refillall  -- pass over all zips, del from db, recreate file lists and fill them to db")
@@ -172,11 +174,10 @@ def new_lists():
 
 if __name__ == "__main__":
     app = create_app()
+    DEBUG = app.config['DEBUG']
     if len(sys.argv) > 1:
         if sys.argv[1] == "dropdb":
             dropdb()
-        elif sys.argv[1] == "cleandb":
-            print("clean:", app.config['DBSQLITE'])
         elif sys.argv[1] == "newdb":
             newdb()
         elif sys.argv[1] == "fillnew":

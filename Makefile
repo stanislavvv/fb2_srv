@@ -1,4 +1,5 @@
 FLAKE8_ARGS=--max-line-length=120
+export FLASK_ENV=prod
 
 help:
 	@echo "Run \`make <target>'"
