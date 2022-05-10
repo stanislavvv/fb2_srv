@@ -18,6 +18,7 @@ class DevelopmentConfig(Config):
     TITLE = "Home opds directory"
     FB2_XSLT = 'fb2_to_html.xsl'
     APPLICATION_ROOT = ''
+    PAGE_SIZE = 10
 
 
 class TestConfig(Config):
@@ -29,6 +30,7 @@ class TestConfig(Config):
     TITLE = "Home opds directory"
     FB2_XSLT = 'fb2_to_html.xsl'
     APPLICATION_ROOT = '/books'
+    PAGE_SIZE = 10
 
 
 class ProductionConfig(Config):
@@ -39,6 +41,7 @@ class ProductionConfig(Config):
     TITLE = "Home opds directory"
     FB2_XSLT = 'fb2_to_html.xsl'
     APPLICATION_ROOT = '/books'
+    PAGE_SIZE = 100
 
 
 config = {"development": DevelopmentConfig, "test": TestConfig, "prod": ProductionConfig}

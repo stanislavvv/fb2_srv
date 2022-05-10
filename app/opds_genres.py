@@ -5,7 +5,7 @@
 # import urllib.parse
 # import hashlib
 from flask import current_app
-from .opds_internals import BOOKS_LIMIT, get_db_connection, get_dtiso, sizeof_fmt
+from .opds_internals import get_db_connection, get_dtiso, sizeof_fmt
 from .opds_internals import get_authors, get_genres_names, get_seqs
 
 
@@ -142,10 +142,14 @@ def get_genre_books(gen_id, page=0):
         ORDER BY book_title
         LIMIT "%s"
         OFFSET "%s";
-    """ % (gen_id, gen_id, gen_id, gen_id, str(BOOKS_LIMIT), str(page * BOOKS_LIMIT))
+    """ % (
+        gen_id, gen_id, gen_id, gen_id, 
+        str(current_app.config['PAGE_SIZE']),
+        str(page * current_app.config['PAGE_SIZE'])
+    )
     rows = conn.execute(REQ).fetchall()
     rows_count = len(rows)
-    if rows_count >= BOOKS_LIMIT:
+    if rows_count >= current_app.config['PAGE_SIZE']:
         ret["feed"]["link"].append(
             {
                 "@href": current_app.config['APPLICATION_ROOT'] + "/opds/genres/" + gen_id + "/" + str(page + 1),

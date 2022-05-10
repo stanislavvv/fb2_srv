@@ -7,10 +7,6 @@ import urllib.parse
 from flask import current_app
 
 
-# max books on page
-BOOKS_LIMIT = 10
-
-
 # Custom collation, maybe it is more efficient
 # to store strings
 def unicode_nocase_collation(a: str, b: str):
