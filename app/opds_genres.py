@@ -143,7 +143,7 @@ def get_genre_books(gen_id, page=0):
         LIMIT "%s"
         OFFSET "%s";
     """ % (
-        gen_id, gen_id, gen_id, gen_id, 
+        gen_id, gen_id, gen_id, gen_id,
         str(current_app.config['PAGE_SIZE']),
         str(page * current_app.config['PAGE_SIZE'])
     )
