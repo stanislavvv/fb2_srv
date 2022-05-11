@@ -137,6 +137,8 @@ def sizeof_fmt(num, suffix="B"):
 # urlencode string (quote + replace some characters to %NN)
 def url_str(s):
     tr = {
+        '"': '%22',
+        "'": '%27',
         '/': '%2F'
     }
     ret = ''
@@ -150,6 +152,8 @@ def url_str(s):
 
 def unurl(s):
     tr = {
+        '%22': '"',
+        '%27': "'",
         '%2F': '/'
     }
     ret = s
