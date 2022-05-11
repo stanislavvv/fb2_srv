@@ -6,12 +6,12 @@
   * [minor] join multiline description with spaces as separator (minimum), or process it to `<p>line 1</p><p>line 2</p><p>...` (better)
   * [normal] fb2parse() generate new authors from scratch (from name 'aaa & bbb' generate 'aaa' + 'bbb') -- need testing
   * [normal] quote /'"`/ and similar symbols -- in progress
-  * [normal] author names in pine-quotes like '«Адам Смит»' must be stripped
 
 # ToDo:
 
   * refactor utils/__init__.py and managedb,py - too many functions in one file -- in progress (stalled)
   * replace 'H' (latin) to 'Н' (cyrillic) in cyrillic names
+  * check interface speed in case annotations was taken directly from zip/fb2
 
 # ToDo sometime:
 

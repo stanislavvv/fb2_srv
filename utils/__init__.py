@@ -65,7 +65,7 @@ def fb2parse(z, filename, replace_data):
         seq_ids = get_sequence_ids(info['sequence'])
     book_title = ''
     if 'book-title' in info and info['book-title'] is not None:
-        book_title = info['book-title']
+        book_title = info['book-title'].replace('«', '"').replace('»', '"')
     lang = ''
     if 'lang' in info and info['lang'] is not None:
         lang = get_lang(info['lang'])
