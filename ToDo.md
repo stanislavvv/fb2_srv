@@ -12,6 +12,7 @@
   * refactor utils/__init__.py and managedb,py - too many functions in one file -- in progress (stalled)
   * replace 'H' (latin) to 'Н' (cyrillic) in cyrillic names
   * check interface speed in case annotations was taken directly from zip/fb2
+  * input fields validation
 
 # ToDo sometime:
 
