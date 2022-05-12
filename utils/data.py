@@ -221,7 +221,7 @@ def get_sequence_names(seq):
     if isinstance(seq, dict):
         name = None
         if '@name' in seq:
-            name = seq['@name'].strip('|').replace('«', '"').replace('»', '"')
+            name = strip_quotes(seq['@name'].strip('|').replace('«', '"').replace('»', '"'))
             name = name.strip()
             r = "%s" % name
             return r
@@ -231,7 +231,7 @@ def get_sequence_names(seq):
         for s in seq:
             name = None
             if '@name' in s:
-                name = s['@name'].strip('|').replace('«', '"').replace('»', '"')
+                name = strip_quotes(s['@name'].strip('|').replace('«', '"').replace('»', '"'))
                 name = name.strip()
                 r = "%s" % name
                 ret.append(r)
@@ -246,7 +246,7 @@ def get_sequence_ids(seq):
     if isinstance(seq, dict):
         name = None
         if '@name' in seq:
-            name = seq['@name'].strip('|').replace('«', '"').replace('»', '"')
+            name = strip_quotes(seq['@name'].strip('|').replace('«', '"').replace('»', '"'))
             name = name.strip()
             r = "%s" % name
             return make_id(r)
@@ -256,7 +256,7 @@ def get_sequence_ids(seq):
         for s in seq:
             name = None
             if '@name' in s:
-                name = s['@name'].strip('|').replace('«', '"').replace('»', '"')
+                name = strip_quotes(s['@name'].strip('|').replace('«', '"').replace('»', '"'))
                 name = name.strip()
                 r = "%s" % name.strip()
                 ret.append(make_id(r))
