@@ -184,6 +184,7 @@ def get_sequence(seq):
         num = None
         if '@name' in seq:
             name = strip_quotes(seq['@name'].strip('|').replace('«', '"').replace('»', '"'))
+            name = name.strip()
             id = make_id(name)
         if '@number' in seq:
             num = seq['@number']
@@ -199,6 +200,7 @@ def get_sequence(seq):
             num = None
             if '@name' in s:
                 name = strip_quotes(s['@name'].strip('|').replace('«', '"').replace('»', '"'))
+                name = name.strip()
                 id = make_id(name)
             if '@number' in s:
                 num = s['@number']
@@ -220,6 +222,7 @@ def get_sequence_names(seq):
         name = None
         if '@name' in seq:
             name = seq['@name'].strip('|').replace('«', '"').replace('»', '"')
+            name = name.strip()
             r = "%s" % name
             return r
         return ""
@@ -229,6 +232,7 @@ def get_sequence_names(seq):
             name = None
             if '@name' in s:
                 name = s['@name'].strip('|').replace('«', '"').replace('»', '"')
+                name = name.strip()
                 r = "%s" % name
                 ret.append(r)
         return "|".join(ret)
@@ -243,6 +247,7 @@ def get_sequence_ids(seq):
         name = None
         if '@name' in seq:
             name = seq['@name'].strip('|').replace('«', '"').replace('»', '"')
+            name = name.strip()
             r = "%s" % name
             return make_id(r)
         ret = ""
@@ -252,6 +257,7 @@ def get_sequence_ids(seq):
             name = None
             if '@name' in s:
                 name = s['@name'].strip('|').replace('«', '"').replace('»', '"')
+                name = name.strip()
                 r = "%s" % name.strip()
                 ret.append(make_id(r))
         return "|".join(ret)
