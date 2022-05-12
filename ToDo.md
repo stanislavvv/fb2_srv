@@ -5,7 +5,7 @@
   * [minor] strip leading spaces from authors/sequences/book titles before placing to database (may be after id calculation)
   * [minor] join multiline description with spaces as separator (minimum), or process it to `<p>line 1</p><p>line 2</p><p>...` (better)
   * [normal] fb2parse() generate new authors from scratch (from name 'aaa & bbb' generate 'aaa' + 'bbb') -- need testing
-  * [normal] quote /'"`/ and similar symbols -- in progress
+  * [normal] quote /'"`/ and similar symbols -- need testing
 
 # ToDo:
 

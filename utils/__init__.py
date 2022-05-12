@@ -95,17 +95,18 @@ def fb2parse(z, filename, replace_data):
 
 # iterate over files in zip, return array of book struct
 def ziplist(zip_file):
+    DEBUG = __main__.DEBUG
     print(zip_file)
     ret = []
     z = zipfile.ZipFile(zip_file)
     replace_data = get_replace_list(zip_file)
     for filename in z.namelist():
         if not os.path.isdir(filename):
-            # print(zip_file + "/" + filename + "             ", end="\r")
+            if DEBUG:
+                print(zip_file + "/" + filename + "             ")
             res = fb2parse(z, filename, replace_data)
             if res is not None:
                 ret.append(res)
-    # print("")
     return ret
 
 
