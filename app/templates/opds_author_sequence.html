@@ -26,6 +26,8 @@
             <p>{{i.content['#text']|safe}}</p>
             <hr>
         </div>
+        <p>Language: {{i['dc:language']}}</p>
+        <p>Updated: {{i.updated}}</p>
         {% endfor %}
         <hr>
         <p>
@@ -38,4 +40,3 @@
         {% endif -%}
     </body>
 </html>
-

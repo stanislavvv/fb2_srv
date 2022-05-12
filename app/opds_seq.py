@@ -302,7 +302,7 @@ def get_books_in_seq(seq_id):
         for k, v in authors_data.items():
             authors.append(
                 {
-                    "uri": "/opds/author/" + k,
+                    "uri": current_app.config['APPLICATION_ROOT'] + "/opds/author/" + k,
                     "name": v
                 }
             )
@@ -353,7 +353,7 @@ def get_books_in_seq(seq_id):
                 }
             )
         annotext = """
-        <p class=\"book\"> %s </p>\n<br/>Format: fb2<br/>Lang: ru<br/>
+        <p class=\"book\"> %s </p>\n<br/>Format: fb2<br/>
         Size: %s<br/>Sequence: %s, Number: %s<br/>
         """ % (annotation, sizeof_fmt(size), seq, str(seq_num))
         ret["feed"]["entry"].append(

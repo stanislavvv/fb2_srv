@@ -356,7 +356,7 @@ def get_author_sequence(auth_id, seq_id):
         for k, v in authors_data.items():
             authors.append(
                 {
-                    "uri": "/opds/author/" + k,
+                    "uri": current_app.config['APPLICATION_ROOT'] + "/opds/author/" + k,
                     "name": v
                 }
             )
@@ -406,7 +406,7 @@ def get_author_sequence(auth_id, seq_id):
                 }
             )
         annotext = """
-        <p class=\"book\"> %s </p>\n<br/>Format: fb2<br/>Lang: ru<br/>
+        <p class=\"book\"> %s </p>\n<br/>Format: fb2<br/>
         Size: %s<br/>Sequence: %s, Number: %s<br/>
         """ % (annotation, sizeof_fmt(size), seq_name, str(seq_num))
         ret["feed"]["entry"].append(
@@ -482,7 +482,7 @@ def get_author_sequenceless(auth_id):
         for k, v in authors_data.items():
             authors.append(
                 {
-                    "uri": "/opds/author/" + k,
+                    "uri": current_app.config['APPLICATION_ROOT'] + "/opds/author/" + k,
                     "name": v
                 }
             )
@@ -512,7 +512,7 @@ def get_author_sequenceless(auth_id):
                 }
             )
         annotext = """
-        <p class=\"book\"> %s </p>\n<br/>Format: fb2<br/>Lang: ru<br/>
+        <p class=\"book\"> %s </p>\n<br/>Format: fb2<br/>
         Size: %s<br/>Sequence: %s<br/>
         """ % (annotation, sizeof_fmt(size), "")
         ret["feed"]["entry"].append(
@@ -590,7 +590,7 @@ def get_author_by_alphabet(auth_id):
         for k, v in authors_data.items():
             authors.append(
                 {
-                    "uri": "/opds/author/" + k,
+                    "uri": current_app.config['APPLICATION_ROOT'] + "/opds/author/" + k,
                     "name": v
                 }
             )
@@ -633,7 +633,7 @@ def get_author_by_alphabet(auth_id):
                 }
             )
         annotext = """
-        <p class=\"book\"> %s </p>\n<br/>Format: fb2<br/>Lang: ru<br/>
+        <p class=\"book\"> %s </p>\n<br/>Format: fb2<br/>
         Size: %s<br/>Sequence: %s<br/>
         """ % (annotation, sizeof_fmt(size), "")
         ret["feed"]["entry"].append(
@@ -717,7 +717,7 @@ def get_author_by_time(auth_id):
         for k, v in authors_data.items():
             authors.append(
                 {
-                    "uri": "/opds/author/" + k,
+                    "uri": current_app.config['APPLICATION_ROOT'] + "/opds/author/" + k,
                     "name": v
                 }
             )
@@ -760,7 +760,7 @@ def get_author_by_time(auth_id):
                 }
             )
         annotext = """
-        <p class=\"book\"> %s </p>\n<br/>Format: fb2<br/>Lang: ru<br/>
+        <p class=\"book\"> %s </p>\n<br/>Format: fb2<br/>
         Size: %s<br/>Sequence: %s<br/>
         """ % (annotation, sizeof_fmt(size), "")
         ret["feed"]["entry"].append(

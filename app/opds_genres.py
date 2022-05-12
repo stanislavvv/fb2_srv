@@ -175,7 +175,7 @@ def get_genre_books(gen_id, page=0):
         for k, v in authors_data.items():
             authors.append(
                 {
-                    "uri": "/opds/author/" + k,
+                    "uri": current_app.config['APPLICATION_ROOT'] + "/opds/author/" + k,
                     "name": v
                 }
             )
@@ -218,7 +218,7 @@ def get_genre_books(gen_id, page=0):
                 }
             )
         annotext = """
-        <p class=\"book\"> %s </p>\n<br/>Format: fb2<br/>Lang: ru<br/>
+        <p class=\"book\"> %s </p>\n<br/>Format: fb2<br/>
         Size: %s<br/>
         """ % (annotation, sizeof_fmt(size))
         ret["feed"]["entry"].append(
