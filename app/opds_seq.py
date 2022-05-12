@@ -155,10 +155,12 @@ def get_sequences(seq_root):
         REQ = '''
         SELECT U_UPPER(name) as seq
         FROM sequences
-        WHERE U_UPPER(name) like "%s%%"
+        WHERE
+            U_UPPER(name) like '%s%%'
+            OR U_UPPER(name) like '%%|%s%%'
         GROUP BY seq
         ORDER BY seq;
-        ''' % seq_root
+        ''' % (seq_root, seq_root)
         conn = get_db_connection()
         rows = conn.execute(REQ).fetchall()
         ret["feed"]["id"] = "tag:root:sequences:" + urllib.parse.quote(seq_root, encoding='utf-8')
@@ -184,8 +186,8 @@ def get_sequences(seq_root):
         SELECT id, name
         FROM sequences
         WHERE
-            U_UPPER(name) like "%s%%"
-            OR U_UPPER(name) like "%%|%s%%"
+            U_UPPER(name) like '%s%%'
+            OR U_UPPER(name) like '%%|%s%%'
         GROUP BY name
         ORDER BY name;
         ''' % (seq_root, seq_root)
@@ -268,11 +270,11 @@ def get_books_in_seq(seq_id):
         seq_books.seq_num as s_num
     FROM books, books_descr, seq_books
     WHERE (sequence_ids = "%s"
-            OR sequence_ids like "%%|%s"
-            OR sequence_ids like "%s|%%"
-            OR sequence_ids like "%%|%s|%%"
+            OR sequence_ids like '%%|%s'
+            OR sequence_ids like '%s|%%'
+            OR sequence_ids like '%%|%s|%%'
         )
-        AND seq_books.seq_id = "%s"
+        AND seq_books.seq_id = '%s'
         AND books.zipfile = seq_books.zipfile
         AND books.filename = seq_books.filename
         AND books_descr.book_id = books.book_id

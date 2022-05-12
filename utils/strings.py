@@ -49,6 +49,16 @@ def rchop(s, suffix):
     return s
 
 
+# '"word word"' -> 'word word'
+# '"word" word' -> '`word` word'
+def strip_quotes(s: str):
+    if s is None:
+        return None
+    tmp = s.replace('"', '"').strip('"')
+    if tmp.find('"') > 0:
+        tmp = s.replace('"', '"').replace('"', '`')
+    return tmp
+
 # init genres dict
 def get_genres():
     global genres

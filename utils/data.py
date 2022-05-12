@@ -5,7 +5,7 @@ import json
 import os
 
 # from .strings import strnull, strlist, quote_identifier, rchop
-from .strings import strlist
+from .strings import strlist, strip_quotes
 
 
 # get name, strip quotes from begin/end, return md5
@@ -183,7 +183,7 @@ def get_sequence(seq):
         name = None
         num = None
         if '@name' in seq:
-            name = seq['@name'].strip('|').replace('«', '"').replace('»', '"')
+            name = strip_quotes(seq['@name'].strip('|').replace('«', '"').replace('»', '"'))
             id = make_id(name)
         if '@number' in seq:
             num = seq['@number']
@@ -198,7 +198,7 @@ def get_sequence(seq):
             name = None
             num = None
             if '@name' in s:
-                name = s['@name'].strip('|').replace('«', '"').replace('»', '"')
+                name = strip_quotes(s['@name'].strip('|').replace('«', '"').replace('»', '"'))
                 id = make_id(name)
             if '@number' in s:
                 num = s['@number']
