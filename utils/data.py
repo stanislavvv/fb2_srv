@@ -311,3 +311,11 @@ def replace_book(filename, book, replace_data):
             book[k] = v
         print("replace in:", filename)
     return book
+
+
+def get_title(title):
+    if isinstance(title, str):
+        return title.replace('«', '"').replace('»', '"')
+    if isinstance(title, dict):
+        return(str(title["#text"]).replace('«', '"').replace('»', '"'))
+    return(str(title).replace('«', '"').replace('»', '"'))

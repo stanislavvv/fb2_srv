@@ -12,6 +12,7 @@ from .strings import get_genres, get_genres_replace, genres_replace, check_genre
 from .data import recursive_text, get_genre, get_authors, get_author_ids
 from .data import get_sequence, get_sequence_names, get_sequence_ids, get_lang
 from .data import get_struct_by_key, make_id, get_replace_list, replace_book
+from .data import get_title
 from .db import author2db, genres2db, seq2db, unicode_nocase_collation, bookinfo2db
 import __main__
 
@@ -65,7 +66,7 @@ def fb2parse(z, filename, replace_data):
         seq_ids = get_sequence_ids(info['sequence'])
     book_title = ''
     if 'book-title' in info and info['book-title'] is not None:
-        book_title = info['book-title'].replace('«', '"').replace('»', '"')
+        book_title = get_title(info['book-title'])
     lang = ''
     if 'lang' in info and info['lang'] is not None:
         lang = get_lang(info['lang'])
