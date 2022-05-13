@@ -138,8 +138,8 @@ def get_author_ids(author):
                 a_tmp2 = " ".join(a_tmp)
                 a_tmp2 = a_tmp2.strip('|').strip("'").strip('"')
                 a_tmp2 = a_tmp2.strip("«").strip("»").strip()
-            if len(a_tmp2) > 0:
-                g.append(make_id(a_tmp2.ljust(4)))
+                if len(a_tmp2) > 0:
+                    g.append(make_id(a_tmp2.ljust(4)))
         if len(g) > 0:
             ret = "|".join(g)
     else:
