@@ -349,7 +349,7 @@ def get_books_in_seq(seq_id):
             category.append(
                 {
                     "@label": v,
-                    "@term": v
+                    "@term": k
                 }
             )
         annotext = """

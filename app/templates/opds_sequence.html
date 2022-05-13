@@ -38,7 +38,7 @@
             <p>
             Genres: 
             {% for c in i.category %}
-                <a href="/html/genres/{{c['@term']}}">{{c['@label']}}</a> 
+                <a href="{{ config.APPLICATION_ROOT }}/html/genres/{{c['@term']}}">{{c['@label']}}</a> 
             {% endfor %}
             </p>
             <p>
