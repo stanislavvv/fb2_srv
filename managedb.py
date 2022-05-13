@@ -118,10 +118,14 @@ def create_booklist(zip_file):
 
 def update_booklist(zip_file):
     booklist = zip_file + ".list"
+    replacelist = zip_file + ".replace"
     if os.path.exists(booklist):
         ziptime = os.path.getmtime(zip_file)
         listtime = os.path.getmtime(booklist)
-        if ziptime < listtime:
+        replacetime = 0
+        if os.path.exists(replacelist):
+            replacetime = os.path.getmtime(replacelist)
+        if ziptime < listtime and replacetime < listtime:
             return False
     create_booklist(zip_file)
     if os.path.exists(booklist):
