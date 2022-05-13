@@ -9,7 +9,7 @@ import json
 
 from app import create_app
 from utils import ziplist, booklist2db
-from utils.db import unicode_nocase_collation
+from utils.db import unicode_nocase_collation, clean_authors
 
 DEBUG = True
 
@@ -80,6 +80,7 @@ def usage():
     print("Commands:")
     print(" dropdb     -- remove database from disk")
     print(" newdb      -- [re]create database from scratch")
+    print(" fsck       -- remove orphan authors")
     print(" fillnew    -- add new data to database")
     print(" refillall  -- pass over all zips, del from db, recreate file lists and fill them to db")
     print(" fill_lists -- as refillall, but does not recreate lists, only refill data to db")
@@ -176,6 +177,11 @@ def new_lists():
         create_booklist(zip_file)
 
 
+def db_fsck():
+    dbfile = app.config['DBSQLITE']
+    clean_authors(dbfile)
+
+
 if __name__ == "__main__":
     app = create_app()
     DEBUG = app.config['DEBUG']
@@ -192,6 +198,8 @@ if __name__ == "__main__":
             fill_lists()
         elif sys.argv[1] == "new_lists":
             new_lists()
+        elif sys.argv[1] == "fsck":
+            db_fsck()
         else:
             usage()
     else:

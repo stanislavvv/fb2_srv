@@ -90,3 +90,42 @@ def bookinfo2db(cur, book_id, book_title, annotation):
         if len(rows) > 0:
             cur.execute("DELETE FROM books_descr WHERE book_id = '%s'" % book_id)
         cur.execute("INSERT INTO books_descr VALUES (?, ?, ?)", (book_data))
+
+
+def clean_authors(dbfile):
+    import sqlite3
+    con = sqlite3.connect(dbfile)
+    con.create_collation(
+        "UNICODE_NOCASE", unicode_nocase_collation
+    )
+    authors4del = []
+    authors_names4del = []
+    cur = con.cursor()
+    REQ = 'SELECT id, name FROM authors;'
+    cur.execute(REQ)
+    rows = cur.fetchall()
+    for row in rows:
+        id = row[0]
+        name = row[1]
+        REQ = '''SELECT count(*) as cnt
+        FROM books
+        WHERE
+            author_ids = "%s" OR
+            author_ids LIKE "%s|%%" OR
+            author_ids LIKE "%%|%s" OR
+            author_ids LIKE "%%|%s|%%";
+        ''' % (id, id, id, id)
+        cur.execute(REQ)
+        rows2 = cur.fetchall()
+        for row2 in rows:
+            if row2[0] == 0:
+                authors4del.append(id)
+                authors_names4del.append(name)
+    if len(authors4del) > 0:
+        print("delete authors:", ", ".join(authors_names4del))
+        REQ = 'DELETE FROM authors WHERE id IN ("'
+        auth_in = '","'.join(authors4del)
+        REQ = REQ + auth_in + ')";'
+        cur.execute(REQ)
+    con.commit()
+    con.close()

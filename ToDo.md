@@ -6,7 +6,6 @@
   * [minor] join multiline description with spaces as separator (minimum), or process it to `<p>line 1</p><p>line 2</p><p>...` (better)
   * [normal] fb2parse() generate new authors from scratch (from name 'aaa & bbb' generate 'aaa' + 'bbb') -- need testing
   * [normal] quote /'"`/ and similar symbols -- need testing
-  * [normal] wrong genre links with configured site subdir
 
 # ToDo:
 

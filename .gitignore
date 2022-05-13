@@ -5,5 +5,5 @@ genres_unknown
 tmp
 __pycache__
 data
-LOG
+LOG*
 logs
