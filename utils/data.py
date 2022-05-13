@@ -323,5 +323,8 @@ def get_title(title):
     if isinstance(title, str):
         return title.replace('«', '"').replace('»', '"')
     if isinstance(title, dict):
-        return(str(title["#text"]).replace('«', '"').replace('»', '"'))
+        if '#text' in title:
+            return(str(title["#text"]).replace('«', '"').replace('»', '"'))
+        if 'p' in title:
+            return(str(title['p']).replace('«', '"').replace('»', '"'))
     return(str(title).replace('«', '"').replace('»', '"'))
