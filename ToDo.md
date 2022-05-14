@@ -9,9 +9,10 @@
 
 # ToDo:
 
+  * [high] add `list_refresh` commands
   * refactor utils/__init__.py and managedb,py - too many functions in one file -- in progress (stalled)
   * replace 'H' (latin) to 'Н' (cyrillic) in cyrillic seq/author names
-  * add command for removal of authors/sequences without books. Call it `managedb.py fsck. Use 'vacuum' as last SQL command.`
+  * add command for removal of authors/sequences without books. Call it `managedb.py` fsck. Use 'vacuum' as last SQL command.`
   * add logging of wrong-formatted fb2 to `managedb.py`
   * check interface speed in case annotations was taken directly from zip/fb2
   * input fields validation
