@@ -78,13 +78,14 @@ CREATE_REQ = [
 def usage():
     print("Usage: managedb.py <command>")
     print("Commands:")
-    print(" dropdb     -- remove database from disk")
-    print(" newdb      -- [re]create database from scratch")
-    print(" fsck       -- remove orphan authors")
-    print(" fillnew    -- add new data to database")
-    print(" refillall  -- pass over all zips, del from db, recreate file lists and fill them to db")
-    print(" fill_lists -- as refillall, but does not recreate lists, only refill data to db")
-    print(" new_lists  -- as refillall, but recreate lists, no refill any data to db")
+    print(" dropdb      -- remove database from disk")
+    print(" newdb       -- [re]create database from scratch")
+    print(" fsck        -- remove orphan authors")
+    print(" fillnew     -- add new data to database")
+    print(" refillall   -- pass over all zips, del from db, recreate file lists and fill them to db")
+    print(" fill_lists  -- as refillall, but does not recreate lists, only refill data to db")
+    print(" renew_lists -- as refillall, but recreate lists, no refill any data to db")
+    print(" new_lists   -- as fillnew, but update lists, no refill any data to db")
 
 
 def dropdb():
@@ -129,11 +130,6 @@ def update_booklist(zip_file):
         if ziptime < listtime and replacetime < listtime:
             return False
     create_booklist(zip_file)
-    if os.path.exists(booklist):
-        booklist2db(booklist, app.config['DBSQLITE'])
-        return True
-    else:
-        return False
 
 
 def fillall():
@@ -156,6 +152,8 @@ def fillnew():
         i += 1
         print("[" + str(i) + "] ", end='')
         update_booklist(zip_file)
+        if os.path.exists(booklist):
+            booklist2db(booklist, dbfile)
 
 
 def fill_lists():
@@ -168,13 +166,22 @@ def fill_lists():
         booklist2db(booklist, dbfile)
 
 
-def new_lists():
+def renew_lists():
     zipdir = app.config['ZIPS']
     i = 0
     for zip_file in glob.glob(zipdir + '/*.zip'):
         i += 1
         print("[" + str(i) + "] ", end='')
         create_booklist(zip_file)
+
+
+def new_lists():
+    zipdir = app.config['ZIPS']
+    i = 0
+    for zip_file in glob.glob(zipdir + '/*.zip'):
+        i += 1
+        print("[" + str(i) + "] ", end='')
+        update_booklist(zip_file)
 
 
 def db_fsck():
@@ -196,6 +203,8 @@ if __name__ == "__main__":
             fillall()
         elif sys.argv[1] == "fill_lists":
             fill_lists()
+        elif sys.argv[1] == "renew_lists":
+            renew_lists()
         elif sys.argv[1] == "new_lists":
             new_lists()
         elif sys.argv[1] == "fsck":
