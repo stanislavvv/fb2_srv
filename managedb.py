@@ -158,6 +158,7 @@ def fillnew():
         i += 1
         print("[" + str(i) + "] ", end='')
         update_booklist(zip_file)
+        booklist = zip_file + ".list"
         if os.path.exists(booklist):
             booklist2db(booklist, dbfile)
 
