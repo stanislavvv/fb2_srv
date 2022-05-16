@@ -88,7 +88,7 @@ def get_authors_list(auth_root):
         ret["feed"]["updated"] = dtiso
         REQ = '''SELECT U_UPPER(substr(name,1,3)) as nm
         FROM authors
-        WHERE name like "%s%%"
+        WHERE U_UPPER(name) like "%s%%"
         GROUP BY nm ORDER BY nm;''' % a_root
         conn = get_db_connection()
         rows = conn.execute(REQ).fetchall()
@@ -320,7 +320,11 @@ def get_author_sequence(auth_id, seq_id):
         books_descr.annotation as annotation,
         seq_books.seq_num as s_num
     FROM books, books_descr, seq_books
-    WHERE (author_ids = '%s'
+    WHERE
+        seq_books.zipfile = books.zipfile
+        AND seq_books.filename = books.filename
+        AND books_descr.book_id = books.book_id
+        AND (author_ids = '%s'
             OR author_ids LIKE '%s|%%'
             OR author_ids LIKE '%%|%s'
             OR author_ids LIKE '%%|%s|%%'
@@ -330,10 +334,7 @@ def get_author_sequence(auth_id, seq_id):
             OR sequence_ids LIKE '%%|%s'
             OR sequence_ids LIKE '%%|%s|%%'
         )
-        AND seq_books.seq_id = '%s'
-        AND seq_books.zipfile = books.zipfile
-        AND seq_books.filename = books.filename
-        AND books_descr.book_id = books.book_id ORDER BY s_num, book_title;
+        AND seq_books.seq_id = '%s' ORDER BY s_num, book_title;
     """ % (auth_id, auth_id, auth_id, auth_id, seq_id, seq_id, seq_id, seq_id, seq_id)
     rows = conn.execute(REQ).fetchall()
     for row in rows:
@@ -456,13 +457,14 @@ def get_author_sequenceless(auth_id):
         date_time,
         annotation
     FROM books, books_descr
-    WHERE (author_ids = '%s'
+    WHERE
+        seq_ids = ''
+        AND books.book_id = books_descr.book_id
+        AND (author_ids = '%s'
             OR author_ids LIKE '%s|%%'
             OR author_ids LIKE '%%|%s'
             OR author_ids LIKE '%%|%s|%%'
-        )
-        AND seq_ids = ''
-        AND books.book_id = books_descr.book_id;
+        );
     """ % (auth_id, auth_id, auth_id, auth_id)
     rows = conn.execute(REQ).fetchall()
     for row in rows:
@@ -563,12 +565,13 @@ def get_author_by_alphabet(auth_id):
         date_time,
         annotation
     FROM books, books_descr
-    WHERE (author_ids = '%s'
+    WHERE
+        books.book_id = books_descr.book_id
+        AND (author_ids = '%s'
             OR author_ids LIKE '%s|%%'
             OR author_ids LIKE '%%|%s'
             OR author_ids LIKE '%%|%s|%%'
         )
-        AND books.book_id = books_descr.book_id
         ORDER BY book_title;
     """ % (auth_id, auth_id, auth_id, auth_id)
     rows = conn.execute(REQ).fetchall()
@@ -690,12 +693,13 @@ def get_author_by_time(auth_id):
         date_time,
         annotation
     FROM books, books_descr
-    WHERE (author_ids = '%s'
+    WHERE
+        books.book_id = books_descr.book_id
+        AND (author_ids = '%s'
             OR author_ids LIKE '%s|%%'
             OR author_ids LIKE '%%|%s'
             OR author_ids LIKE '%%|%s|%%'
         )
-        AND books.book_id = books_descr.book_id
         ORDER BY date_time;
     """ % (auth_id, auth_id, auth_id, auth_id)
     rows = conn.execute(REQ).fetchall()

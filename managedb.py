@@ -16,6 +16,12 @@ DEBUG = True
 
 CREATE_REQ = [
     """
+    pragma synchronous = normal;
+    """,
+    """
+    pragma page_size = 32768;
+    """,
+    """
     CREATE TABLE 'books' (
         'zipfile'	TEXT NOT NULL,
         'filename'	TEXT NOT NULL,

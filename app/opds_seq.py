@@ -269,15 +269,16 @@ def get_books_in_seq(seq_id):
         annotation,
         seq_books.seq_num as s_num
     FROM books, books_descr, seq_books
-    WHERE (sequence_ids = "%s"
+    WHERE
+        seq_books.seq_id = '%s'
+        AND books.zipfile = seq_books.zipfile
+        AND books.filename = seq_books.filename
+        AND books_descr.book_id = books.book_id
+        AND (sequence_ids = "%s"
             OR sequence_ids like '%%|%s'
             OR sequence_ids like '%s|%%'
             OR sequence_ids like '%%|%s|%%'
         )
-        AND seq_books.seq_id = '%s'
-        AND books.zipfile = seq_books.zipfile
-        AND books.filename = seq_books.filename
-        AND books_descr.book_id = books.book_id
         ORDER BY s_num, authors, book_title;
     ''' % (seq_id, seq_id, seq_id, seq_id, seq_id)
     conn = get_db_connection()

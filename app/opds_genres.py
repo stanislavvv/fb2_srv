@@ -133,12 +133,13 @@ def get_genre_books(gen_id, page=0):
         date_time,
         annotation
     FROM books, books_descr
-    WHERE (genres = '%s'
+    WHERE
+        books.book_id = books_descr.book_id
+        AND (genres = '%s'
             OR genres LIKE '%s|%%'
             OR genres LIKE '%%|%s'
             OR genres LIKE '%%|%s|%%'
         )
-        AND books.book_id = books_descr.book_id
         ORDER BY book_title
         LIMIT "%s"
         OFFSET "%s";

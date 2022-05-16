@@ -40,12 +40,21 @@ def get_dtiso():
 def get_auth_seqs(auth_id):
     ret = []
     seq_cnt = {}
-    REQ1 = "SELECT book_id, seq_ids as sequence_ids FROM books WHERE length(sequence_ids) > 0 AND author_ids = '"
-    REQ2 = "' OR author_ids LIKE '"
-    REQ3 = "|%' OR author_ids LIKE '%|"
-    REQ4 = "' OR author_ids LIKE '%|"
-    REQ5 = "|%' AND sequence_ids != '';"
-    REQ = REQ1 + auth_id + REQ2 + auth_id + REQ3 + auth_id + REQ4 + auth_id + REQ5
+    REQ = """
+    SELECT
+        book_id,
+        seq_ids as sequence_ids
+    FROM books
+    WHERE
+        sequence_ids != '' AND
+        length(sequence_ids) > 0 AND
+        (
+            author_ids = '%s' OR
+            author_ids LIKE '%s|%%' OR
+            author_ids LIKE '%%|%s' OR
+            author_ids LIKE '%%|%s|%%'
+        )
+    """ % (auth_id, auth_id, auth_id, auth_id)
     conn = get_db_connection()
     rows = conn.execute(REQ).fetchall()
     if len(rows) != 0:
