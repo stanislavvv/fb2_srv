@@ -153,6 +153,7 @@ def fillall():
 
 def fillnew():
     zipdir = app.config['ZIPS']
+    dbfile = app.config['DBSQLITE']
     i = 0
     for zip_file in glob.glob(zipdir + '/*.zip'):
         i += 1
