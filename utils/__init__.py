@@ -42,7 +42,7 @@ def fb2parse(z, filename, replace_data):
     fb2data = get_struct_by_key('FictionBook', data)  # data['FictionBook']
     descr = get_struct_by_key('description', fb2data)  # fb2data['description']
     info = get_struct_by_key('title-info', descr)  # descr['title-info']
-    if replace_data is not None:
+    if replace_data is not None and filename in replace_data:
         info = replace_book(filename, info, replace_data)
 
     if 'genre' in info and info['genre'] is not None:

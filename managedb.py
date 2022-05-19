@@ -136,6 +136,7 @@ def update_booklist(zip_file):
         if ziptime < listtime and replacetime < listtime:
             return False
     create_booklist(zip_file)
+    return True
 
 
 def fillall():
@@ -193,7 +194,7 @@ def new_lists():
 
 def db_fsck():
     dbfile = app.config['DBSQLITE']
-    clean_authors(dbfile)
+    clean_authors(dbfile, DEBUG)
 
 
 if __name__ == "__main__":

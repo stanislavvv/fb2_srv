@@ -92,7 +92,8 @@ def bookinfo2db(cur, book_id, book_title, annotation):
         cur.execute("INSERT INTO books_descr VALUES (?, ?, ?)", (book_data))
 
 
-def clean_authors(dbfile):
+def clean_authors(dbfile, DEBUG):
+    #DEBUG = __main__.DEBUG
     import sqlite3
     con = sqlite3.connect(dbfile)
     con.create_collation(
@@ -101,13 +102,15 @@ def clean_authors(dbfile):
     authors4del = []
     authors_names4del = []
     cur = con.cursor()
-    REQ = 'SELECT id, name FROM authors;'
+    REQ = 'SELECT id, name FROM authors ORDER BY name;'
     cur.execute(REQ)
     rows = cur.fetchall()
+    if DEBUG:
+        print("Authors total:", len(rows))  # debug
     for row in rows:
         id = row[0]
         name = row[1]
-        REQ = '''SELECT count(*) as cnt
+        REQ2 = '''SELECT count(book_id) as cnt
         FROM books
         WHERE
             author_ids = "%s" OR
@@ -115,14 +118,19 @@ def clean_authors(dbfile):
             author_ids LIKE "%%|%s" OR
             author_ids LIKE "%%|%s|%%";
         ''' % (id, id, id, id)
-        cur.execute(REQ)
+        cur.execute(REQ2)
         rows2 = cur.fetchall()
-        for row2 in rows:
+        for row2 in rows2:
+            if DEBUG:
+                print(name + " :" + str(row2[0]) + "                                     \r", end = '')
             if row2[0] == 0:
                 authors4del.append(id)
                 authors_names4del.append(name)
+                if DEBUG:
+                    print("DEL:", name, "                     ")  # debug
     if len(authors4del) > 0:
-        print("delete authors:", ", ".join(authors_names4del))
+        if DEBUG:
+            print("delete authors:", ", ".join(authors_names4del))
         REQ = 'DELETE FROM authors WHERE id IN ("'
         auth_in = '","'.join(authors4del)
         REQ = REQ + auth_in + ')";'
