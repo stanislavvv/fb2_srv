@@ -133,7 +133,7 @@ def clean_authors(dbfile, DEBUG):
             print("delete authors:", ", ".join(authors_names4del))
         REQ = 'DELETE FROM authors WHERE id IN ("'
         auth_in = '","'.join(authors4del)
-        REQ = REQ + auth_in + ')";'
+        REQ = REQ + auth_in + '");'
         cur.execute(REQ)
     con.commit()
     con.close()
