@@ -1,6 +1,5 @@
 # BUGS:
 
-  * [minor] duplicate links in entries to authors in /html/authorsequence/<auth_id>/<seq_id> -- in html mode only. won't fix?
   * [minor] set nickname to author without brackets, if other fields empty
   * [minor] strip leading spaces from authors/sequences/book titles before placing to database (may be after id calculation)
   * [minor] join multiline description with spaces as separator (minimum), or process it to `<p>line 1</p><p>line 2</p><p>...` (better)
