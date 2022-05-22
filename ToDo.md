@@ -11,6 +11,7 @@
   * remove author name from main table
   * add command for removal of authors/sequences without books. Call it `managedb.py` fsck. Use 'vacuum' as last SQL command.` -- in progress
   * ignore case sort of authors/sequences
+  * ignore case in id generation
   * add configurable logging in `managedb.py` (DEBUG (current zip, current book, may be show some fields of metadata + INFO), INFO (current zip + WARN), WARN (show wrong formatted, but readable fb2 in from zipfile/filename.fb2 + ERR), ERR (only real errors))
   * refactor utils/__init__.py and managedb,py - too many functions in one file -- in progress (stalled)
   * check interface speed in case annotations was taken directly from zip/fb2
