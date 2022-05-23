@@ -27,7 +27,6 @@ CREATE_REQ = [
         'filename'	TEXT NOT NULL,
         'genres'	TEXT,
         'author_ids'	NUMERIC,
-        'seq_names'	TEXT,
         'seq_ids'	TEXT,
         'book_id'	TEXT,
         'lang'	TEXT,

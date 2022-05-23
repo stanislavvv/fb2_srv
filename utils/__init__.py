@@ -132,7 +132,6 @@ def iterate_list(blist, dbfile):
             book["filename"],
             book["genres"],
             book["author_ids"],
-            book["seq_names"],
             book["seq_ids"],
             book["book_id"],
             book["lang"],
@@ -146,7 +145,7 @@ def iterate_list(blist, dbfile):
         author2db(cur, book["authors"])
         bookinfo2db(cur, book["book_id"], book["book_title"], book["annotation"])
         seq2db(cur, book["sequences"], insdata[0], insdata[1])
-        cur.execute("INSERT INTO books VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (insdata))
+        cur.execute("INSERT INTO books VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", (insdata))
         if DEBUG:
             for author in insdata[3].split("|"):  # debug
                 au.write(author + "|" + book["zipfile"] + "/" + book["filename"] + "\n")  # debug
