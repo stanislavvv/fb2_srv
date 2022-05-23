@@ -464,7 +464,7 @@ def get_author_sequenceless(auth_id):
             OR author_ids LIKE '%s|%%'
             OR author_ids LIKE '%%|%s'
             OR author_ids LIKE '%%|%s|%%'
-        );
+        ) ORDER BY book_title;
     """ % (auth_id, auth_id, auth_id, auth_id)
     rows = conn.execute(REQ).fetchall()
     for row in rows:

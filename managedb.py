@@ -26,7 +26,6 @@ CREATE_REQ = [
         'zipfile'	TEXT NOT NULL,
         'filename'	TEXT NOT NULL,
         'genres'	TEXT,
-        'authors'	TEXT,
         'author_ids'	NUMERIC,
         'seq_names'	TEXT,
         'seq_ids'	TEXT,

@@ -279,7 +279,7 @@ def get_books_in_seq(seq_id):
             OR sequence_ids like '%s|%%'
             OR sequence_ids like '%%|%s|%%'
         )
-        ORDER BY s_num, authors, book_title;
+        ORDER BY s_num, book_title;
     ''' % (seq_id, seq_id, seq_id, seq_id, seq_id)
     conn = get_db_connection()
     rows = conn.execute(REQ).fetchall()
