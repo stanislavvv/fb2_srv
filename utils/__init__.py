@@ -9,7 +9,7 @@ import json
 from bs4 import BeautifulSoup
 from datetime import datetime
 from .strings import get_genres, get_genres_replace, genres_replace, check_genres, rchop
-from .data import recursive_text, get_genre, get_authors, get_author_ids
+from .data import get_genre, get_authors, get_author_ids
 from .data import get_sequence, get_sequence_names, get_sequence_ids, get_lang
 from .data import get_struct_by_key, make_id, get_replace_list, replace_book
 from .data import get_title
@@ -29,6 +29,10 @@ def fb2parse(z, filename, replace_data):
         return None
     fb2 = z.open(filename)
     bs = BeautifulSoup(bytes(fb2.read(READ_SIZE)), 'xml')
+    bs_descr = bs.FictionBook.description
+    tinfo = bs_descr.find("title-info")
+    bs_anno = str(tinfo.annotation)
+    bs_anno = bs_anno.replace("<annotation>","").replace("</annotation>","")
     doc = bs.prettify()
     data = xmltodict.parse(doc)
     if 'FictionBook' not in data:  # parse with namespace
@@ -72,7 +76,7 @@ def fb2parse(z, filename, replace_data):
         lang = get_lang(info['lang'])
     annotext = ''
     if 'annotation' in info and info['annotation'] is not None:
-        annotext = recursive_text(info['annotation'])
+        annotext = bs_anno
     book_path = str(os.path.basename(z.filename)) + "/" + filename
     book_id = make_id(book_path)
     out = {
@@ -147,7 +151,7 @@ def iterate_list(blist, dbfile):
         seq2db(cur, book["sequences"], insdata[0], insdata[1])
         cur.execute("INSERT INTO books VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", (insdata))
         if DEBUG:
-            for author in insdata[3].split("|"):  # debug
+            for author in book["authors"].split("|"):  # debug
                 au.write(author + "|" + book["zipfile"] + "/" + book["filename"] + "\n")  # debug
     con.commit()
     con.close()

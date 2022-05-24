@@ -3,6 +3,7 @@
 import hashlib
 import json
 import os
+import html
 
 from .strings import strlist, strip_quotes
 
@@ -14,22 +15,6 @@ def make_id(name):
     else:
         n = "--- unknown ---"
     return hashlib.md5(n.encode('utf-8').upper()).hexdigest()
-
-
-# pass over nested dict and return all values as single text string
-def recursive_text(data):
-    ret = ""
-    if isinstance(data, list):
-        for li in data:
-            ret += recursive_text(li)
-            if isinstance(li, dict):
-                ret += recursive_text(li)
-    elif isinstance(data, dict):
-        for k, v in data.items():
-            ret += recursive_text(v)
-    else:
-        ret += str(data)
-    return ret
 
 
 # return pipe-separated string of genres from input struct
