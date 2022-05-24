@@ -1,6 +1,6 @@
 # BUGS:
 
-  * [minor] join multiline description with spaces as separator (minimum), or process it to `<p>line 1</p><p>line 2</p><p>...` (better)
+  * [minor] generate correct html description from existing data (close open tags and so on)
   * [normal] fb2parse() generate new authors from scratch (from name 'aaa & bbb' generate 'aaa' + 'bbb') -- need testing
   * [normal] quote /'"`/ and similar symbols -- symbols stripped or replaced, need testing
 
