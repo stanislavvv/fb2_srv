@@ -93,7 +93,6 @@ def bookinfo2db(cur, book_id, book_title, annotation):
 
 
 def clean_authors(dbfile, DEBUG):
-    #DEBUG = __main__.DEBUG
     import sqlite3
     con = sqlite3.connect(dbfile)
     con.create_collation(
@@ -122,7 +121,7 @@ def clean_authors(dbfile, DEBUG):
         rows2 = cur.fetchall()
         for row2 in rows2:
             if DEBUG:
-                print(name + " :" + str(row2[0]) + "                                     \r", end = '')
+                print(name + " :" + str(row2[0]) + "                                     \r", end='')
             if row2[0] == 0:
                 authors4del.append(id)
                 authors_names4del.append(name)

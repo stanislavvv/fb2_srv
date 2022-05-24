@@ -59,6 +59,7 @@ def strip_quotes(s: str):
         tmp = s.replace('"', '"').replace('"', '`')
     return tmp
 
+
 # init genres dict
 def get_genres():
     global genres

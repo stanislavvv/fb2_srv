@@ -13,6 +13,7 @@ from .opds_internals import get_seqs
 
 def main_opds():
     dtiso = get_dtiso()
+    approot = current_app.config['APPLICATION_ROOT']
     ret = {
         "feed": {
             "@xmlns": "http://www.w3.org/2005/Atom",
@@ -25,22 +26,22 @@ def main_opds():
             "icon": "/favicon.ico",
             "link": [
                 # {
-                    # "@href": current_app.config['APPLICATION_ROOT'] + "/opds-opensearch.xml",
+                    # "@href": approot + "/opds-opensearch.xml",
                     # "@rel": "search",
                     # "@type": "application/opensearchdescription+xml"
                 # },
                 # {
-                    # "@href": current_app.config['APPLICATION_ROOT'] + "/opds/search?searchTerm={searchTerms}",
+                    # "@href": approot + "/opds/search?searchTerm={searchTerms}",
                     # "@rel": "search",
                     # "@type": "application/atom+xml"
                 # },
                 {
-                    "@href": current_app.config['APPLICATION_ROOT'] + "/opds/",
+                    "@href": approot + "/opds/",
                     "@rel": "start",
                     "@type": "application/atom+xml;profile=opds-catalog"
                 },
                 {
-                    "@href": current_app.config['APPLICATION_ROOT'] + "/opds/",
+                    "@href": approot + "/opds/",
                     "@rel": "self",
                     "@type": "application/atom+xml;profile=opds-catalog"
                 }
@@ -55,7 +56,7 @@ def main_opds():
                         "#text": "Поиск книг по авторам"
                     },
                     "link": {
-                        "@href": current_app.config['APPLICATION_ROOT'] + "/opds/authorsindex",
+                        "@href": approot + "/opds/authorsindex",
                         "@type": "application/atom+xml;profile=opds-catalog"
                     }
                 },
@@ -68,7 +69,7 @@ def main_opds():
                         "#text": "Поиск книг по сериям"
                     },
                     "link": {
-                        "@href": current_app.config['APPLICATION_ROOT'] + "/opds/sequencesindex",
+                        "@href": approot + "/opds/sequencesindex",
                         "@type": "application/atom+xml;profile=opds-catalog"
                     }
                 },
@@ -81,7 +82,7 @@ def main_opds():
                         "#text": "Поиск книг по жанрам"
                     },
                     "link": {
-                        "@href": current_app.config['APPLICATION_ROOT'] + "/opds/genres",
+                        "@href": approot + "/opds/genres",
                         "@type": "application/atom+xml;profile=opds-catalog"
                     }
                 }
@@ -95,6 +96,7 @@ def main_opds():
 #   may be None, "" or / for /opds/sequencesindex
 def get_sequences(seq_root):
     dtiso = get_dtiso()
+    approot = current_app.config['APPLICATION_ROOT']
     ret = {
         "feed": {
             "@xmlns": "http://www.w3.org/2005/Atom",
@@ -107,17 +109,17 @@ def get_sequences(seq_root):
             "icon": "/favicon.ico",
             "link": [
                 # {
-                    # "@href": current_app.config['APPLICATION_ROOT'] + "/opds-opensearch.xml",
+                    # "@href": approot + "/opds-opensearch.xml",
                     # "@rel": "search",
                     # "@type": "application/opensearchdescription+xml"
                 # },
                 # {
-                    # "@href": current_app.config['APPLICATION_ROOT'] + "/opds/search?searchTerm={searchTerms}",
+                    # "@href": approot + "/opds/search?searchTerm={searchTerms}",
                     # "@rel": "search",
                     # "@type": "application/atom+xml"
                 # },
                 {
-                    "@href": current_app.config['APPLICATION_ROOT'] + "/opds/",
+                    "@href": approot + "/opds/",
                     "@rel": "start",
                     "@type": "application/atom+xml;profile=opds-catalog"
                 }
@@ -145,7 +147,7 @@ def get_sequences(seq_root):
                         "#text": "книги на '" + ch + "'"
                     },
                     "link": {
-                        "@href": current_app.config['APPLICATION_ROOT'] + "/opds/sequences/" + urllib.parse.quote(ch),
+                        "@href": approot + "/opds/sequences/" + urllib.parse.quote(ch),
                         "@type": "application/atom+xml;profile=opds-catalog"
                     }
                 }
@@ -175,7 +177,7 @@ def get_sequences(seq_root):
                         "#text": "книги на '" + ch + "'"
                     },
                     "link": {
-                        "@href": current_app.config['APPLICATION_ROOT'] + "/opds/sequences/" + urllib.parse.quote(ch, encoding='utf-8'),
+                        "@href": approot + "/opds/sequences/" + urllib.parse.quote(ch, encoding='utf-8'),
                         "@type": "application/atom+xml;profile=opds-catalog"
                     }
                 }
@@ -207,7 +209,7 @@ def get_sequences(seq_root):
                         "#text": "книги на '" + seq_name + "'"
                     },
                     "link": {
-                        "@href": current_app.config['APPLICATION_ROOT'] + "/opds/sequencebooks/" + seq_id,
+                        "@href": approot + "/opds/sequencebooks/" + seq_id,
                         "@type": "application/atom+xml;profile=opds-catalog"
                     }
                 }
@@ -218,6 +220,7 @@ def get_sequences(seq_root):
 
 def get_books_in_seq(seq_id):
     dtiso = get_dtiso()
+    approot = current_app.config['APPLICATION_ROOT']
     REQ = 'SELECT id, name FROM sequences WHERE id = "%s"' % seq_id
     conn = get_db_connection()
     rows = conn.execute(REQ).fetchall()
@@ -236,17 +239,17 @@ def get_books_in_seq(seq_id):
             "icon": "/favicon.ico",
             "link": [
                 # {
-                    # "@href": current_app.config['APPLICATION_ROOT'] + "/opds-opensearch.xml",
+                    # "@href": approot + "/opds-opensearch.xml",
                     # "@rel": "search",
                     # "@type": "application/opensearchdescription+xml"
                 # },
                 # {
-                    # "@href": current_app.config['APPLICATION_ROOT'] + "/opds/search?searchTerm={searchTerms}",
+                    # "@href": approot + "/opds/search?searchTerm={searchTerms}",
                     # "@rel": "search",
                     # "@type": "application/atom+xml"
                 # },
                 {
-                    "@href": current_app.config['APPLICATION_ROOT'] + "/opds/",
+                    "@href": approot + "/opds/",
                     "@rel": "start",
                     "@type": "application/atom+xml;profile=opds-catalog"
                 }
@@ -303,13 +306,13 @@ def get_books_in_seq(seq_id):
         for k, v in authors_data.items():
             authors.append(
                 {
-                    "uri": current_app.config['APPLICATION_ROOT'] + "/opds/author/" + k,
+                    "uri": approot + "/opds/author/" + k,
                     "name": v
                 }
             )
             links.append(
                 {
-                    "@href": current_app.config['APPLICATION_ROOT'] + "/opds/author/" + k,
+                    "@href": approot + "/opds/author/" + k,
                     "@rel": "related",
                     "@title": v,
                     "@type": "application/atom+xml"
@@ -320,7 +323,7 @@ def get_books_in_seq(seq_id):
         for k, v in seq_data.items():
             links.append(
                 {
-                    "@href": current_app.config['APPLICATION_ROOT'] + "/opds/sequencebooks/" + k,
+                    "@href": approot + "/opds/sequencebooks/" + k,
                     "@rel": "related",
                     "@title": "All books in sequence '" + v + "'",
                     "@type": "application/atom+xml"
@@ -329,7 +332,7 @@ def get_books_in_seq(seq_id):
 
         links.append(
             {
-                "@href": current_app.config['APPLICATION_ROOT'] + "/fb2/" + zipfile + "/" + filename,
+                "@href": approot + "/fb2/" + zipfile + "/" + filename,
                 "@rel": "http://opds-spec.org/acquisition/open-access",
                 "@title": "Download",
                 "@type": "application/fb2+zip"
@@ -337,7 +340,7 @@ def get_books_in_seq(seq_id):
         )
         links.append(
             {
-                "@href": current_app.config['APPLICATION_ROOT'] + "/read/" + zipfile + "/" + filename,
+                "@href": approot + "/read/" + zipfile + "/" + filename,
                 "@rel": "alternate",
                 "@title": "Read in browser",
                 "@type": "text/html"

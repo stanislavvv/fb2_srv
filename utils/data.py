@@ -4,7 +4,6 @@ import hashlib
 import json
 import os
 
-# from .strings import strnull, strlist, quote_identifier, rchop
 from .strings import strlist, strip_quotes
 
 
@@ -315,7 +314,7 @@ def replace_book(filename, book, replace_data):
         replace = replace_data[filename]
         for k, v in replace.items():
             book[k] = v
-            print("replace:", k, v) # debug
+            print("replace:", k, v)  # debug
         print("replace in:", filename)
     return book
 
