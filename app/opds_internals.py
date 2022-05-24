@@ -70,7 +70,7 @@ def get_auth_seqs(auth_id):
         selector = []
         for k, v in seq_cnt.items():
             selector.append('"' + k + '"')
-        REQ = 'SELECT id, name FROM sequences WHERE id IN (' + ",".join(selector) + ') ORDER BY name;'
+        REQ = 'SELECT id, name FROM sequences WHERE id IN (' + ",".join(selector) + ') ORDER BY U_UPPER(name);'
         rows = conn.execute(REQ).fetchall()
         for row in rows:
             seq_id = row["id"]
@@ -124,7 +124,7 @@ def get_seqs(ids):
     selector = []
     for i in ids.split("|"):
         selector.append("'" + i + "'")
-    REQ = "SELECT id, name FROM sequences WHERE id IN (" + ",".join(selector) + ");"
+    REQ = "SELECT id, name FROM sequences WHERE id IN (" + ",".join(selector) + ") ORDER BY U_UPPER(name);"
     conn = get_db_connection()
     rows = conn.execute(REQ).fetchall()
     for row in rows:

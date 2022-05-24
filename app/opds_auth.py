@@ -125,7 +125,7 @@ def get_authors_list(auth_root):
         SELECT id, name
         FROM authors
         WHERE U_UPPER(name) LIKE "%s%%"
-        ORDER BY name;
+        ORDER BY U_UPPER(name);
         ''' % a_root
         ret["feed"]["id"] = "tag:root:authors:" + url_str(a_root)
         conn = get_db_connection()
@@ -239,7 +239,7 @@ def get_author_list(auth_id):
 
 def get_author_sequences(auth_id):
     dtiso = get_dtiso()
-    REQ = 'SELECT id, name FROM authors WHERE id = "%s"' % auth_id
+    REQ = 'SELECT id, name FROM authors WHERE id = "%s" ORDER BY U_UPPER(name)' % auth_id
     conn = get_db_connection()
     rows = conn.execute(REQ).fetchall()
     if len(rows) == 0:

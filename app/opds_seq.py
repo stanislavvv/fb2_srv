@@ -188,8 +188,8 @@ def get_sequences(seq_root):
         WHERE
             U_UPPER(name) like '%s%%'
             OR U_UPPER(name) like '%%|%s%%'
-        GROUP BY name
-        ORDER BY name;
+        GROUP BY U_UPPER(name)
+        ORDER BY U_UPPER(name);
         ''' % (seq_root, seq_root)
         ret["feed"]["id"] = "tag:root:sequences:" + urllib.parse.quote(seq_root, encoding='utf-8')
         conn = get_db_connection()

@@ -14,7 +14,7 @@ def make_id(name):
         n = str(name).strip("'").strip('"')
     else:
         n = "--- unknown ---"
-    return hashlib.md5(n.encode('utf-8')).hexdigest()
+    return hashlib.md5(n.encode('utf-8').upper()).hexdigest()
 
 
 # pass over nested dict and return all values as single text string
