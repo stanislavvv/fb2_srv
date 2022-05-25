@@ -1,13 +1,13 @@
 # BUGS:
 
-  * [minor] generate correct html description from existing data (close open tags and so on)
+  * [minor] generate correct html description from existing data (close open tags and so on) -- need testing
   * [normal] fb2parse() generate new authors from scratch (from name 'aaa & bbb' generate 'aaa' + 'bbb') -- need testing
   * [normal] quote /'"`/ and similar symbols -- symbols stripped or replaced, need testing
 
 # ToDo:
 
   * add command for removal of authors/sequences without books. Call it `managedb.py` fsck. Use 'vacuum' as last SQL command.` -- in progress
-  * ignore case in id generation -- in testing
+  * search must ignore case and similar letters
   * add special cases for parsing wrong formatted sequence info from form: '<sequence number="« name=»Эссе"/>'
   * replace 'H' (latin) to 'Н' (cyrillic) in cyrillic seq/author names
   * input fields validation

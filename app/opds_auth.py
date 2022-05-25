@@ -18,15 +18,15 @@ def ret_hdr_author():  # python does not have constants
             "icon": "/favicon.ico",
             "link": [
                 # {
-                    # "@href": "/opds-opensearch.xml",
+                    # "@href": current_app.config['APPLICATION_ROOT'] + "/opds-opensearch.xml",
                     # "@rel": "search",
                     # "@type": "application/opensearchdescription+xml"
                 # },
-                # {
-                    # "@href": "/opds/search?searchTerm={searchTerms}",
-                    # "@rel": "search",
-                    # "@type": "application/atom+xml"
-                # },
+                {
+                    "@href": current_app.config['APPLICATION_ROOT'] + "/opds/search?searchTerm={searchTerms}",
+                    "@rel": "search",
+                    "@type": "application/atom+xml"
+                },
                 {
                     "@href": current_app.config['APPLICATION_ROOT'] + "/opds/",
                     "@rel": "start",

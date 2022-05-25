@@ -1,24 +1,20 @@
 # -*- coding: utf-8 -*-
 
-# import xmltodict
-# import sqlite3
-# import urllib.parse
-# import hashlib
+from .opds_internals import get_db_connection, get_dtiso, get_authors, get_genres_names
+from .opds_internals import get_seqs, sizeof_fmt, unurl
 from flask import current_app
-from .opds_internals import get_db_connection, get_dtiso, sizeof_fmt
-from .opds_internals import get_authors, get_genres_names, get_seqs
 
 
-def ret_hdr_genre():
+def ret_hdr_search():  # python does not have constants
     return {
         "feed": {
             "@xmlns": "http://www.w3.org/2005/Atom",
             "@xmlns:dc": "http://purl.org/dc/terms/",
             "@xmlns:os": "http://a9.com/-/spec/opensearch/1.1/",
             "@xmlns:opds": "http://opds-spec.org/2010/catalog",
-            "id": "tag:root:genre",
+            "id": "tag:root:authors",
             "updated": "0000-00-00_00:00",
-            "title": "Books by genres",
+            "title": "Books by authors",
             "icon": "/favicon.ico",
             "link": [
                 # {
@@ -35,6 +31,11 @@ def ret_hdr_genre():
                     "@href": current_app.config['APPLICATION_ROOT'] + "/opds/",
                     "@rel": "start",
                     "@type": "application/atom+xml;profile=opds-catalog"
+                },
+                {
+                    "@href": current_app.config['APPLICATION_ROOT'] + "/opds/",
+                    "@rel": "up",
+                    "@type": "application/atom+xml;profile=opds-catalog"
                 }
             ],
             "entry": []
@@ -42,28 +43,82 @@ def ret_hdr_genre():
     }
 
 
-def get_genres_list():
+def get_search_main(s_term):
     dtiso = get_dtiso()
-    ret = ret_hdr_genre()
-    ret["feed"]["updated"] = dtiso
+    approot = current_app.config['APPLICATION_ROOT']
+    if s_term is None:
+        ret = ret_hdr_search()
+        ret["feed"]["updated"] = dtiso
+        ret["feed"]["id"] = "tag:search::"
+    else:
+        s_raw = unurl(s_term)
+        ret = ret_hdr_search()
+        ret["feed"]["id"] = "tag:search::%s" % s_raw
+        ret["feed"]["updated"] = dtiso
+        ret["feed"]["link"].append(
+          {
+            "updated": dtiso,
+            "id": "tag:search:authors::",
+            "title": "Search in authors names",
+            "content": {
+              "@type": "text",
+              "#text": "Search in authors names"
+            },
+            "link": {
+              "@href": approot + "/opds/search-authors?searchTerm=%s" % s_term,
+              "@type": "application/atom+xml;profile=opds-catalog"
+            }
+          }
+        )
+        ret["feed"]["link"].append(
+          {
+            "updated": "2022-05-25T07:26:50+02:00",
+            "id": "tag:search:title",
+            "title": "Search in book titles",
+            "content": {
+              "@type": "text",
+              "#text": "Поиск книг по названию"
+            },
+            "link": {
+              "@href": "/opds/search-books?searchTerm=%s" % s_term,
+              "@type": "application/atom+xml;profile=opds-catalog"
+            }
+          }
+        )
+    print(ret)
+    return ret
 
-    REQ = 'SELECT id, description, `group` FROM genres ORDER BY `group`, description;'
+
+def get_search_authors(s_term):
+    dtiso = get_dtiso()
+    s_raw = unurl(s_term)
+    print(s_raw)
+    approot = current_app.config['APPLICATION_ROOT']
+    ret = ret_hdr_search()
+    ret["feed"]["updated"] = dtiso
+    REQ = '''
+    SELECT id, name
+    FROM authors
+    WHERE U_UPPER(name) LIKE "%%%s%%"
+    ORDER BY U_UPPER(name);
+    ''' % s_raw.replace('"', '\"')  # simple quote: ToDo - change to more sophistic
+    ret["feed"]["id"] = "tag:search::%s" % s_raw
     conn = get_db_connection()
     rows = conn.execute(REQ).fetchall()
     for row in rows:
-        genre = row["description"]
-        gen_id = row["id"]
+        auth_name = row["name"]
+        auth_id = row["id"]
         ret["feed"]["entry"].append(
             {
                 "updated": dtiso,
-                "id": "tag:genre:" + gen_id,
-                "title": genre,
+                "id": "tag:authors:" + auth_id,
+                "title": auth_name,
                 "content": {
                     "@type": "text",
-                    "#text": "Books in genre '" + genre + "'"
+                    "#text": "Books of author: " + auth_name
                 },
                 "link": {
-                    "@href": current_app.config['APPLICATION_ROOT'] + "/opds/genres/" + gen_id,
+                    "@href": approot + "/opds/author/" + auth_id,
                     "@type": "application/atom+xml;profile=opds-catalog"
                 }
             }
@@ -72,52 +127,15 @@ def get_genres_list():
     return ret
 
 
-def get_genre_books(gen_id, page=0):
+def get_search_books(s_term):
+    s_raw = unurl(s_term)
+    ret = ret_hdr_search()
     dtiso = get_dtiso()
-    ret = ret_hdr_genre()
-
-    REQ = 'SELECT id, description FROM genres WHERE id = "%s"' % gen_id
-    conn = get_db_connection()
-    rows = conn.execute(REQ).fetchall()
-    if len(rows) == 0:
-        return ""
-    genre = rows[0][1]
-
-    ret["feed"]["id"] = "tag:root:genre:" + gen_id
-    ret["feed"]["title"] = "Books in genre: " + genre + " by aplhabet"
+    approot = current_app.config['APPLICATION_ROOT']
+    ret = ret_hdr_search()
+    ret["feed"]["id"] = "tag:search:books::"
+    ret["feed"]["title"] = "Search books by: '" + s_raw + "'"
     ret["feed"]["updated"] = dtiso
-    if page == 0:
-        ret["feed"]["link"].append(
-            {
-                "@href": current_app.config['APPLICATION_ROOT'] + "/opds/genres/",
-                "@rel": "up",
-                "@type": "application/atom+xml;profile=opds-catalog"
-            }
-        )
-    else:
-        if page == 1:
-            ret["feed"]["link"].append(
-                {
-                    "@href": current_app.config['APPLICATION_ROOT'] + "/opds/genres/" + gen_id,
-                    "@rel": "prev",
-                    "@type": "application/atom+xml;profile=opds-catalog"
-                }
-            )
-        else:
-            ret["feed"]["link"].append(
-                {
-                    "@href": current_app.config['APPLICATION_ROOT'] + "/opds/genres/" + gen_id + "/" + str(page - 1),
-                    "@rel": "prev",
-                    "@type": "application/atom+xml;profile=opds-catalog"
-                }
-            )
-        ret["feed"]["link"].append(
-            {
-                "@href": current_app.config['APPLICATION_ROOT'] + "/opds/genres/" + gen_id,
-                "@rel": "up",
-                "@type": "application/atom+xml;profile=opds-catalog"
-            }
-        )
 
     REQ = """
     SELECT
@@ -135,29 +153,11 @@ def get_genre_books(gen_id, page=0):
     FROM books, books_descr
     WHERE
         books.book_id = books_descr.book_id
-        AND (genres = '%s'
-            OR genres LIKE '%s|%%'
-            OR genres LIKE '%%|%s'
-            OR genres LIKE '%%|%s|%%'
-        )
-        ORDER BY book_title
-        LIMIT "%s"
-        OFFSET "%s";
-    """ % (
-        gen_id, gen_id, gen_id, gen_id,
-        str(current_app.config['PAGE_SIZE']),
-        str(page * current_app.config['PAGE_SIZE'])
-    )
+        AND U_UPPER(book_title) LIKE "%%%s%%"
+        ORDER BY book_title;
+    """ % s_raw.replace('"', '\"')  # simple quote: ToDo - change to more sophistic
+    conn = get_db_connection()
     rows = conn.execute(REQ).fetchall()
-    rows_count = len(rows)
-    if rows_count >= current_app.config['PAGE_SIZE']:
-        ret["feed"]["link"].append(
-            {
-                "@href": current_app.config['APPLICATION_ROOT'] + "/opds/genres/" + gen_id + "/" + str(page + 1),
-                "@rel": "next",
-                "@type": "application/atom+xml;profile=opds-catalog"
-            }
-        )
     for row in rows:
         zipfile = row["zipfile"]
         filename = row["filename"]
@@ -176,7 +176,7 @@ def get_genre_books(gen_id, page=0):
         for k, v in authors_data.items():
             authors.append(
                 {
-                    "uri": current_app.config['APPLICATION_ROOT'] + "/opds/author/" + k,
+                    "uri": approot + "/opds/author/" + k,
                     "name": v
                 }
             )
@@ -185,7 +185,7 @@ def get_genre_books(gen_id, page=0):
         for k, v in seq_data.items():
             links.append(
                 {
-                    "@href": current_app.config['APPLICATION_ROOT'] + "/opds/sequencebooks/" + k,
+                    "@href": approot + "/opds/sequencebooks/" + k,
                     "@rel": "related",
                     "@title": "All books in sequence '" + v + "'",
                     "@type": "application/atom+xml"
@@ -194,7 +194,7 @@ def get_genre_books(gen_id, page=0):
 
         links.append(
             {
-                "@href": current_app.config['APPLICATION_ROOT'] + "/fb2/" + zipfile + "/" + filename,
+                "@href": approot + "/fb2/" + zipfile + "/" + filename,
                 "@rel": "http://opds-spec.org/acquisition/open-access",
                 "@title": "Download",
                 "@type": "application/fb2+zip"
@@ -202,7 +202,7 @@ def get_genre_books(gen_id, page=0):
         )
         links.append(
             {
-                "@href": current_app.config['APPLICATION_ROOT'] + "/read/" + zipfile + "/" + filename,
+                "@href": approot + "/read/" + zipfile + "/" + filename,
                 "@rel": "alternate",
                 "@title": "Read in browser",
                 "@type": "text/html"

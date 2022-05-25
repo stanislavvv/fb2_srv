@@ -30,11 +30,11 @@ def main_opds():
                     # "@rel": "search",
                     # "@type": "application/opensearchdescription+xml"
                 # },
-                # {
-                    # "@href": approot + "/opds/search?searchTerm={searchTerms}",
-                    # "@rel": "search",
-                    # "@type": "application/atom+xml"
-                # },
+                {
+                    "@href": approot + "/opds/search?searchTerm={searchTerms}",
+                    "@rel": "search",
+                    "@type": "application/atom+xml"
+                },
                 {
                     "@href": approot + "/opds/",
                     "@rel": "start",
@@ -113,11 +113,11 @@ def get_sequences(seq_root):
                     # "@rel": "search",
                     # "@type": "application/opensearchdescription+xml"
                 # },
-                # {
-                    # "@href": approot + "/opds/search?searchTerm={searchTerms}",
-                    # "@rel": "search",
-                    # "@type": "application/atom+xml"
-                # },
+                {
+                    "@href": approot + "/opds/search?searchTerm={searchTerms}",
+                    "@rel": "search",
+                    "@type": "application/atom+xml"
+                },
                 {
                     "@href": approot + "/opds/",
                     "@rel": "start",
@@ -243,11 +243,11 @@ def get_books_in_seq(seq_id):
                     # "@rel": "search",
                     # "@type": "application/opensearchdescription+xml"
                 # },
-                # {
-                    # "@href": approot + "/opds/search?searchTerm={searchTerms}",
-                    # "@rel": "search",
-                    # "@type": "application/atom+xml"
-                # },
+                {
+                    "@href": approot + "/opds/search?searchTerm={searchTerms}",
+                    "@rel": "search",
+                    "@type": "application/atom+xml"
+                },
                 {
                     "@href": approot + "/opds/",
                     "@rel": "start",
