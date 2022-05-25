@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from .opds_internals import get_db_connection, get_dtiso, get_authors, get_genres_names
-from .opds_internals import get_seqs, sizeof_fmt, unurl
+from .opds_internals import get_seqs, sizeof_fmt, unurl, url_str
 from flask import current_app
 
 
@@ -14,7 +14,7 @@ def ret_hdr_search():  # python does not have constants
             "@xmlns:opds": "http://opds-spec.org/2010/catalog",
             "id": "tag:root:authors",
             "updated": "0000-00-00_00:00",
-            "title": "Books by authors",
+            "title": "Books search",
             "icon": "/favicon.ico",
             "link": [
                 # {
@@ -55,7 +55,7 @@ def get_search_main(s_term):
         ret = ret_hdr_search()
         ret["feed"]["id"] = "tag:search::%s" % s_raw
         ret["feed"]["updated"] = dtiso
-        ret["feed"]["link"].append(
+        ret["feed"]["entry"].append(
           {
             "updated": dtiso,
             "id": "tag:search:authors::",
@@ -65,12 +65,12 @@ def get_search_main(s_term):
               "#text": "Search in authors names"
             },
             "link": {
-              "@href": approot + "/opds/search-authors?searchTerm=%s" % s_term,
+              "@href": approot + "/opds/search-authors?searchTerm=%s" % url_str(s_term),
               "@type": "application/atom+xml;profile=opds-catalog"
             }
           }
         )
-        ret["feed"]["link"].append(
+        ret["feed"]["entry"].append(
           {
             "updated": "2022-05-25T07:26:50+02:00",
             "id": "tag:search:title",
@@ -80,19 +80,17 @@ def get_search_main(s_term):
               "#text": "Поиск книг по названию"
             },
             "link": {
-              "@href": "/opds/search-books?searchTerm=%s" % s_term,
+              "@href": "/opds/search-books?searchTerm=%s" % url_str(s_term),
               "@type": "application/atom+xml;profile=opds-catalog"
             }
           }
         )
-    print(ret)
     return ret
 
 
 def get_search_authors(s_term):
     dtiso = get_dtiso()
     s_raw = unurl(s_term)
-    print(s_raw)
     approot = current_app.config['APPLICATION_ROOT']
     ret = ret_hdr_search()
     ret["feed"]["updated"] = dtiso
@@ -101,8 +99,9 @@ def get_search_authors(s_term):
     FROM authors
     WHERE U_UPPER(name) LIKE "%%%s%%"
     ORDER BY U_UPPER(name);
-    ''' % s_raw.replace('"', '\"')  # simple quote: ToDo - change to more sophistic
+    ''' % s_raw.replace('"', '\"').upper()  # simple quote: ToDo - change to more sophistic
     ret["feed"]["id"] = "tag:search::%s" % s_raw
+    ret["feed"]["title"] = "Search in authors names by '%s'" % s_raw
     conn = get_db_connection()
     rows = conn.execute(REQ).fetchall()
     for row in rows:
@@ -134,7 +133,7 @@ def get_search_books(s_term):
     approot = current_app.config['APPLICATION_ROOT']
     ret = ret_hdr_search()
     ret["feed"]["id"] = "tag:search:books::"
-    ret["feed"]["title"] = "Search books by: '" + s_raw + "'"
+    ret["feed"]["title"] = "Search in books titles by: '%s'" % s_raw
     ret["feed"]["updated"] = dtiso
 
     REQ = """
@@ -155,7 +154,7 @@ def get_search_books(s_term):
         books.book_id = books_descr.book_id
         AND U_UPPER(book_title) LIKE "%%%s%%"
         ORDER BY book_title;
-    """ % s_raw.replace('"', '\"')  # simple quote: ToDo - change to more sophistic
+    """ % s_raw.replace('"', '\"').upper()  # simple quote: ToDo - change to more sophistic
     conn = get_db_connection()
     rows = conn.execute(REQ).fetchall()
     for row in rows:
