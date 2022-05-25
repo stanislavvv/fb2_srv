@@ -7,7 +7,7 @@
 # ToDo:
 
   * add command for removal of authors/sequences without books. Call it `managedb.py` fsck. Use 'vacuum' as last SQL command.` -- in progress
-  * search must ignore case and similar letters
+  * search must ignore similar letters (like cyrillic 'е' and 'ё' or diacritic symbols)
   * add special cases for parsing wrong formatted sequence info from form: '<sequence number="« name=»Эссе"/>'
   * replace 'H' (latin) to 'Н' (cyrillic) in cyrillic seq/author names
   * input fields validation
