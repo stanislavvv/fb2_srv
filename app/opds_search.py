@@ -80,7 +80,7 @@ def get_search_main(s_term):
               "#text": "Поиск книг по названию"
             },
             "link": {
-              "@href": "/opds/search-books?searchTerm=%s" % url_str(s_term),
+              "@href": approot + "/opds/search-books?searchTerm=%s" % url_str(s_term),
               "@type": "application/atom+xml;profile=opds-catalog"
             }
           }
@@ -95,7 +95,7 @@ def get_search_main(s_term):
               "#text": "Поиск книг по аннотации"
             },
             "link": {
-              "@href": "/opds/search-annotations?searchTerm=%s" % url_str(s_term),
+              "@href": approot + "/opds/search-annotations?searchTerm=%s" % url_str(s_term),
               "@type": "application/atom+xml;profile=opds-catalog"
             }
           }
