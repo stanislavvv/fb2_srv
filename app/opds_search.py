@@ -85,21 +85,21 @@ def get_search_main(s_term):
             }
           }
         )
-        ret["feed"]["entry"].append(
-          {
-            "updated": "2022-05-25T07:26:50+02:00",
-            "id": "tag:search:title",
-            "title": "Search in books annotations",
-            "content": {
-              "@type": "text",
-              "#text": "Поиск книг по аннотации"
-            },
-            "link": {
-              "@href": approot + "/opds/search-annotations?searchTerm=%s" % url_str(s_term),
-              "@type": "application/atom+xml;profile=opds-catalog"
-            }
-          }
-        )
+        # ret["feed"]["entry"].append(
+          # {
+            # "updated": "2022-05-25T07:26:50+02:00",
+            # "id": "tag:search:title",
+            # "title": "Search in books annotations",
+            # "content": {
+              # "@type": "text",
+              # "#text": "Поиск книг по аннотации"
+            # },
+            # "link": {
+              # "@href": approot + "/opds/search-annotations?searchTerm=%s" % url_str(s_term),
+              # "@type": "application/atom+xml;profile=opds-catalog"
+            # }
+          # }
+        # )
     return ret
 
 
