@@ -51,9 +51,8 @@ def get_search_main(s_term):
         ret["feed"]["updated"] = dtiso
         ret["feed"]["id"] = "tag:search::"
     else:
-        s_raw = unurl(s_term)
         ret = ret_hdr_search()
-        ret["feed"]["id"] = "tag:search::%s" % s_raw
+        ret["feed"]["id"] = "tag:search::%s" % s_term
         ret["feed"]["updated"] = dtiso
         ret["feed"]["entry"].append(
           {
@@ -105,7 +104,6 @@ def get_search_main(s_term):
 
 def get_search_authors(s_term):
     dtiso = get_dtiso()
-    s_raw = unurl(s_term)
     approot = current_app.config['APPLICATION_ROOT']
     ret = ret_hdr_search()
     ret["feed"]["updated"] = dtiso
@@ -114,9 +112,9 @@ def get_search_authors(s_term):
     FROM authors
     WHERE U_UPPER(name) LIKE "%%%s%%"
     ORDER BY U_UPPER(name);
-    ''' % s_raw.replace('"', '\"').upper()  # simple quote: ToDo - change to more sophistic
-    ret["feed"]["id"] = "tag:search::%s" % s_raw
-    ret["feed"]["title"] = "Search in authors names by '%s'" % s_raw
+    ''' % s_term.replace('"', '\"').upper()  # simple quote: ToDo - change to more sophistic
+    ret["feed"]["id"] = "tag:search::%s" % s_term
+    ret["feed"]["title"] = "Search in authors names by '%s'" % s_term
     conn = get_db_connection()
     rows = conn.execute(REQ).fetchall()
     for row in rows:
@@ -142,13 +140,12 @@ def get_search_authors(s_term):
 
 
 def get_search_books(s_term):
-    s_raw = unurl(s_term)
     ret = ret_hdr_search()
     dtiso = get_dtiso()
     approot = current_app.config['APPLICATION_ROOT']
     ret = ret_hdr_search()
     ret["feed"]["id"] = "tag:search:books::"
-    ret["feed"]["title"] = "Search in books titles by: '%s'" % s_raw
+    ret["feed"]["title"] = "Search in books titles by: '%s'" % s_term
     ret["feed"]["updated"] = dtiso
 
     REQ = """
@@ -169,7 +166,7 @@ def get_search_books(s_term):
         books.book_id = books_descr.book_id
         AND U_UPPER(book_title) LIKE "%%%s%%"
         ORDER BY book_title;
-    """ % s_raw.replace('"', '\"').upper()  # simple quote: ToDo - change to more sophistic
+    """ % s_term.replace('"', '\"').upper()  # simple quote: ToDo - change to more sophistic
     conn = get_db_connection()
     rows = conn.execute(REQ).fetchall()
     for row in rows:
@@ -257,13 +254,12 @@ def get_search_books(s_term):
 
 
 def get_search_annotations(s_term):
-    s_raw = unurl(s_term)
     ret = ret_hdr_search()
     dtiso = get_dtiso()
     approot = current_app.config['APPLICATION_ROOT']
     ret = ret_hdr_search()
     ret["feed"]["id"] = "tag:search:books::"
-    ret["feed"]["title"] = "Search in books titles by: '%s'" % s_raw
+    ret["feed"]["title"] = "Search in books titles by: '%s'" % s_term
     ret["feed"]["updated"] = dtiso
 
     REQ = """
@@ -284,7 +280,7 @@ def get_search_annotations(s_term):
         books.book_id = books_descr.book_id
         AND U_UPPER(annotation) LIKE "%%%s%%"
         ORDER BY book_title;
-    """ % s_raw.replace('"', '\"').upper()  # simple quote: ToDo - change to more sophistic
+    """ % s_term.replace('"', '\"').upper()  # simple quote: ToDo - change to more sophistic
     conn = get_db_connection()
     rows = conn.execute(REQ).fetchall()
     for row in rows:
