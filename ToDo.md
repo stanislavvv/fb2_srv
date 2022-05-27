@@ -1,8 +1,6 @@
 # BUGS:
 
   * [minor] generate correct html description from existing data (close open tags and so on) -- need testing
-  * [normal] fb2parse() generate new authors from scratch (from name 'aaa & bbb' generate 'aaa' + 'bbb') -- need testing
-  * [high] search unavailable in `FLASK_ENV=prod`
 
 # ToDo:
 
@@ -10,8 +8,7 @@
   * search several words in any order
   * search must ignore similar letters (like cyrillic 'е' and 'ё' or diacritic symbols)
   * add special cases for parsing wrong formatted sequence info from form: '<sequence number="« name=»Эссе"/>'
-  * replace 'H' (latin) to 'Н' (cyrillic) in cyrillic seq/author names
-  * input fields validation
+  * replace 'H' (latin) to 'Н' (cyrillic) in cyrillic seq/author names before save it to database
   * check interface speed in case annotations was taken directly from zip/fb2
 
 # ToDo sometime:
