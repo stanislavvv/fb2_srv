@@ -14,13 +14,14 @@ from .data import get_sequence, get_sequence_names, get_sequence_ids, get_lang
 from .data import get_struct_by_key, make_id, get_replace_list, replace_book
 from .data import get_title
 from .db import author2db, genres2db, seq2db, unicode_nocase_collation, bookinfo2db
+from .inpx import get_inpx_meta
 import __main__
 
 READ_SIZE = 20480  # description in 20kb...
 
 
 # get filename in opened zip (assume filename format as fb2), return book struct
-def fb2parse(z, filename, replace_data):
+def fb2parse(z, filename, replace_data, inpx_data):
     file_info = z.getinfo(filename)
     fb2dt = datetime(*file_info.date_time)
     date_time = fb2dt.strftime("%F_%H:%M")
@@ -48,6 +49,8 @@ def fb2parse(z, filename, replace_data):
     info = get_struct_by_key('title-info', descr)  # descr['title-info']
     if replace_data is not None and filename in replace_data:
         info = replace_book(filename, info, replace_data)
+    if inpx_data is not None and filename in inpx_data:
+        info = replace_book(filename, info, inpx_data)
 
     if 'genre' in info and info['genre'] is not None:
         genre = get_genre(info['genre'])
@@ -99,17 +102,18 @@ def fb2parse(z, filename, replace_data):
 
 
 # iterate over files in zip, return array of book struct
-def ziplist(zip_file):
+def ziplist(inpx_data, zip_file):
     DEBUG = __main__.DEBUG
     print(zip_file)
     ret = []
     z = zipfile.ZipFile(zip_file)
     replace_data = get_replace_list(zip_file)
+    inpx_data = get_inpx_meta(inpx_data, zip_file)
     for filename in z.namelist():
         if not os.path.isdir(filename):
             if DEBUG:
                 print(zip_file + "/" + filename + "             ")
-            res = fb2parse(z, filename, replace_data)
+            res = fb2parse(z, filename, replace_data, inpx_data)
             if res is not None:
                 ret.append(res)
     return ret

@@ -299,8 +299,8 @@ def replace_book(filename, book, replace_data):
         replace = replace_data[filename]
         for k, v in replace.items():
             book[k] = v
-            print("replace:", k, v)  # debug
-        print("replace in:", filename)
+            # print("replace:", k, v)  # debug
+        # print("replace in:", filename)
     return book
 
 

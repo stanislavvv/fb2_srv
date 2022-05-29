@@ -13,6 +13,7 @@ from utils.db import unicode_nocase_collation, clean_authors
 
 DEBUG = True
 
+INPX = "flibusta_fb2_local.inpx"  # filename of metadata indexes zip
 
 CREATE_REQ = [
     """
@@ -114,15 +115,15 @@ def newdb():
     con.close()
 
 
-def create_booklist(zip_file):
+def create_booklist(inpx_data, zip_file):
     booklist = zip_file + ".list"
-    list = ziplist(zip_file)
+    list = ziplist(inpx_data, zip_file)
     bl = open(booklist, 'w')
     bl.write(json.dumps(list, ensure_ascii=False))
     bl.close()
 
 
-def update_booklist(zip_file):
+def update_booklist(inpx_data, zip_file):
     booklist = zip_file + ".list"
     replacelist = zip_file + ".replace"
     if os.path.exists(booklist):
@@ -133,18 +134,19 @@ def update_booklist(zip_file):
             replacetime = os.path.getmtime(replacelist)
         if ziptime < listtime and replacetime < listtime:
             return False
-    create_booklist(zip_file)
+    create_booklist(inpx_data, zip_file)
     return True
 
 
 def fillall():
     dbfile = app.config['DBSQLITE']
     zipdir = app.config['ZIPS']
+    inpx_data = zipdir + "/" + INPX
     i = 0
     for zip_file in glob.glob(zipdir + '/*.zip'):
         i += 1
         print("[" + str(i) + "] ", end='')
-        create_booklist(zip_file)
+        create_booklist(inpx_data, zip_file)
         booklist = zip_file + ".list"
         if os.path.exists(booklist):
             booklist2db(booklist, dbfile)
@@ -153,18 +155,20 @@ def fillall():
 def fillnew():
     zipdir = app.config['ZIPS']
     dbfile = app.config['DBSQLITE']
+    inpx_data = zipdir + "/" + INPX
     i = 0
     for zip_file in glob.glob(zipdir + '/*.zip'):
         i += 1
         print("[" + str(i) + "] ", end='')
         booklist = zip_file + ".list"
-        if update_booklist(zip_file):
+        if update_booklist(inpx_data, zip_file):
             booklist2db(booklist, dbfile)
 
 
 def fill_lists():
     dbfile = app.config['DBSQLITE']
     zipdir = app.config['ZIPS']
+    inpx_data = zipdir + "/" + INPX
     i = 0
     for booklist in glob.glob(zipdir + '/*.zip.list'):
         i += 1
@@ -174,20 +178,22 @@ def fill_lists():
 
 def renew_lists():
     zipdir = app.config['ZIPS']
+    inpx_data = zipdir + "/" + INPX
     i = 0
     for zip_file in glob.glob(zipdir + '/*.zip'):
         i += 1
         print("[" + str(i) + "] ", end='')
-        create_booklist(zip_file)
+        create_booklist(inpx_data, zip_file)
 
 
 def new_lists():
     zipdir = app.config['ZIPS']
+    inpx_data = zipdir + "/" + INPX
     i = 0
     for zip_file in glob.glob(zipdir + '/*.zip'):
         i += 1
         print("[" + str(i) + "] ", end='')
-        update_booklist(zip_file)
+        update_booklist(inpx_data, zip_file)
 
 
 def db_fsck():
