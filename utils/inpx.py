@@ -57,13 +57,16 @@ def get_line_fields(line):
     r = {}
     li = line.split("\004")
     if len(li) >= 11:
-        r["authors"] = authors2fields(
+        r["author"] = authors2fields(
             array_strip_empty(li[0].split(":"))
         )
-        r["genres"] = array_strip_empty(li[1].split(":"))
+        r["genre"] = array_strip_empty(li[1].split(":"))
         r["book-title"] = li[2]
-        r["sequences"] = li[3]
-        r["seq_num"] = li[4]
+        if len(li[3]) > 2:
+            if int(li[4]) >= 0:
+                r["sequence"] = { "@name": li[3], "@number": li[4] }
+            else:
+                r["sequence"] = { "@name": li[3] }
         r["lang"] = li[11]
         return li[5] + ".fb2", r
     else:

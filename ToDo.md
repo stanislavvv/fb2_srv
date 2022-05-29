@@ -4,7 +4,6 @@
 
 # ToDo:
 
-  * use `flibusta_fb2_local.inpx` for metadata
   * use field `date` from fb2 if exists
   * add command for removal of authors/sequences without books. Call it `managedb.py` fsck. Use 'vacuum' as last SQL command. -- in progress
   * search several words in any order
