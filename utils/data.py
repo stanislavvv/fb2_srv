@@ -3,7 +3,7 @@
 import hashlib
 import json
 import os
-import html
+# import html
 
 from .strings import strlist, strip_quotes
 

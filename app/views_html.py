@@ -12,6 +12,7 @@ html = Blueprint("html", __name__, template_folder='templates')
 
 redir_all = "html.html_root"
 
+
 @html.route("/", methods=['GET'])
 def hello_world():
     location = url_for(redir_all)

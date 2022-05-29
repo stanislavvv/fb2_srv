@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from .opds_internals import get_db_connection, get_dtiso, get_authors, get_genres_names
-from .opds_internals import get_seqs, sizeof_fmt, unurl, url_str
+from .opds_internals import get_seqs, sizeof_fmt, url_str
 from flask import current_app
 
 
@@ -85,19 +85,19 @@ def get_search_main(s_term):
           }
         )
         # ret["feed"]["entry"].append(
-          # {
-            # "updated": "2022-05-25T07:26:50+02:00",
-            # "id": "tag:search:title",
-            # "title": "Search in books annotations",
-            # "content": {
-              # "@type": "text",
-              # "#text": "Поиск книг по аннотации"
-            # },
-            # "link": {
-              # "@href": approot + "/opds/search-annotations?searchTerm=%s" % url_str(s_term),
-              # "@type": "application/atom+xml;profile=opds-catalog"
+            # {
+                # "updated": "2022-05-25T07:26:50+02:00",
+                # "id": "tag:search:title",
+                # "title": "Search in books annotations",
+                # "content": {
+                    # "@type": "text",
+                    # "#text": "Поиск книг по аннотации"
+                # },
+                # "link": {
+                    # "@href": approot + "/opds/search-annotations?searchTerm=%s" % url_str(s_term),
+                    # "@type": "application/atom+xml;profile=opds-catalog"
+                # }
             # }
-          # }
         # )
     return ret
 

@@ -168,7 +168,6 @@ def fillnew():
 def fill_lists():
     dbfile = app.config['DBSQLITE']
     zipdir = app.config['ZIPS']
-    inpx_data = zipdir + "/" + INPX
     i = 0
     for booklist in glob.glob(zipdir + '/*.zip.list'):
         i += 1

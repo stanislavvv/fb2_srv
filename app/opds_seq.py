@@ -1,10 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# import xmltodict
-# import datetime
-# import sqlite3
 import urllib.parse
-# import hashlib
 from flask import current_app
 
 from .opds_internals import get_db_connection, get_dtiso, any2alphabet, get_authors, get_genres_names, sizeof_fmt

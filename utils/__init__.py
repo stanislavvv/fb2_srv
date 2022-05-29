@@ -33,7 +33,7 @@ def fb2parse(z, filename, replace_data, inpx_data):
     bs_descr = bs.FictionBook.description
     tinfo = bs_descr.find("title-info")
     bs_anno = str(tinfo.annotation)
-    bs_anno = bs_anno.replace("<annotation>","").replace("</annotation>","")
+    bs_anno = bs_anno.replace("<annotation>", "").replace("</annotation>", "")
     doc = bs.prettify()
     data = xmltodict.parse(doc)
     if 'FictionBook' not in data:  # parse with namespace

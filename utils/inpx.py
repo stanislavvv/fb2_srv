@@ -2,7 +2,6 @@
 
 import zipfile
 import os
-#import codecs
 
 
 def array_strip_empty(arr):
@@ -21,7 +20,16 @@ def authors2fields(authors):
     ret = []
     for a in authors:
         au = a.split(',')
-        if len(au) >=3:
+        if len(au) >= 4:
+            ret.append(
+                {
+                    "last-name": au[0],
+                    "first-name": au[1],
+                    "middle-name": au[2],
+                    "nick-name": au[3]
+                }
+            )
+        elif len(au) == 3:
             ret.append(
                 {
                     "last-name": au[0],
@@ -67,22 +75,14 @@ def get_inpx_meta(inpx_data, zip_file):
     inp_file = os.path.basename(zip_file).replace(".zip", ".inp")
 
     z = zipfile.ZipFile(inpx_data)
-    f = z.open(inp_file, "r")
-    line = f.readline().decode('utf-8').strip("\r").strip("\n")
-    while len(line) > 10:
-        fb2, meta = get_line_fields(line)
-        ret.update({fb2: meta})
+    try:
+        f = z.open(inp_file, "r")
         line = f.readline().decode('utf-8').strip("\r").strip("\n")
-    f.close()
+        while len(line) > 10:
+            fb2, meta = get_line_fields(line)
+            ret.update({fb2: meta})
+            line = f.readline().decode('utf-8').strip("\r").strip("\n")
+        f.close()
+    except Exception as e:
+        print(e)
     return ret
-    # try:
-        # f = z.open(inp_file)
-        # line = f.readline().strip("\r").strip("\n")
-        # while line:
-            # fb2, meta = get_line_fields(line)
-            # ret.update({fb2: meta})
-            # line = f.readline().strip("\r").strip("\n")
-        # f.close()
-    # except Exception as e:
-        # print(e)
-    # return ret

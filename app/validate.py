@@ -38,7 +38,7 @@ def validate_genre(s: str):
 
 # simple prefix validation in .../sequenceindes and .../authorsindex
 def validate_prefix(s: str):
-    ret = s.replace('"','`').replace("'",'`')  # no "' quotes in database
+    ret = s.replace('"', '`').replace("'", '`')  # no "' quotes in database
     if len(ret) > 10:
         return None
     return ret
@@ -46,7 +46,7 @@ def validate_prefix(s: str):
 
 # search pattern some normalization
 def validate_search(s: str):
-    ret = unurl(s).replace('"','`').replace("'",'`').replace(';','')
+    ret = unurl(s).replace('"', '`').replace("'", '`').replace(';', '')
     if len(ret) > 128:
         ret = ret[:128]
     return ret
