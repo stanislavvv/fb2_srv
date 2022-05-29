@@ -63,7 +63,7 @@ def get_line_fields(line):
         r["genre"] = array_strip_empty(li[1].split(":"))
         r["book-title"] = li[2]
         if len(li[3]) > 2:
-            if int(li[4]) >= 0:
+            if li[4] is not None and li[4] != '' and int(li[4]) >= 0:
                 r["sequence"] = { "@name": li[3], "@number": li[4] }
             else:
                 r["sequence"] = { "@name": li[3] }
@@ -81,7 +81,7 @@ def get_inpx_meta(inpx_data, zip_file):
     try:
         f = z.open(inp_file, "r")
         line = f.readline().decode('utf-8').strip("\r").strip("\n")
-        while len(line) > 10:
+        while len(line) > 3:
             fb2, meta = get_line_fields(line)
             ret.update({fb2: meta})
             line = f.readline().decode('utf-8').strip("\r").strip("\n")
