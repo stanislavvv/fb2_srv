@@ -54,10 +54,11 @@ def rchop(s, suffix):
 def strip_quotes(s: str):
     if s is None:
         return None
-    tmp = s.replace('"', '"').strip('"')
-    if tmp.find('"') > 0:
-        tmp = s.replace('"', '"').replace('"', '`')
-    return tmp
+    s = s.replace('"', '`')
+    tmp = s.strip('`')
+    if tmp.find('`') == -1:  # not found
+        s = tmp
+    return s
 
 
 # init genres dict

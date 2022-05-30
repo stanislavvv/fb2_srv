@@ -4,11 +4,11 @@
 
 # ToDo:
 
-  * use field `date` from fb2 if exists
+  * add special cases for parsing wrong formatted sequence info from form: '<sequence number="« name=»Эссе"/>' (same bug in .inp)
+  * use field `date` from `.inp` if exists (fb2 date does not correspond with file date)
   * add command for removal of authors/sequences without books. Call it `managedb.py` fsck. Use 'vacuum' as last SQL command. -- in progress
   * search several words in any order
   * search must ignore similar letters (like cyrillic 'е' and 'ё' or diacritic symbols)
-  * add special cases for parsing wrong formatted sequence info from form: '<sequence number="« name=»Эссе"/>'
   * replace 'H' (latin) to 'Н' (cyrillic) in cyrillic seq/author names before save it to database
   * check interface speed in case annotations was taken directly from zip/fb2
 
