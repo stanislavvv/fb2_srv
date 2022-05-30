@@ -64,9 +64,9 @@ def get_line_fields(line):
         r["book-title"] = li[2]
         if len(li[3]) > 2:
             if li[4] is not None and li[4] != '' and int(li[4]) >= 0:
-                r["sequence"] = { "@name": li[3], "@number": li[4] }
+                r["sequence"] = {"@name": li[3], "@number": li[4]}
             else:
-                r["sequence"] = { "@name": li[3] }
+                r["sequence"] = {"@name": li[3]}
         r["lang"] = li[11]
         return li[5] + ".fb2", r
     else:

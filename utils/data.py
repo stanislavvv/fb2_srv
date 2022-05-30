@@ -3,7 +3,6 @@
 import hashlib
 import json
 import os
-import sys
 # import html
 
 from .strings import strlist, strip_quotes
@@ -178,7 +177,12 @@ def get_sequence(seq):
         elif name is not None:
             ret.append({"name": name, "id": id})
         elif num is not None:
-            ret.append({"num": num2int(num)})
+            if num.find('« name=»') != -1:
+                name = num.replace('« name=»', '')
+                id = make_id(name)
+                ret.append({"name": name, "id": id})
+            else:
+                ret.append({"num": num2int(num)})
     elif isinstance(seq, list):
         for s in seq:
             name = None
@@ -194,7 +198,12 @@ def get_sequence(seq):
             elif name is not None:
                 ret.append({"name": name, "id": id})
             elif num is not None:
-                ret.append({"num": num2int(num)})
+                if num.find('« name=»') != -1:
+                    name = num.replace('« name=»', '')
+                    id = make_id(name)
+                    ret.append({"name": name, "id": id})
+                else:
+                    ret.append({"num": num2int(num)})
     else:
         ret.append(str(seq))
     return ret
