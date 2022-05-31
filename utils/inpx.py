@@ -2,6 +2,7 @@
 
 import zipfile
 import os
+from .strings import strip_quotes
 
 
 def array_strip_empty(arr):
