@@ -54,7 +54,7 @@ def rchop(s, suffix):
 def strip_quotes(s: str):
     if s is None:
         return None
-    s = s.replace('"', '`')
+    s = s.replace('"', '`'),replace('«', '`'),replace('»', '`')
     tmp = s.strip('`')
     if tmp.find('`') == -1:  # not found
         s = tmp
