@@ -72,8 +72,8 @@ def get_authors(author):
                     else:
                         a_tmp.append(strlist(i['nickname']))
                 a_tmp2 = " ".join(a_tmp)
-                a_tmp2 = a_tmp2.strip('|').strip("'").strip('"')
-                a_tmp2 = a_tmp2.strip("«").strip("»").strip()
+                a_tmp2 = strip_quotes(a_tmp2).strip('|')
+                a_tmp2 = a_tmp2.strip()
                 if len(a_tmp2) > 0:
                     g.append(a_tmp2.ljust(4))
         if len(g) > 0:
@@ -93,8 +93,8 @@ def get_authors(author):
                 else:
                     a_tmp.append(strlist(author['nickname']))
         r = " ".join(a_tmp)
-        r = r.strip('|').strip("'").strip('"')
-        r = r.strip("«").strip("»").strip()
+        r = strip_quotes(r).strip('|')
+        r = r.strip()
         if len(r) > 0:
             ret = r.ljust(4)
     return ret
@@ -120,8 +120,8 @@ def get_author_ids(author):
                     else:
                         a_tmp.append(strlist(i['nickname']))
                 a_tmp2 = " ".join(a_tmp)
-                a_tmp2 = a_tmp2.strip('|').strip("'").strip('"')
-                a_tmp2 = a_tmp2.strip("«").strip("»").strip()
+                a_tmp2 = strip_quotes(a_tmp2).strip('|')
+                a_tmp2 = a_tmp2.strip()
                 if len(a_tmp2) > 0:
                     g.append(make_id(a_tmp2.ljust(4)))
         if len(g) > 0:
@@ -141,8 +141,8 @@ def get_author_ids(author):
                 else:
                     a_tmp.append(strlist(author['nickname']))
         r = " ".join(a_tmp)
-        r = r.strip('|').strip("'").strip('"')
-        r = r.strip("«").strip("»").strip()
+        r = strip_quotes(r).strip('|')
+        r = r.strip()
         if len(r) > 0:
             ret = make_id(r.ljust(4))
     return ret

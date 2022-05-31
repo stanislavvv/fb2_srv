@@ -19,7 +19,7 @@ def array_strip_empty(arr):
 def authors2fields(authors):
     ret = []
     for a in authors:
-        au = a.split(',')
+        au = strip_quotes(a).split(',')
         if len(au) >= 4:
             ret.append(
                 {
