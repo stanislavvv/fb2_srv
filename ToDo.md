@@ -1,7 +1,7 @@
 # BUGS:
 
   * [minor] generate correct html description from existing data (close open tags and so on) -- need testing
-  * [normal] does not read entire `.inp` from `.inpx` archive
+  * [normal] does not read entire `.inp` from `.inpx` archive -- in testing
 
 # ToDo:
 

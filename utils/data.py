@@ -154,7 +154,7 @@ def num2int(num: str):
         return ret
     except Exception as e:
         print(e)
-        return 0
+        return -1
 
 
 # return struct: [{"name": "SomeName", "id": "id...", num: 3}, ...]

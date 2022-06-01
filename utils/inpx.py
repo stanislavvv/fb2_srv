@@ -3,6 +3,9 @@
 import zipfile
 import os
 from .strings import strip_quotes
+from .data import num2int
+
+import json
 
 
 def array_strip_empty(arr):
@@ -64,7 +67,7 @@ def get_line_fields(line):
         r["genre"] = array_strip_empty(li[1].split(":"))
         r["book-title"] = li[2]
         if len(li[3]) > 2:
-            if li[4] is not None and li[4] != '' and int(li[4]) >= 0:
+            if li[4] is not None and li[4] != '' and num2int(li[4]) >= 0:
                 r["sequence"] = {"@name": li[3], "@number": li[4]}
             else:
                 r["sequence"] = {"@name": li[3]}
@@ -81,8 +84,9 @@ def get_inpx_meta(inpx_data, zip_file):
     z = zipfile.ZipFile(inpx_data)
     try:
         f = z.open(inp_file, "r")
-        line = f.readline().decode('utf-8').strip("\r").strip("\n")
-        while len(line) > 3:
+        data = f.read().decode('utf-8')
+        lines = data.split("\n")
+        for line in lines:
             fb2, meta = get_line_fields(line)
             ret.update({fb2: meta})
             line = f.readline().decode('utf-8').strip("\r").strip("\n")
