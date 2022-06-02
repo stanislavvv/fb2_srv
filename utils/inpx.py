@@ -81,8 +81,8 @@ def get_inpx_meta(inpx_data, zip_file):
     ret = {}
     inp_file = os.path.basename(zip_file).replace(".zip", ".inp")
 
-    z = zipfile.ZipFile(inpx_data)
     try:
+        z = zipfile.ZipFile(inpx_data)
         f = z.open(inp_file, "r")
         data = f.read().decode('utf-8')
         lines = data.split("\n")
