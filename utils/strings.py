@@ -3,6 +3,9 @@
 import codecs
 
 
+# genres meta
+genres_meta = {}
+
 # genres (see get_genres())
 genres = {}
 
@@ -61,6 +64,20 @@ def strip_quotes(s: str):
     return s
 
 
+# init genres meta dict
+def get_genres_meta():
+    global genres_meta
+    data = open('genres_meta.list', 'r')
+    while True:
+        line = data.readline()
+        if not line:
+            break
+        f = line.strip('\n').split('|')
+        if len(f) > 1:
+            genres_meta[f[0]] = f[1]
+    data.close()
+
+
 # init genres dict
 def get_genres():
     global genres
@@ -71,7 +88,7 @@ def get_genres():
             break
         f = line.strip('\n').split('|')
         if len(f) > 1:
-            genres[f[0]] = f[1]
+            genres[f[1]] = {"descr": f[2], "meta_id": f[0]}
     data.close()
 
 
@@ -117,6 +134,20 @@ def genres_replace(genrs):
 
 def get_genre_name(gen_id):
     if gen_id in genres and genres[gen_id] is not None:
-        return genres[gen_id]
+        return genres[gen_id]["descr"]
     else:
         return gen_id
+
+
+def get_genre_meta(gen_id):
+    if gen_id in genres and genres[gen_id] is not None:
+        return genres[gen_id]["meta_id"]
+    else:
+        return 0
+
+
+def get_meta_name(meta_id):
+    if meta_id in genres_meta and genres_meta[meta_id] is not None:
+        return genres_meta[meta_id]
+    else:
+        return "--"

@@ -63,9 +63,16 @@ CREATE_REQ = [
     """
     CREATE TABLE 'genres' (
         'id'	TEXT UNIQUE,
+        'meta_id'    INTEGER,
         'description'	TEXT,
-        'group'	TEXT,
         PRIMARY KEY('id')
+    );
+    """,
+    """
+    CREATE TABLE 'genres_meta' (
+        'meta_id'    INTEGER,
+        'description'	TEXT,
+        PRIMARY KEY('meta_id')
     );
     """,
     """

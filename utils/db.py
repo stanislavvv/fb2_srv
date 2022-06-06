@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # import sqlite3
-from .strings import get_genre_name
+from .strings import get_genre_name, get_genre_meta, get_meta_name
 from .data import make_id
 
 
@@ -67,13 +67,22 @@ def genres2db(cur, genrs):
     for genre_id in genrs.split("|"):
         if genre_id is not None and genre_id != "":
             genre = get_genre_name(genre_id)
+            genre_meta = get_genre_meta(genre_id)
             REQ = 'SELECT count(*) FROM genres WHERE id = "%s"' % genre_id
             cur.execute(REQ)
             rows = cur.fetchall()
             cnt = rows[0][0]
             if cnt == 0:
-                genre_data = [genre_id, genre, ""]
+                genre_data = [genre_id, genre_meta, genre]
                 cur.execute("INSERT INTO genres VALUES (?, ?, ?)", (genre_data))
+                REQ = 'SELECT count(*) from genres_meta WHERE meta_id = "%s"' % genre_meta
+                cur.execute(REQ)
+                rows = cur.fetchall()
+                cnt = rows[0][0]
+                if cnt == 0:
+                    meta_name = get_meta_name(genre_meta)
+                    meta_data = [genre_meta, meta_name]
+                    cur.execute("INSERT INTO genres_meta VALUES (?, ?)", (meta_data))
 
 
 def bookinfo2db(cur, book_id, book_title, annotation):

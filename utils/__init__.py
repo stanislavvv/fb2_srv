@@ -8,7 +8,7 @@ import json
 
 from bs4 import BeautifulSoup
 from datetime import datetime
-from .strings import get_genres, get_genres_replace, genres_replace, check_genres, rchop
+from .strings import get_genres, get_genres_meta, get_genres_replace, genres_replace, check_genres, rchop
 from .data import get_genre, get_authors, get_author_ids
 from .data import get_sequence, get_sequence_names, get_sequence_ids, get_lang
 from .data import get_struct_by_key, make_id, get_replace_list, replace_book
@@ -172,6 +172,7 @@ def iterate_list(blist, dbfile):
 # wrapper over iterate_list, get .list, fill some auxiliary structs, pass .list next to iterate_list
 def booklist2db(booklist, dbfile):
     print(booklist)
+    get_genres_meta()
     get_genres()  # official genres from genres.list
     get_genres_replace()  # replacement for unofficial genres from genres_replace.list
     iterate_list(booklist, dbfile)
