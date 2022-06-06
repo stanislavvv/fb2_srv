@@ -5,7 +5,6 @@
 # ToDo:
 
   * search must ignore similar letters (like cyrillic 'е' and 'ё' or diacritic symbols) -- testing
-  * sort orders in authors/sequences initial pages (letters russian, letters latinic, all ignore diacritic, another symbols at the end)
   * genres from MyHomeLib and hierarchical sort with subheaders
   * check interface speed in case annotations was taken directly from zip/fb2
   * add command for removal of authors/sequences without books. Call it `managedb.py` fsck. Use 'vacuum' as last SQL command. -- stalled

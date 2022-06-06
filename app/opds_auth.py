@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from .opds_internals import get_db_connection, get_dtiso, get_authors, get_genres_names
-from .opds_internals import get_auth_seqs, get_seqs, sizeof_fmt, url_str, unurl
+from .opds_internals import get_auth_seqs, get_seqs, sizeof_fmt, url_str, unurl, any2alphabet
 from flask import current_app
 
 
@@ -58,9 +58,8 @@ def get_authors_list(auth_root):
         GROUP BY nm
         ORDER BY nm;'''
         conn = get_db_connection()
-        rows = conn.execute(ALL_AUTHORS).fetchall()
-        for row in rows:
-            ch = row["nm"]
+        rows = any2alphabet("nm", conn.execute(ALL_AUTHORS).fetchall(), 1)
+        for ch in rows:
             ret["feed"]["entry"].append(
                 {
                     "updated": dtiso,

@@ -7,6 +7,18 @@ import unicodedata as ud
 
 from flask import current_app
 
+alphabet_1 = [  # first letters in main authors/sequences page
+    'А', 'Б', 'В', 'Г', 'Д', 'Е', 'Ё', 'Ж', 'З', 'И', 'Й',
+    'К', 'Л', 'М', 'Н', 'О', 'П', 'Р', 'С', 'Т', 'У', 'Ф',
+    'Х', 'Ц', 'Ч', 'Ш', 'Щ', 'Ъ', 'Ы', 'Ь', 'Э', 'Ю', 'Я'
+]
+
+alphabet_2 = [  # second letters in main authors/sequences page
+    'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J',
+    'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T',
+    'U', 'V', 'W', 'X', 'Y', 'Z'
+]
+
 
 # Custom collation, maybe it is more efficient
 # to store strings
@@ -87,12 +99,26 @@ def get_auth_seqs(auth_id):
     return ret
 
 
+def custom_alphabet_sort(slist):
+    ret = []
+    for s in sorted(slist):
+        if len(s) > 0 and s[0] in alphabet_1:
+            ret.append(s)
+    for s in sorted(slist):
+        if len(s) > 0 and s[0] in alphabet_2:
+            ret.append(s)
+    for s in sorted(slist):
+        if len(s) > 0 and s[0] not in alphabet_1 and s[0] not in alphabet_2:
+            ret.append(s)
+    return ret
+
+
 def any2alphabet(field, sq3_rows, num):
     alphabet = {}
     for i in sq3_rows:
         s = i[field]
         alphabet[s[:num]] = 1
-    return sorted(list(alphabet))
+    return custom_alphabet_sort(list(alphabet))
 
 
 def get_authors(ids):
@@ -180,7 +206,7 @@ def unurl(s):
     return ret
 
 
-def param_to_search(field:str, s:str):
+def param_to_search(field: str, s: str):
     ret = []
     words = s.split(' ')
     for w in words:

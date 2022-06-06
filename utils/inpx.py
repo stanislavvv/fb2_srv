@@ -5,7 +5,7 @@ import os
 from .strings import strip_quotes
 from .data import num2int
 
-import json
+# import json
 
 
 def array_strip_empty(arr):
