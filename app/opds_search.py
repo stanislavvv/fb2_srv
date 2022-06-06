@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from .opds_internals import get_db_connection, get_dtiso, get_authors, get_genres_names
-from .opds_internals import get_seqs, sizeof_fmt, url_str, param_to_search
+from .opds_internals import get_seqs, sizeof_fmt, url_str, param_to_search, unicode_upper
 from flask import current_app
 
 
@@ -92,6 +92,8 @@ def get_search_authors(s_term):
     approot = current_app.config['APPLICATION_ROOT']
     ret = ret_hdr_search()
     ret["feed"]["updated"] = dtiso
+    ret["feed"]["id"] = "tag:search::%s" % s_term
+    ret["feed"]["title"] = "Search in authors names by '%s'" % s_term
     s_term = param_to_search("U_UPPER(name)", s_term)
 
     REQ = '''
@@ -99,9 +101,7 @@ def get_search_authors(s_term):
     FROM authors
     WHERE U_UPPER(name) LIKE %s
     ORDER BY U_UPPER(name);
-    ''' % s_term.replace('"', '\"').upper()  # simple quote: ToDo - change to more sophistic
-    ret["feed"]["id"] = "tag:search::%s" % s_term
-    ret["feed"]["title"] = "Search in authors names by '%s'" % s_term
+    ''' % unicode_upper(s_term.replace('"', '\"'))  # simple quote: ToDo - change to more sophistic
     conn = get_db_connection()
     rows = conn.execute(REQ).fetchall()
     for row in rows:
@@ -154,7 +154,7 @@ def get_search_books(s_term):
         books.book_id = books_descr.book_id
         AND U_UPPER(book_title) LIKE %s
         ORDER BY book_title;
-    """ % s_term.replace('"', '\"').upper()  # simple quote: ToDo - change to more sophistic
+    """ % unicode_upper(s_term.replace('"', '\"'))  # simple quote: ToDo - change to more sophistic
     conn = get_db_connection()
     rows = conn.execute(REQ).fetchall()
     for row in rows:

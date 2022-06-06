@@ -3,6 +3,7 @@
 import datetime
 import sqlite3
 import urllib.parse
+import unicodedata as ud
 
 from flask import current_app
 
@@ -10,16 +11,21 @@ from flask import current_app
 # Custom collation, maybe it is more efficient
 # to store strings
 def unicode_nocase_collation(a: str, b: str):
-    if a.casefold() == b.casefold():
+    if ud.normalize('NFKD', a).casefold() == ud.normalize('NFKD', b).casefold():
         return 0
-    if a.casefold() < b.casefold():
+    if ud.normalize('NFKD', a).casefold() < ud.normalize('NFKD', b).casefold():
         return -1
     return 1
 
 
-# custom UPPER for sqlite
+# custom UPPER + normalize for sqlite
 def unicode_upper(s: str):
-    return s.upper()
+    ret = ud.normalize('NFKD', s)
+    ret = ret.upper()
+    ret = ret.replace('Ё', 'Е')
+    ret = ret.replace('Й', 'И')
+    ret = ret.replace('Ъ', 'Ь')
+    return ret
 
 
 def get_db_connection():
