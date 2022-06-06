@@ -71,6 +71,7 @@ def get_line_fields(line):
                 r["sequence"] = {"@name": li[3], "@number": li[4]}
             else:
                 r["sequence"] = {"@name": li[3]}
+        r["date_time"] = li[10] + "_00:00"
         r["lang"] = li[11]
         return li[5] + ".fb2", r
     else:

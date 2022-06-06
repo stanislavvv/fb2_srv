@@ -4,14 +4,13 @@
 
 # ToDo:
 
-  * use field `date` from `.inp` if exists (fb2 date does not correspond with file date)
-  * add command for removal of authors/sequences without books. Call it `managedb.py` fsck. Use 'vacuum' as last SQL command. -- stalled
   * search several words in any order
   * search must ignore similar letters (like cyrillic 'е' and 'ё' or diacritic symbols)
   * sort orders in authors/sequences initial pages (letters russian, letters latinic, all ignore diacritic, another symbols at the end)
   * genres from MyHomeLib and hierarchical sort with subheaders
   * replace 'H' (latin) to 'Н' (cyrillic) in cyrillic seq/author names before save it to database (may be not actual) -- need testing
   * check interface speed in case annotations was taken directly from zip/fb2
+  * add command for removal of authors/sequences without books. Call it `managedb.py` fsck. Use 'vacuum' as last SQL command. -- stalled
 
 # ToDo sometime:
 

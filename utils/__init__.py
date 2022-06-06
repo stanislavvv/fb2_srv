@@ -55,6 +55,8 @@ def fb2parse(z, filename, replace_data, inpx_data):
     if inpx_data is not None and filename in inpx_data:
         info = replace_book(filename, info, inpx_data)
 
+    if "date_time" in info and info["date_time"] is not None:
+        date_time = str(info["date_time"])
     if 'genre' in info and info['genre'] is not None:
         genre = get_genre(info['genre'])
     else:
