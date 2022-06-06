@@ -172,3 +172,13 @@ def unurl(s):
         for r, v in tr.items():
             ret = ret.replace(r, v)
     return ret
+
+
+def param_to_search(field:str, s:str):
+    ret = []
+    words = s.split(' ')
+    for w in words:
+        if w is not None and w != "":
+            ret.append('"%%%s%%"' % w)
+    f = " AND %s LIKE " % field
+    return f.join(ret)

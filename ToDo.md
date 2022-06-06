@@ -4,7 +4,6 @@
 
 # ToDo:
 
-  * search several words in any order
   * search must ignore similar letters (like cyrillic 'е' and 'ё' or diacritic symbols)
   * sort orders in authors/sequences initial pages (letters russian, letters latinic, all ignore diacritic, another symbols at the end)
   * genres from MyHomeLib and hierarchical sort with subheaders

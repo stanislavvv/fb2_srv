@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from .opds_internals import get_db_connection, get_dtiso, get_authors, get_genres_names
-from .opds_internals import get_seqs, sizeof_fmt, url_str
+from .opds_internals import get_seqs, sizeof_fmt, url_str, param_to_search
 from flask import current_app
 
 
@@ -92,10 +92,12 @@ def get_search_authors(s_term):
     approot = current_app.config['APPLICATION_ROOT']
     ret = ret_hdr_search()
     ret["feed"]["updated"] = dtiso
+    s_term = param_to_search("U_UPPER(name)", s_term)
+
     REQ = '''
     SELECT id, name
     FROM authors
-    WHERE U_UPPER(name) LIKE "%%%s%%"
+    WHERE U_UPPER(name) LIKE %s
     ORDER BY U_UPPER(name);
     ''' % s_term.replace('"', '\"').upper()  # simple quote: ToDo - change to more sophistic
     ret["feed"]["id"] = "tag:search::%s" % s_term
@@ -132,6 +134,7 @@ def get_search_books(s_term):
     ret["feed"]["id"] = "tag:search:books::"
     ret["feed"]["title"] = "Search in books titles by: '%s'" % s_term
     ret["feed"]["updated"] = dtiso
+    s_term = param_to_search("U_UPPER(book_title)", s_term)
 
     REQ = """
     SELECT
@@ -149,121 +152,7 @@ def get_search_books(s_term):
     FROM books, books_descr
     WHERE
         books.book_id = books_descr.book_id
-        AND U_UPPER(book_title) LIKE "%%%s%%"
-        ORDER BY book_title;
-    """ % s_term.replace('"', '\"').upper()  # simple quote: ToDo - change to more sophistic
-    conn = get_db_connection()
-    rows = conn.execute(REQ).fetchall()
-    for row in rows:
-        zipfile = row["zipfile"]
-        filename = row["filename"]
-        genres = row["genres"]
-        author_ids = row["author_ids"]
-        book_title = row["book_title"]
-        book_id = row["book_id"]
-        lang = row["lang"]
-        size = row["size"]
-        date_time = row["date_time"]
-        seq_ids = row["sequence_ids"]
-        annotation = row["annotation"]
-
-        authors = []
-        authors_data = get_authors(author_ids)
-        for k, v in authors_data.items():
-            authors.append(
-                {
-                    "uri": approot + "/opds/author/" + k,
-                    "name": v
-                }
-            )
-        seq_data = get_seqs(seq_ids)
-        links = []
-        for k, v in seq_data.items():
-            links.append(
-                {
-                    "@href": approot + "/opds/sequencebooks/" + k,
-                    "@rel": "related",
-                    "@title": "All books in sequence '" + v + "'",
-                    "@type": "application/atom+xml"
-                }
-            )
-
-        links.append(
-            {
-                "@href": approot + "/fb2/" + zipfile + "/" + filename,
-                "@rel": "http://opds-spec.org/acquisition/open-access",
-                "@title": "Download",
-                "@type": "application/fb2+zip"
-            }
-        )
-        links.append(
-            {
-                "@href": approot + "/read/" + zipfile + "/" + filename,
-                "@rel": "alternate",
-                "@title": "Read in browser",
-                "@type": "text/html"
-            }
-        )
-
-        category = []
-        category_data = get_genres_names(genres)
-        for k, v in category_data.items():
-            category.append(
-                {
-                    "@label": v,
-                    "@term": k
-                }
-            )
-        annotext = """
-        <p class=\"book\"> %s </p>\n<br/>Format: fb2<br/>
-        Size: %s<br/>
-        """ % (annotation, sizeof_fmt(size))
-        ret["feed"]["entry"].append(
-            {
-                "updated": date_time,
-                "id": "tag:book:" + book_id,
-                "title": book_title,
-                "author": authors,
-                "link": links,
-                "category": category,
-                "dc:language": lang,
-                "dc:format": "fb2",
-                "content": {
-                    "@type": "text/html",
-                    "#text": annotext
-                },
-            }
-        )
-    conn.close()
-    return ret
-
-
-def get_search_annotations(s_term):
-    ret = ret_hdr_search()
-    dtiso = get_dtiso()
-    approot = current_app.config['APPLICATION_ROOT']
-    ret = ret_hdr_search()
-    ret["feed"]["id"] = "tag:search:books::"
-    ret["feed"]["title"] = "Search in books titles by: '%s'" % s_term
-    ret["feed"]["updated"] = dtiso
-
-    REQ = """
-    SELECT
-        zipfile,
-        filename,
-        genres,
-        author_ids,
-        seq_ids as sequence_ids,
-        books.book_id as book_id,
-        book_title,
-        lang,
-        size,
-        date_time,
-        annotation
-    FROM books, books_descr
-    WHERE
-        books.book_id = books_descr.book_id
-        AND U_UPPER(annotation) LIKE "%%%s%%"
+        AND U_UPPER(book_title) LIKE %s
         ORDER BY book_title;
     """ % s_term.replace('"', '\"').upper()  # simple quote: ToDo - change to more sophistic
     conn = get_db_connection()
