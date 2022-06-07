@@ -6,7 +6,7 @@ from .opds_auth import get_authors_list, get_author_list, get_author_sequences, 
 from .opds_auth import get_author_sequenceless, get_author_by_alphabet, get_author_by_time
 from .opds_genres import get_genres_list, get_genre_books
 from .opds_search import get_search_main, get_search_authors, get_search_books
-from .validate import redir_invalid, validate_id, validate_genre, validate_prefix, validate_search
+from .validate import redir_invalid, validate_id, validate_genre, validate_prefix, validate_search, validate_genre_meta
 import xmltodict
 
 opds = Blueprint("opds", __name__)
@@ -125,11 +125,18 @@ def opds_author_time(auth=None):
 @opds.route("/opds/genres/")
 @opds.route("/opds/genres")
 def opds_genres_root():
-    xml = xmltodict.unparse(get_genres_list(), pretty=True)
+    xml = xmltodict.unparse(get_genres_list(None), pretty=True)
     return Response(xml, mimetype='text/xml')
 
 
-@opds.route("/opds/genres/<gen_id>")
+@opds.route("/opds/genres/<meta_id>")
+def opds_genres_meta(meta_id=None):
+    meta_id = validate_genre_meta(meta_id)
+    xml = xmltodict.unparse(get_genres_list(meta_id), pretty=True)
+    return Response(xml, mimetype='text/xml')
+
+
+@opds.route("/opds/genre/<gen_id>")
 def opds_genres_book(gen_id=None):
     gen_id = validate_genre(gen_id)
     if gen_id is None:

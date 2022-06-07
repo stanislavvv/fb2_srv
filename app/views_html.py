@@ -6,7 +6,7 @@ from .opds_auth import get_authors_list, get_author_list, get_author_sequences, 
 from .opds_auth import get_author_sequenceless, get_author_by_alphabet, get_author_by_time
 from .opds_genres import get_genres_list, get_genre_books
 from .opds_search import get_search_main, get_search_authors, get_search_books
-from .validate import redir_invalid, validate_id, validate_genre, validate_prefix, validate_search
+from .validate import redir_invalid, validate_id, validate_genre, validate_prefix, validate_search, validate_genre_meta
 
 html = Blueprint("html", __name__, template_folder='templates')
 
@@ -207,7 +207,19 @@ def html_genres_root():
     return Response(page, mimetype='text/html')
 
 
-@html.route("/html/genres/<gen_id>")
+@html.route("/html/genres/<meta_id>")
+def html_genres_meta(meta_id=None):
+    meta_id = validate_genre_meta(meta_id)
+    data = get_genres_list(meta_id)
+    title = data['feed']['title']
+    updated = data['feed']['updated']
+    entry = data['feed']['entry']
+    link = data['feed']['link']
+    page = render_template('opds_root.html', title=title, updated=updated, link=link, entry=entry)
+    return Response(page, mimetype='text/html')
+
+
+@html.route("/html/genre/<gen_id>")
 def html_genres_book(gen_id=None):
     gen_id = validate_genre(gen_id)
     if gen_id is None:

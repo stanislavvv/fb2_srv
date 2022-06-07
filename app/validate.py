@@ -36,6 +36,19 @@ def validate_genre(s: str):
     return None
 
 
+def validate_genre_meta(s: str):
+    ret = s
+    if genre_check.match(s):
+        REQ = "SELECT count(meta_id) FROM genres_meta WHERE meta_id = '" + s + "';"
+        conn = get_db_connection()
+        rows = conn.execute(REQ).fetchall()
+        count = rows[0][0]
+        if count == 0:
+            return None
+        return ret
+    return None
+
+
 # simple prefix validation in .../sequenceindes and .../authorsindex
 def validate_prefix(s: str):
     ret = s.replace('"', '`').replace("'", '`')  # no "' quotes in database

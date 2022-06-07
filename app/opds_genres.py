@@ -42,33 +42,66 @@ def ret_hdr_genre():
     }
 
 
-def get_genres_list():
+def get_genres_list(meta_id=None):
     dtiso = get_dtiso()
     ret = ret_hdr_genre()
     ret["feed"]["updated"] = dtiso
 
-    REQ = 'SELECT id, description, `group` FROM genres ORDER BY `group`, description;'
-    conn = get_db_connection()
-    rows = conn.execute(REQ).fetchall()
-    for row in rows:
-        genre = row["description"]
-        gen_id = row["id"]
-        ret["feed"]["entry"].append(
-            {
-                "updated": dtiso,
-                "id": "tag:genre:" + gen_id,
-                "title": genre,
-                "content": {
-                    "@type": "text",
-                    "#text": "Books in genre '" + genre + "'"
-                },
-                "link": {
-                    "@href": current_app.config['APPLICATION_ROOT'] + "/opds/genres/" + gen_id,
-                    "@type": "application/atom+xml;profile=opds-catalog"
+    if meta_id is None:
+        REQ = '''
+            SELECT meta_id, description
+            FROM genres_meta
+            ORDER BY description;
+        '''
+        conn = get_db_connection()
+        rows = conn.execute(REQ).fetchall()
+        for row in rows:
+            genre_meta = row["description"]
+            meta_id = row["meta_id"]
+            ret["feed"]["entry"].append(
+                {
+                    "updated": dtiso,
+                    "id": "tag:genres:" + str(meta_id),
+                    "title": genre_meta,
+                    "content": {
+                        "@type": "text",
+                        "#text": "Genres in group '" + genre_meta + "'"
+                    },
+                    "link": {
+                        "@href": current_app.config['APPLICATION_ROOT'] + "/opds/genres/" + str(meta_id),
+                        "@type": "application/atom+xml;profile=opds-catalog"
+                    }
                 }
-            }
-        )
-    conn.close()
+            )
+        conn.close()
+    else:
+        REQ = '''
+            SELECT id, description
+            FROM genres
+            WHERE meta_id = "%s"
+            ORDER BY description;
+        ''' % meta_id
+        conn = get_db_connection()
+        rows = conn.execute(REQ).fetchall()
+        for row in rows:
+            genre = row["description"]
+            gen_id = row["id"]
+            ret["feed"]["entry"].append(
+                {
+                    "updated": dtiso,
+                    "id": "tag:genre:" + gen_id,
+                    "title": genre,
+                    "content": {
+                        "@type": "text",
+                        "#text": "Books in genre '" + genre + "'"
+                    },
+                    "link": {
+                        "@href": current_app.config['APPLICATION_ROOT'] + "/opds/genre/" + gen_id,
+                        "@type": "application/atom+xml;profile=opds-catalog"
+                    }
+                }
+            )
+        conn.close()
     return ret
 
 
