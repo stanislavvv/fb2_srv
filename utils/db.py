@@ -145,3 +145,111 @@ def clean_authors(dbfile, DEBUG):
         cur.execute(REQ)
     con.commit()
     con.close()
+
+
+def clean_sequences(dbfile, DEBUG):
+    import sqlite3
+    con = sqlite3.connect(dbfile)
+    con.create_collation(
+        "UNICODE_NOCASE", unicode_nocase_collation
+    )
+    seqs4del = []
+    seq_names4del = []
+    cur = con.cursor()
+    REQ = 'SELECT id, name FROM sequences ORDER BY name;'
+    cur.execute(REQ)
+    rows = cur.fetchall()
+    if DEBUG:
+        print("Sequences total: %s               " % len(rows))  # debug
+    for row in rows:
+        id = row[0]
+        name = row[1]
+        REQ2 = '''SELECT count(book_id) as cnt
+        FROM books
+        WHERE
+            seq_ids = "%s" OR
+            seq_ids LIKE "%s|%%" OR
+            seq_ids LIKE "%%|%s" OR
+            seq_ids LIKE "%%|%s|%%";
+        ''' % (id, id, id, id)
+        cur.execute(REQ2)
+        rows2 = cur.fetchall()
+        for row2 in rows2:
+            if DEBUG:
+                print(name + " :" + str(row2[0]) + "                                     \r", end='')
+            if row2[0] == 0:
+                seqs4del.append(id)
+                seq_names4del.append(name)
+                if DEBUG:
+                    print("DEL:", name, "                     ")  # debug
+    if len(seqs4del) > 0:
+        if DEBUG:
+            print("delete sequences:", ", ".join(seq_names4del))
+        REQ = 'DELETE FROM sequences WHERE id IN ("'
+        auth_in = '","'.join(seqs4del)
+        REQ = REQ + auth_in + '");'
+        cur.execute(REQ)
+    con.commit()
+    con.close()
+
+
+
+
+def clean_genres(dbfile, DEBUG):
+    import sqlite3
+    con = sqlite3.connect(dbfile)
+    con.create_collation(
+        "UNICODE_NOCASE", unicode_nocase_collation
+    )
+    genres4del = []
+    cur = con.cursor()
+    REQ = 'SELECT id FROM genres ORDER BY id;'
+    cur.execute(REQ)
+    rows = cur.fetchall()
+    if DEBUG:
+        print("Genres total: %s                    " % len(rows))  # debug
+    for row in rows:
+        id = row[0]
+        REQ2 = '''SELECT count(book_id) as cnt
+        FROM books
+        WHERE
+            genres = "%s" OR
+            genres LIKE "%s|%%" OR
+            genres LIKE "%%|%s" OR
+            genres LIKE "%%|%s|%%";
+        ''' % (id, id, id, id)
+        cur.execute(REQ2)
+        rows2 = cur.fetchall()
+        for row2 in rows2:
+            if DEBUG:
+                print(id + " :" + str(row2[0]) + "                                     \r", end='')
+            if row2[0] == 0:
+                genres4del.append(id)
+                if DEBUG:
+                    print("DEL:", id, "                     ")  # debug
+    if len(genres4del) > 0:
+        if DEBUG:
+            print("delete genres:", ", ".join(genres4del))
+        REQ = 'DELETE FROM genres WHERE id IN ("'
+        auth_in = '","'.join(genres4del)
+        REQ = REQ + auth_in + '");'
+        cur.execute(REQ)
+    con.commit()
+    con.close()
+
+
+def vacuum_db(dbfile, DEBUG):
+    REQ = 'VACUUM;'
+    import sqlite3
+    con = sqlite3.connect(dbfile)
+    con.create_collation(
+        "UNICODE_NOCASE", unicode_nocase_collation
+    )
+    cur = con.cursor()
+    if DEBUG:
+        print("VACUUM begin                 ")
+    cur.execute(REQ)
+    if DEBUG:
+        print("VACUUM end")
+    con.commit()
+    con.close()

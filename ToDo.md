@@ -1,11 +1,11 @@
 # BUGS:
 
-  * [minor] generate correct html description from existing data (close open tags and so on) -- need testing
+  * exists
 
 # ToDo:
 
   * check interface speed in case annotations was taken directly from zip/fb2
-  * add command for removal of authors/sequences without books. Call it `managedb.py` fsck. Use 'vacuum' as last SQL command. -- stalled
+  * add command for removal of authors/sequences without books. Call it `managedb.py` fsck. Use 'vacuum' as last SQL command. -- need testing
 
 # ToDo sometime:
 

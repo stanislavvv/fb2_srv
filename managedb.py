@@ -9,7 +9,7 @@ import json
 
 from app import create_app
 from utils import ziplist, booklist2db
-from utils.db import unicode_nocase_collation, clean_authors
+from utils.db import unicode_nocase_collation, clean_authors, clean_sequences, vacuum_db, clean_genres
 
 DEBUG = True
 
@@ -205,6 +205,9 @@ def new_lists():
 def db_fsck():
     dbfile = app.config['DBSQLITE']
     clean_authors(dbfile, DEBUG)
+    clean_sequences(dbfile, DEBUG)
+    clean_genres(dbfile, DEBUG)
+    vacuum_db(dbfile, DEBUG)
 
 
 if __name__ == "__main__":
