@@ -4,7 +4,6 @@
 
 # ToDo:
 
-  * check interface speed in case annotations was taken directly from zip/fb2
   * add command for removal of authors/sequences without books. Call it `managedb.py` fsck. Use 'vacuum' as last SQL command. -- need testing
 
 # ToDo sometime:
