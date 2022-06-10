@@ -4,6 +4,7 @@
 
 # ToDo:
 
+  * change "up" links in genres
   * add per-zip view (by authors/sequences/genres) with custom zip sorting (as in torrent description)
   * refactor it!
 
