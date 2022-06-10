@@ -4,6 +4,7 @@
 
 # ToDo:
 
+  * add per-zip view (by authors/sequences/genres) with custom zip sorting (as in torrent description)
   * refactor it!
 
 # ToDo sometime:
