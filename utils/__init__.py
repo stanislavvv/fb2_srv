@@ -50,10 +50,10 @@ def fb2parse(z, filename, replace_data, inpx_data):
     if isinstance(info, list):
         # see f.fb2-513034-516388.zip/513892.fb2
         info = info[0]
-    if replace_data is not None and filename in replace_data:
-        info = replace_book(filename, info, replace_data)
     if inpx_data is not None and filename in inpx_data:
         info = replace_book(filename, info, inpx_data)
+    if replace_data is not None and filename in replace_data:
+        info = replace_book(filename, info, replace_data)
 
     if "date_time" in info and info["date_time"] is not None:
         date_time = str(info["date_time"])
