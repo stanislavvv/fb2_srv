@@ -1,11 +1,11 @@
 # BUGS:
 
-  * exists
+  * '' as non-zero sequence name
 
 # ToDo:
 
   * change "up" links in genres
-  * add per-zip view (by authors/sequences/genres) with custom zip sorting (as in torrent description)
+  * add per-zip view (by authors/sequences/genres) with custom zip sorting (as in torrent description) -- in progress
   * refactor it!
 
 # ToDo sometime:

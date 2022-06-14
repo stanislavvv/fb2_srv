@@ -4,6 +4,7 @@ import datetime
 import sqlite3
 import urllib.parse
 import unicodedata as ud
+import re
 
 from flask import current_app
 
@@ -18,6 +19,14 @@ alphabet_2 = [  # second letters in main authors/sequences page
     'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T',
     'U', 'V', 'W', 'X', 'Y', 'Z'
 ]
+
+# sort zips right
+file_pattern = re.compile(r'.*-(\d+)-.*?')
+def get_order(file):
+    match = file_pattern.match(file)
+    if not match:
+        return math.inf
+    return int(match.groups()[0])
 
 
 # Custom collation, maybe it is more efficient
@@ -55,25 +64,67 @@ def get_dtiso():
 
 
 # return [ { "name": seq_name, "id": seq_id, "count": books_count }, ...]
-def get_auth_seqs(auth_id):
+def get_auth_seqs(auth_id=None, zip_file=None):
     ret = []
     seq_cnt = {}
-    REQ = """
-    SELECT
-        book_id,
-        seq_ids as sequence_ids
-    FROM books
-    WHERE
-        sequence_ids != '' AND
-        length(sequence_ids) > 0 AND
-        (
-            author_ids = '%s' OR
-            author_ids LIKE '%s|%%' OR
-            author_ids LIKE '%%|%s' OR
-            author_ids LIKE '%%|%s|%%'
-        )
-    """ % (auth_id, auth_id, auth_id, auth_id)
+    if auth_id is not None and zip_file is None:
+        REQ = """
+        SELECT
+            book_id,
+            seq_ids as sequence_ids
+        FROM books
+        WHERE
+            sequence_ids != '' AND
+            length(sequence_ids) > 0 AND
+            (
+                author_ids = '%s' OR
+                author_ids LIKE '%s|%%' OR
+                author_ids LIKE '%%|%s' OR
+                author_ids LIKE '%%|%s|%%'
+            )
+        """ % (auth_id, auth_id, auth_id, auth_id)
+    elif auth_id is not None and zip_file is not None:
+        REQ = """
+        SELECT
+            book_id,
+            seq_ids as sequence_ids
+        FROM books
+        WHERE
+            zipfile = %s AND
+            sequence_ids != '' AND
+            length(sequence_ids) > 0 AND
+            (
+                author_ids = '%s' OR
+                author_ids LIKE '%s|%%' OR
+                author_ids LIKE '%%|%s' OR
+                author_ids LIKE '%%|%s|%%'
+            )
+        """ % (zip_file, auth_id, auth_id, auth_id, auth_id)        
+    elif auth_id is None and zip_file is not None:
+        REQ = """
+        SELECT
+            book_id,
+            seq_ids as sequence_ids
+        FROM books
+        WHERE
+            zipfile = '%s' AND
+            sequence_ids != '' AND
+            length(sequence_ids) > 0
+        """ % zip_file
+    else:
+        # return none
+        REQ = """
+        SELECT
+            book_id,
+            seq_ids as sequence_ids
+        FROM books
+        WHERE
+            zipfile = '' AND
+            sequence_ids != '' AND
+            length(sequence_ids) < 0
+        """ % zip_file
     conn = get_db_connection()
+    print(REQ)
     rows = conn.execute(REQ).fetchall()
     if len(rows) != 0:
         for row in rows:
@@ -97,6 +148,21 @@ def get_auth_seqs(auth_id):
                 ret.append({"name": seq_name, "id": seq_id, "count": seq_cnt[seq_id]})
     conn.close()
     return ret
+
+
+def get_zips_sorted():
+    ret = []
+    REQ = """
+    SELECT zipfile
+    FROM books
+    GROUP BY zipfile
+    """
+    conn = get_db_connection()
+    rows = conn.execute(REQ).fetchall()
+    if len(rows) != 0:
+        for row in rows:
+            ret.append(row["zipfile"])
+    return sorted(ret, key=get_order, reverse=True)
 
 
 def custom_alphabet_sort(slist):

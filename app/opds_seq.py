@@ -81,6 +81,19 @@ def main_opds():
                         "@href": approot + "/opds/genres",
                         "@type": "application/atom+xml;profile=opds-catalog"
                     }
+                },
+                {
+                    "updated": dtiso,
+                    "id": "tag:root:zips",
+                    "title": "По архивам",
+                    "content": {
+                        "@type": "text",
+                        "#text": "Поиск книг по архивам"
+                    },
+                    "link": {
+                        "@href": approot + "/opds/zips",
+                        "@type": "application/atom+xml;profile=opds-catalog"
+                    }
                 }
             ]
         }

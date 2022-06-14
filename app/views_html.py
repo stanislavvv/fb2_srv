@@ -6,7 +6,10 @@ from .opds_auth import get_authors_list, get_author_list, get_author_sequences, 
 from .opds_auth import get_author_sequenceless, get_author_by_alphabet, get_author_by_time
 from .opds_genres import get_genres_list, get_genre_books
 from .opds_search import get_search_main, get_search_authors, get_search_books
-from .validate import redir_invalid, validate_id, validate_genre, validate_prefix, validate_search, validate_genre_meta
+from .opds_zips import get_zips_list, get_zip_list, get_zip_sequences, get_zip_sequence
+from .opds_zips import get_zip_sequenceless, get_zip_by_alphabet
+from .validate import redir_invalid, validate_id, validate_genre, validate_prefix
+from .validate import validate_search, validate_genre_meta, validate_zip
 
 html = Blueprint("html", __name__, template_folder='templates')
 
@@ -239,6 +242,93 @@ def html_genres_book_page(gen_id=None, page=0):
     if gen_id is None:
         return redir_invalid(redir_all)
     data = get_genre_books(gen_id, page)
+    title = data['feed']['title']
+    updated = data['feed']['updated']
+    entry = data['feed']['entry']
+    link = data['feed']['link']
+    page = render_template('opds_sequence.html', title=title, updated=updated, link=link, entry=entry)
+    return Response(page, mimetype='text/html')
+
+
+@html.route("/html/zips", methods=['GET'])
+def html_by_zips_root():
+    data = get_zips_list()
+    title = data['feed']['title']
+    updated = data['feed']['updated']
+    entry = data['feed']['entry']
+    link = data['feed']['link']
+    page = render_template('opds_root.html', title=title, updated=updated, link=link, entry=entry)
+    return Response(page, mimetype='text/html')
+
+
+@html.route("/html/zip/<zip_name>", methods=['GET'])
+def html_by_zip(zip_name=None):
+    zip_name = validate_zip(zip_name)
+    if zip_name is None:
+        return redir_invalid(redir_all)
+    data = get_zip_list(zip_name)
+    print(">>>>")
+    print(data)
+    print("<<<<")
+    title = data['feed']['title']
+    updated = data['feed']['updated']
+    entry = data['feed']['entry']
+    link = data['feed']['link']
+    page = render_template('opds_author_main.html', title=title, updated=updated, link=link, entry=entry)
+    return Response(page, mimetype='text/html')
+
+
+@html.route("/html/zip/<zip_name>/sequences")
+def html_zip_sequences(zip_name=None):
+    zip_name = validate_zip(zip_name)
+    if zip_name is None:
+        return redir_invalid(redir_all)
+    data = get_zip_sequences(zip_name)
+    title = data['feed']['title']
+    updated = data['feed']['updated']
+    entry = data['feed']['entry']
+    link = data['feed']['link']
+    page = render_template('opds_author_sequence.html', title=title, updated=updated, link=link, entry=entry)
+    return Response(page, mimetype='text/html')
+
+
+@html.route("/html/zipsequence/<zip_name>/<seq>")
+def html_zip_sequence(zip_name=None, seq=None):
+    zip_name = validate_zip(zip_name)
+    if zip_name is None:
+        return redir_invalid(redir_all)
+    seq = validate_id(seq)
+    if seq is None:
+        return redir_invalid(redir_all)
+    data = get_zip_sequence(zip_name, seq)
+    title = data['feed']['title']
+    updated = data['feed']['updated']
+    entry = data['feed']['entry']
+    link = data['feed']['link']
+    page = render_template('opds_sequence.html', title=title, updated=updated, link=link, entry=entry)
+    return Response(page, mimetype='text/html')
+
+
+@html.route("/html/zip/<zip_name>/sequenceless")
+def html_zip_sequenceless(zip_name=None):
+    zip_name = validate_zip(zip_name)
+    if zip_name is None:
+        return redir_invalid(redir_all)
+    data = get_zip_sequenceless(zip_name)
+    title = data['feed']['title']
+    updated = data['feed']['updated']
+    entry = data['feed']['entry']
+    link = data['feed']['link']
+    page = render_template('opds_sequence.html', title=title, updated=updated, link=link, entry=entry)
+    return Response(page, mimetype='text/html')
+
+
+@html.route("/html/zip/<zip_name>/alphabet")
+def html_zip_alphabet(zip_name=None):
+    zip_name = validate_zip(zip_name)
+    if zip_name is None:
+        return redir_invalid(redir_all)
+    data = get_zip_by_alphabet(zip_name)
     title = data['feed']['title']
     updated = data['feed']['updated']
     entry = data['feed']['entry']
