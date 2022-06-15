@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from .opds_internals import get_db_connection, get_dtiso, get_authors, get_genres_names, get_seqs
-from .opds_internals import get_auth_seqs, get_zips_sorted, sizeof_fmt, url_str, unurl, any2alphabet
+from .opds_internals import get_auth_seqs, get_zips_sorted, sizeof_fmt
 from flask import current_app
 
 

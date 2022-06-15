@@ -22,11 +22,14 @@ alphabet_2 = [  # second letters in main authors/sequences page
 
 # sort zips right
 file_pattern = re.compile(r'.*-(\d+)-.*?')
+
+
 def get_order(file):
     match = file_pattern.match(file)
     if not match:
-        return math.inf
+        return 10000000000000000000
     return int(match.groups()[0])
+# /sort zips
 
 
 # Custom collation, maybe it is more efficient
@@ -99,7 +102,7 @@ def get_auth_seqs(auth_id=None, zip_file=None):
                 author_ids LIKE '%%|%s' OR
                 author_ids LIKE '%%|%s|%%'
             )
-        """ % (zip_file, auth_id, auth_id, auth_id, auth_id)        
+        """ % (zip_file, auth_id, auth_id, auth_id, auth_id)
     elif auth_id is None and zip_file is not None:
         REQ = """
         SELECT

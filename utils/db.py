@@ -193,8 +193,6 @@ def clean_sequences(dbfile, DEBUG):
     con.close()
 
 
-
-
 def clean_genres(dbfile, DEBUG):
     import sqlite3
     con = sqlite3.connect(dbfile)
