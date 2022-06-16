@@ -6,7 +6,10 @@ from .opds_auth import get_authors_list, get_author_list, get_author_sequences, 
 from .opds_auth import get_author_sequenceless, get_author_by_alphabet, get_author_by_time
 from .opds_genres import get_genres_list, get_genre_books
 from .opds_search import get_search_main, get_search_authors, get_search_books
-from .validate import redir_invalid, validate_id, validate_genre, validate_prefix, validate_search, validate_genre_meta
+from .opds_zips import get_zips_list, get_zip_list, get_zip_sequences, get_zip_sequence
+from .opds_zips import get_zip_sequenceless, get_zip_by_alphabet
+from .validate import redir_invalid, validate_id, validate_genre, validate_prefix
+from .validate import validate_search, validate_genre_meta, validate_zip
 import xmltodict
 
 opds = Blueprint("opds", __name__)
@@ -151,6 +154,62 @@ def opds_genres_book_page(gen_id=None, page=0):
     if gen_id is None:
         return redir_invalid(redir_all)
     xml = xmltodict.unparse(get_genre_books(gen_id, page), pretty=True)
+    return Response(xml, mimetype='text/xml')
+
+
+@opds.route("/opds/zips", methods=['GET'])
+def opds_by_zips_root():
+    xml = xmltodict.unparse(get_zips_list(), pretty=True)
+    return Response(xml, mimetype='text/xml')
+
+
+@opds.route("/opds/zip/<zip_name>", methods=['GET'])
+def opds_by_zip(zip_name=None):
+    zip_name = validate_zip(zip_name)
+    if zip_name is None:
+        return redir_invalid(redir_all)
+    xml = xmltodict.unparse(get_zip_list(zip_name), pretty=True)
+    return Response(xml, mimetype='text/xml')
+
+
+@opds.route("/opds/zip/<zip_name>/sequences")
+def opds_zip_sequences(zip_name=None):
+    zip_name = validate_zip(zip_name)
+    if zip_name is None:
+        return redir_invalid(redir_all)
+    xml = xmltodict.unparse(get_zip_sequences(zip_name), pretty=True)
+    return Response(xml, mimetype='text/xml')
+
+
+@opds.route("/opds/zipsequence/<zip_name>/<seq>")
+def opds_zip_sequence(zip_name=None, seq=None):
+    zip_name = validate_zip(zip_name)
+    if zip_name is None:
+        return redir_invalid(redir_all)
+    seq = validate_id(seq)
+    if seq is None:
+        return redir_invalid(redir_all)
+    xml = xmltodict.unparse(get_zip_sequence(zip_name, seq), pretty=True)
+    return Response(xml, mimetype='text/xml')
+
+
+@opds.route("/opds/zip/<zip_name>/sequenceless")
+@opds.route("/opds/zip/<zip_name>/sequenceless/<int:page>")
+def opds_zip_sequenceless(zip_name=None, page=0):
+    zip_name = validate_zip(zip_name)
+    if zip_name is None:
+        return redir_invalid(redir_all)
+    xml = xmltodict.unparse(get_zip_sequenceless(zip_name, page), pretty=True)
+    return Response(xml, mimetype='text/xml')
+
+
+@opds.route("/opds/zip/<zip_name>/alphabet")
+@opds.route("/opds/zip/<zip_name>/alphabet/<int:page>")
+def opds_zip_alphabet(zip_name=None, page=0):
+    zip_name = validate_zip(zip_name)
+    if zip_name is None:
+        return redir_invalid(redir_all)
+    xml = xmltodict.unparse(get_zip_by_alphabet(zip_name, page), pretty=True)
     return Response(xml, mimetype='text/xml')
 
 

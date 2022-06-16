@@ -150,13 +150,13 @@ def get_zip_sequences(zip_name):
                 }
             },
         )
-    print(ret)
     return ret
 
 
 def get_zip_sequence(zip_name, seq_id):
     dtiso = get_dtiso()
     approot = current_app.config['APPLICATION_ROOT']
+
     REQ = 'SELECT id, name FROM sequences WHERE id = "%s"' % seq_id
     conn = get_db_connection()
     rows = conn.execute(REQ).fetchall()
@@ -296,7 +296,7 @@ def get_zip_sequence(zip_name, seq_id):
     return ret
 
 
-def get_zip_sequenceless(zip_name):
+def get_zip_sequenceless(zip_name, page):
     dtiso = get_dtiso()
     approot = current_app.config['APPLICATION_ROOT']
     ret = ret_hdr_zip()
@@ -304,6 +304,38 @@ def get_zip_sequenceless(zip_name):
     ret["feed"]["title"] = "Books in archive: " + zip_name + ' without sequence'
     ret["feed"]["updated"] = dtiso
     conn = get_db_connection()
+    if page == 0:
+        ret["feed"]["link"].append(
+            {
+                "@href": approot + "/opds/zip/" + zip_name,
+                "@rel": "up",
+                "@type": "application/atom+xml;profile=opds-catalog"
+            }
+        )
+    else:
+        if page == 1:
+            ret["feed"]["link"].append(
+                {
+                    "@href": approot + "/opds/zip/" + zip_name + "/sequenceless",
+                    "@rel": "prev",
+                    "@type": "application/atom+xml;profile=opds-catalog"
+                }
+            )
+        else:
+            ret["feed"]["link"].append(
+                {
+                    "@href": approot + "/opds/zip/" + zip_name + "/sequenceless/" + str(page - 1),
+                    "@rel": "prev",
+                    "@type": "application/atom+xml;profile=opds-catalog"
+                }
+            )
+        ret["feed"]["link"].append(
+            {
+                "@href": approot + "/opds/zip/" + zip_name,
+                "@rel": "up",
+                "@type": "application/atom+xml;profile=opds-catalog"
+            }
+        )
 
     REQ = """
     SELECT
@@ -322,9 +354,24 @@ def get_zip_sequenceless(zip_name):
         zipfile = '%s'
         AND seq_ids = ''
         AND books.book_id = books_descr.book_id
-        ORDER BY book_title;
-    """ % (zip_name)
+        ORDER BY book_title
+    LIMIT "%s"
+    OFFSET "%s";
+    """ % (
+        zip_name,
+        str(current_app.config['PAGE_SIZE']),
+        str(page * current_app.config['PAGE_SIZE'])
+    )
     rows = conn.execute(REQ).fetchall()
+    rows_count = len(rows)
+    if rows_count >= current_app.config['PAGE_SIZE']:
+        ret["feed"]["link"].append(
+            {
+                "@href": approot + "/opds/zip/" + zip_name + "/sequenceless/" + str(page + 1),
+                "@rel": "next",
+                "@type": "application/atom+xml;profile=opds-catalog"
+            }
+        )
     for row in rows:
         zipfile = row["zipfile"]
         filename = row["filename"]
@@ -395,7 +442,7 @@ def get_zip_sequenceless(zip_name):
     return ret
 
 
-def get_zip_by_alphabet(zip_name):
+def get_zip_by_alphabet(zip_name, page):
     dtiso = get_dtiso()
     approot = current_app.config['APPLICATION_ROOT']
     ret = ret_hdr_zip()
@@ -403,6 +450,38 @@ def get_zip_by_alphabet(zip_name):
     ret["feed"]["title"] = "Books in archive: " + zip_name + " by aplhabet"
     ret["feed"]["updated"] = dtiso
     conn = get_db_connection()
+    if page == 0:
+        ret["feed"]["link"].append(
+            {
+                "@href": approot + "/opds/zip/" + zip_name,
+                "@rel": "up",
+                "@type": "application/atom+xml;profile=opds-catalog"
+            }
+        )
+    else:
+        if page == 1:
+            ret["feed"]["link"].append(
+                {
+                    "@href": approot + "/opds/zip/" + zip_name + "/alphabet",
+                    "@rel": "prev",
+                    "@type": "application/atom+xml;profile=opds-catalog"
+                }
+            )
+        else:
+            ret["feed"]["link"].append(
+                {
+                    "@href": approot + "/opds/zip/" + zip_name + "/alphabet/" + str(page - 1),
+                    "@rel": "prev",
+                    "@type": "application/atom+xml;profile=opds-catalog"
+                }
+            )
+        ret["feed"]["link"].append(
+            {
+                "@href": approot + "/opds/zip/" + zip_name,
+                "@rel": "up",
+                "@type": "application/atom+xml;profile=opds-catalog"
+            }
+        )
 
     REQ = """
     SELECT
@@ -421,9 +500,24 @@ def get_zip_by_alphabet(zip_name):
     WHERE
         zipfile = '%s' AND
         books.book_id = books_descr.book_id
-        ORDER BY book_title;
-    """ % (zip_name)
+        ORDER BY book_title
+    LIMIT "%s"
+    OFFSET "%s";
+    """ % (
+        zip_name,
+        str(current_app.config['PAGE_SIZE']),
+        str(page * current_app.config['PAGE_SIZE'])
+    )
     rows = conn.execute(REQ).fetchall()
+    rows_count = len(rows)
+    if rows_count >= current_app.config['PAGE_SIZE']:
+        ret["feed"]["link"].append(
+            {
+                "@href": approot + "/opds/zip/" + zip_name + "/alphabet/" + str(page + 1),
+                "@rel": "next",
+                "@type": "application/atom+xml;profile=opds-catalog"
+            }
+        )
     for row in rows:
         zipfile = row["zipfile"]
         filename = row["filename"]

@@ -46,6 +46,7 @@ def get_genres_list(meta_id=None):
     dtiso = get_dtiso()
     ret = ret_hdr_genre()
     ret["feed"]["updated"] = dtiso
+    approot = current_app.config['APPLICATION_ROOT']
 
     if meta_id is None:
         REQ = '''
@@ -68,7 +69,7 @@ def get_genres_list(meta_id=None):
                         "#text": "Genres in group '" + genre_meta + "'"
                     },
                     "link": {
-                        "@href": current_app.config['APPLICATION_ROOT'] + "/opds/genres/" + str(meta_id),
+                        "@href": approot + "/opds/genres/" + str(meta_id),
                         "@type": "application/atom+xml;profile=opds-catalog"
                     }
                 }
@@ -96,7 +97,7 @@ def get_genres_list(meta_id=None):
                         "#text": "Books in genre '" + genre + "'"
                     },
                     "link": {
-                        "@href": current_app.config['APPLICATION_ROOT'] + "/opds/genre/" + gen_id,
+                        "@href": approot + "/opds/genre/" + gen_id,
                         "@type": "application/atom+xml;profile=opds-catalog"
                     }
                 }
@@ -108,6 +109,7 @@ def get_genres_list(meta_id=None):
 def get_genre_books(gen_id, page=0):
     dtiso = get_dtiso()
     ret = ret_hdr_genre()
+    approot = current_app.config['APPLICATION_ROOT']
 
     REQ = 'SELECT id, description FROM genres WHERE id = "%s"' % gen_id
     conn = get_db_connection()
@@ -122,7 +124,7 @@ def get_genre_books(gen_id, page=0):
     if page == 0:
         ret["feed"]["link"].append(
             {
-                "@href": current_app.config['APPLICATION_ROOT'] + "/opds/genres/",
+                "@href": approot + "/opds/genres/",
                 "@rel": "up",
                 "@type": "application/atom+xml;profile=opds-catalog"
             }
@@ -131,7 +133,7 @@ def get_genre_books(gen_id, page=0):
         if page == 1:
             ret["feed"]["link"].append(
                 {
-                    "@href": current_app.config['APPLICATION_ROOT'] + "/opds/genres/" + gen_id,
+                    "@href": approot + "/opds/genres/" + gen_id,
                     "@rel": "prev",
                     "@type": "application/atom+xml;profile=opds-catalog"
                 }
@@ -139,14 +141,14 @@ def get_genre_books(gen_id, page=0):
         else:
             ret["feed"]["link"].append(
                 {
-                    "@href": current_app.config['APPLICATION_ROOT'] + "/opds/genres/" + gen_id + "/" + str(page - 1),
+                    "@href": approot + "/opds/genres/" + gen_id + "/" + str(page - 1),
                     "@rel": "prev",
                     "@type": "application/atom+xml;profile=opds-catalog"
                 }
             )
         ret["feed"]["link"].append(
             {
-                "@href": current_app.config['APPLICATION_ROOT'] + "/opds/genres/" + gen_id,
+                "@href": approot + "/opds/genres/" + gen_id,
                 "@rel": "up",
                 "@type": "application/atom+xml;profile=opds-catalog"
             }
@@ -186,7 +188,7 @@ def get_genre_books(gen_id, page=0):
     if rows_count >= current_app.config['PAGE_SIZE']:
         ret["feed"]["link"].append(
             {
-                "@href": current_app.config['APPLICATION_ROOT'] + "/opds/genres/" + gen_id + "/" + str(page + 1),
+                "@href": approot + "/opds/genres/" + gen_id + "/" + str(page + 1),
                 "@rel": "next",
                 "@type": "application/atom+xml;profile=opds-catalog"
             }
@@ -209,7 +211,7 @@ def get_genre_books(gen_id, page=0):
         for k, v in authors_data.items():
             authors.append(
                 {
-                    "uri": current_app.config['APPLICATION_ROOT'] + "/opds/author/" + k,
+                    "uri": approot + "/opds/author/" + k,
                     "name": v
                 }
             )
@@ -218,7 +220,7 @@ def get_genre_books(gen_id, page=0):
         for k, v in seq_data.items():
             links.append(
                 {
-                    "@href": current_app.config['APPLICATION_ROOT'] + "/opds/sequencebooks/" + k,
+                    "@href": approot + "/opds/sequencebooks/" + k,
                     "@rel": "related",
                     "@title": "All books in sequence '" + v + "'",
                     "@type": "application/atom+xml"
@@ -227,7 +229,7 @@ def get_genre_books(gen_id, page=0):
 
         links.append(
             {
-                "@href": current_app.config['APPLICATION_ROOT'] + "/fb2/" + zipfile + "/" + filename,
+                "@href": approot + "/fb2/" + zipfile + "/" + filename,
                 "@rel": "http://opds-spec.org/acquisition/open-access",
                 "@title": "Download",
                 "@type": "application/fb2+zip"
@@ -235,7 +237,7 @@ def get_genre_books(gen_id, page=0):
         )
         links.append(
             {
-                "@href": current_app.config['APPLICATION_ROOT'] + "/read/" + zipfile + "/" + filename,
+                "@href": approot + "/read/" + zipfile + "/" + filename,
                 "@rel": "alternate",
                 "@title": "Read in browser",
                 "@type": "text/html"

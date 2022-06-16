@@ -267,9 +267,6 @@ def html_by_zip(zip_name=None):
     if zip_name is None:
         return redir_invalid(redir_all)
     data = get_zip_list(zip_name)
-    print(">>>>")
-    print(data)
-    print("<<<<")
     title = data['feed']['title']
     updated = data['feed']['updated']
     entry = data['feed']['entry']
@@ -310,11 +307,12 @@ def html_zip_sequence(zip_name=None, seq=None):
 
 
 @html.route("/html/zip/<zip_name>/sequenceless")
-def html_zip_sequenceless(zip_name=None):
+@html.route("/html/zip/<zip_name>/sequenceless/<int:page>")
+def html_zip_sequenceless(zip_name=None, page=0):
     zip_name = validate_zip(zip_name)
     if zip_name is None:
         return redir_invalid(redir_all)
-    data = get_zip_sequenceless(zip_name)
+    data = get_zip_sequenceless(zip_name, page)
     title = data['feed']['title']
     updated = data['feed']['updated']
     entry = data['feed']['entry']
@@ -324,11 +322,12 @@ def html_zip_sequenceless(zip_name=None):
 
 
 @html.route("/html/zip/<zip_name>/alphabet")
-def html_zip_alphabet(zip_name=None):
+@html.route("/html/zip/<zip_name>/alphabet/<int:page>")
+def html_zip_alphabet(zip_name=None, page=0):
     zip_name = validate_zip(zip_name)
     if zip_name is None:
         return redir_invalid(redir_all)
-    data = get_zip_by_alphabet(zip_name)
+    data = get_zip_by_alphabet(zip_name, page)
     title = data['feed']['title']
     updated = data['feed']['updated']
     entry = data['feed']['entry']
