@@ -127,7 +127,6 @@ def get_auth_seqs(auth_id=None, zip_file=None):
             length(sequence_ids) < 0
         """ % zip_file
     conn = get_db_connection()
-    print(REQ)
     rows = conn.execute(REQ).fetchall()
     if len(rows) != 0:
         for row in rows:
