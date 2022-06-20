@@ -5,6 +5,7 @@ import zipfile
 import xmltodict
 import sqlite3
 import json
+import logging
 
 from bs4 import BeautifulSoup
 from datetime import datetime
@@ -43,6 +44,7 @@ def fb2parse(z, filename, replace_data, inpx_data):
             namespaces={'http://www.gribuser.ru/xml/fictionbook/2.0': None}
         )
     if 'FictionBook' not in data:  # not fb2
+        logging.error("not fb2: %s " % filename)
         return None
     fb2data = get_struct_by_key('FictionBook', data)  # data['FictionBook']
     descr = get_struct_by_key('description', fb2data)  # fb2data['description']
@@ -108,16 +110,14 @@ def fb2parse(z, filename, replace_data, inpx_data):
 
 # iterate over files in zip, return array of book struct
 def ziplist(inpx_data, zip_file):
-    DEBUG = __main__.DEBUG
-    print(zip_file)
+    logging.info(zip_file)
     ret = []
     z = zipfile.ZipFile(zip_file)
     replace_data = get_replace_list(zip_file)
     inpx_data = get_inpx_meta(inpx_data, zip_file)
     for filename in z.namelist():
         if not os.path.isdir(filename):
-            if DEBUG:
-                print(zip_file + "/" + filename + "             ")
+            logging.debug(zip_file + "/" + filename + "             ")
             res = fb2parse(z, filename, replace_data, inpx_data)
             if res is not None:
                 ret.append(res)
@@ -171,7 +171,7 @@ def iterate_list(blist, dbfile):
 
 # wrapper over iterate_list, get .list, fill some auxiliary structs, pass .list next to iterate_list
 def booklist2db(booklist, dbfile):
-    print(booklist)
+    logging.info(booklist)
     get_genres_meta()
     get_genres()  # official genres from genres.list
     get_genres_replace()  # replacement for unofficial genres from genres_replace.list

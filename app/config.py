@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import os
+import logging
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 
@@ -11,7 +12,9 @@ class Config:
 
 
 class DevelopmentConfig(Config):
-    DEBUG = True
+    DBLOGLEVEL = logging.DEBUG  # DEBUG, INFO, WARN, ERR
+    DBLOGFORMAT = '%(asctime)s -- %(message)s'
+    DEBUG = True  # generate debug artefacts
     DBSQLITE = "data/fb_data.sqlite"
     GENRES_LIST = "genres.list"
     ZIPS = "data"
@@ -22,6 +25,8 @@ class DevelopmentConfig(Config):
 
 
 class TestConfig(Config):
+    DBLOGLEVEL = logging.DEBUG
+    DBLOGFORMAT = '%(asctime)s -- %(message)s'
     TESTING = True
     DEBUG = False
     DBSQLITE = "data/fb_data.sqlite"
@@ -34,6 +39,8 @@ class TestConfig(Config):
 
 
 class ProductionConfig(Config):
+    DBLOGLEVEL = logging.INFO
+    DBLOGFORMAT = '%(asctime)s -- %(message)s'
     DEBUG = False
     DBSQLITE = "data/fb_data.sqlite"
     GENRES_LIST = "genres.list"

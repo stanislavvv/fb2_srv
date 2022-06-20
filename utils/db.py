@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# import sqlite3
+import logging
 from .strings import get_genre_name, get_genre_meta, get_meta_name
 from .data import make_id
 
@@ -60,7 +60,7 @@ def seq2db(cur, seqs, zip_file, filename):
                 seq_data = [seq_id, zip_file, filename, seq_num]
                 cur.execute("INSERT INTO seq_books VALUES (?, ?, ?, ?)", (seq_data))
         else:
-            print("Bad seq info in: %s/%s, seq info:" % (zip_file, filename), str(seq))
+            logging.error("Bad seq info in: %s/%s, seq info: %s" % (zip_file, filename, str(seq)))
 
 
 def genres2db(cur, genrs):
@@ -113,8 +113,7 @@ def clean_authors(dbfile, DEBUG):
     REQ = 'SELECT id, name FROM authors ORDER BY name;'
     cur.execute(REQ)
     rows = cur.fetchall()
-    if DEBUG:
-        print("Authors total:", len(rows))  # debug
+    logging.info("Authors total: %s" % len(rows))
     for row in rows:
         id = row[0]
         name = row[1]
@@ -129,16 +128,12 @@ def clean_authors(dbfile, DEBUG):
         cur.execute(REQ2)
         rows2 = cur.fetchall()
         for row2 in rows2:
-            if DEBUG:
-                print(name + " :" + str(row2[0]) + "                                     \r", end='')
             if row2[0] == 0:
                 authors4del.append(id)
                 authors_names4del.append(name)
-                if DEBUG:
-                    print("DEL:", name, "                     ")  # debug
+                logging.debug("DEL: %s" % name)
     if len(authors4del) > 0:
-        if DEBUG:
-            print("delete authors:", ", ".join(authors_names4del))
+        logging.info("delete authors: " + ", ".join(authors_names4del))
         REQ = 'DELETE FROM authors WHERE id IN ("'
         auth_in = '","'.join(authors4del)
         REQ = REQ + auth_in + '");'
@@ -159,8 +154,7 @@ def clean_sequences(dbfile, DEBUG):
     REQ = 'SELECT id, name FROM sequences ORDER BY name;'
     cur.execute(REQ)
     rows = cur.fetchall()
-    if DEBUG:
-        print("Sequences total: %s               " % len(rows))  # debug
+    logging.info("Sequences total: %s               " % len(rows))
     for row in rows:
         id = row[0]
         name = row[1]
@@ -175,16 +169,12 @@ def clean_sequences(dbfile, DEBUG):
         cur.execute(REQ2)
         rows2 = cur.fetchall()
         for row2 in rows2:
-            if DEBUG:
-                print(name + " :" + str(row2[0]) + "                                     \r", end='')
             if row2[0] == 0:
                 seqs4del.append(id)
                 seq_names4del.append(name)
-                if DEBUG:
-                    print("DEL:", name, "                     ")  # debug
+                logging.debug("DEL: %s" % name)
     if len(seqs4del) > 0:
-        if DEBUG:
-            print("delete sequences:", ", ".join(seq_names4del))
+        logging.info("delete sequences:", ", ".join(seq_names4del))
         REQ = 'DELETE FROM sequences WHERE id IN ("'
         auth_in = '","'.join(seqs4del)
         REQ = REQ + auth_in + '");'
@@ -204,8 +194,7 @@ def clean_genres(dbfile, DEBUG):
     REQ = 'SELECT id FROM genres ORDER BY id;'
     cur.execute(REQ)
     rows = cur.fetchall()
-    if DEBUG:
-        print("Genres total: %s                    " % len(rows))  # debug
+    logging.info("Genres total: %s                    " % len(rows))
     for row in rows:
         id = row[0]
         REQ2 = '''SELECT count(book_id) as cnt
@@ -219,15 +208,11 @@ def clean_genres(dbfile, DEBUG):
         cur.execute(REQ2)
         rows2 = cur.fetchall()
         for row2 in rows2:
-            if DEBUG:
-                print(id + " :" + str(row2[0]) + "                                     \r", end='')
             if row2[0] == 0:
                 genres4del.append(id)
-                if DEBUG:
-                    print("DEL:", id, "                     ")  # debug
+                logging.debug("DEL:", id, "                     ")  # debug
     if len(genres4del) > 0:
-        if DEBUG:
-            print("delete genres:", ", ".join(genres4del))
+        logging.info("delete genres:", ", ".join(genres4del))
         REQ = 'DELETE FROM genres WHERE id IN ("'
         auth_in = '","'.join(genres4del)
         REQ = REQ + auth_in + '");'
@@ -244,10 +229,8 @@ def vacuum_db(dbfile, DEBUG):
         "UNICODE_NOCASE", unicode_nocase_collation
     )
     cur = con.cursor()
-    if DEBUG:
-        print("VACUUM begin                 ")
+    logging.info("VACUUM begin                 ")
     cur.execute(REQ)
-    if DEBUG:
-        print("VACUUM end")
+    logging.info("VACUUM end")
     con.commit()
     con.close()

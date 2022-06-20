@@ -2,6 +2,7 @@
 
 import zipfile
 import os
+import logging
 from .strings import strip_quotes
 from .data import num2int
 
@@ -93,5 +94,5 @@ def get_inpx_meta(inpx_data, zip_file):
             line = f.readline().decode('utf-8').strip("\r").strip("\n")
         f.close()
     except Exception as e:
-        print(e)
+        logging.exception(e)
     return ret

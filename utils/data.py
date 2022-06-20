@@ -3,7 +3,7 @@
 import hashlib
 import json
 import os
-# import html
+import logging
 
 from .strings import strlist, strip_quotes
 
@@ -153,7 +153,7 @@ def num2int(num: str):
         ret = int(num)
         return ret
     except Exception as e:
-        print(e)
+        logging.error(e)  # not exception, but error in data
         return -1
 
 
@@ -302,7 +302,8 @@ def get_replace_list(zip_file):
             rl.close()
             ret = r
         except Exception as e:
-            print("Can't load json from '" + replace_list + "':", e)
+            # used error() because error in file data, not in program
+            logging.error("Can't load json from '" + replace_list + "': " + e)
     return ret
 
 
@@ -313,8 +314,6 @@ def replace_book(filename, book, replace_data):
         replace = replace_data[filename]
         for k, v in replace.items():
             book[k] = v
-            # print("replace:", k, v)  # debug
-        # print("replace in:", filename)
     return book
 
 

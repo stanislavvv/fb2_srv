@@ -6,12 +6,14 @@ import os
 import glob
 import sqlite3
 import json
+import logging
 
 from app import create_app
 from utils import ziplist, booklist2db
 from utils.db import unicode_nocase_collation, clean_authors, clean_sequences, vacuum_db, clean_genres
 
 DEBUG = True
+DBLOGLEVEL = logging.DEBUG
 
 INPX = "flibusta_fb2_local.inpx"  # filename of metadata indexes zip
 
@@ -102,7 +104,7 @@ def usage():
 
 def dropdb():
     dbfile = app.config['DBSQLITE']
-    print("removing", dbfile)
+    logging.info("removing %s" % dbfile)
     os.remove(dbfile)
 
 
@@ -110,7 +112,7 @@ def newdb():
     dbfile = app.config['DBSQLITE']
     if os.path.exists(dbfile):
         dropdb()
-    print("creating", dbfile)
+    logging.info("creating %s" % dbfile)
     con = sqlite3.connect(dbfile)
     con.create_collation(
         "UNICODE_NOCASE", unicode_nocase_collation
@@ -152,7 +154,7 @@ def fillall():
     i = 0
     for zip_file in glob.glob(zipdir + '/*.zip'):
         i += 1
-        print("[" + str(i) + "] ", end='')
+        logging.info("[" + str(i) + "] ")
         create_booklist(inpx_data, zip_file)
         booklist = zip_file + ".list"
         if os.path.exists(booklist):
@@ -166,7 +168,7 @@ def fillnew():
     i = 0
     for zip_file in glob.glob(zipdir + '/*.zip'):
         i += 1
-        print("[" + str(i) + "] ", end='')
+        logging.info("[" + str(i) + "] ")
         booklist = zip_file + ".list"
         if update_booklist(inpx_data, zip_file):
             booklist2db(booklist, dbfile)
@@ -178,7 +180,7 @@ def fill_lists():
     i = 0
     for booklist in glob.glob(zipdir + '/*.zip.list'):
         i += 1
-        print("[" + str(i) + "] ", end='')
+        logging.info("[" + str(i) + "] ")
         booklist2db(booklist, dbfile)
 
 
@@ -188,7 +190,7 @@ def renew_lists():
     i = 0
     for zip_file in glob.glob(zipdir + '/*.zip'):
         i += 1
-        print("[" + str(i) + "] ", end='')
+        logging.info("[" + str(i) + "] ")
         create_booklist(inpx_data, zip_file)
 
 
@@ -198,7 +200,7 @@ def new_lists():
     i = 0
     for zip_file in glob.glob(zipdir + '/*.zip'):
         i += 1
-        print("[" + str(i) + "] ", end='')
+        logging.info("[" + str(i) + "] ")
         update_booklist(inpx_data, zip_file)
 
 
@@ -213,6 +215,9 @@ def db_fsck():
 if __name__ == "__main__":
     app = create_app()
     DEBUG = app.config['DEBUG']
+    DBLOGLEVEL = app.config['DBLOGLEVEL']
+    DBLOGFORMAT = app.config['DBLOGFORMAT']
+    logging.basicConfig(level=DBLOGLEVEL, format=DBLOGFORMAT)
     if len(sys.argv) > 1:
         if sys.argv[1] == "dropdb":
             dropdb()

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import codecs
+import logging
 
 
 # genres meta
@@ -113,7 +114,7 @@ def check_genres(g):
     gg = g[2].split('|')
     for i in gg:
         if i not in genres and i != "":
-            print(g[0] + "|" + g[1] + "|" + i)
+            logging.warning("unknown genres: " + g[0] + "|" + g[1] + "|" + i)  # ToDo: write to file
 
 
 def genres_replace(genrs):
