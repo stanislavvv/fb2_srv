@@ -157,7 +157,7 @@ def iterate_list(blist, dbfile):
         author2db(cur, book["authors"])
         auth_ref2db(cur, book["authors"], book["book_id"])
         bookinfo2db(cur, book["book_id"], book["book_title"], book["annotation"])
-        seq2db(cur, book["sequences"], insdata[0], insdata[1])
+        seq2db(cur, book["sequences"], book["book_id"])
         if DEBUG:
             for author in book["authors"].split("|"):  # debug
                 au.write(author + "|" + book["zipfile"] + "/" + book["filename"] + "\n")  # debug

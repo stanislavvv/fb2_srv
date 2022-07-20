@@ -204,6 +204,27 @@ def get_authors(ids):
     return ret
 
 
+def get_book_authors(book_id):
+    ret = {}
+    selector = []
+    REQ = """
+    SELECT authors.id as id, authors.name as name
+    FROM authors, books_authors
+    WHERE
+        books_authors.book_id = '%s'
+        AND authors.id = books_authors.author_id
+    ORDER BY name
+    """ % book_id
+    print(REQ)
+    conn = get_db_connection()
+    rows = conn.execute(REQ).fetchall()
+    for row in rows:
+        (author_id, name) = (row[0], row[1])
+        ret[author_id] = name
+    conn.close()
+    return ret
+
+
 def get_genres_names(genres_ids):
     ret = {}
     selector = []
@@ -225,6 +246,24 @@ def get_seqs(ids):
     for i in ids.split("|"):
         selector.append("'" + i + "'")
     REQ = "SELECT id, name FROM sequences WHERE id IN (" + ",".join(selector) + ") ORDER BY U_UPPER(name);"
+    conn = get_db_connection()
+    rows = conn.execute(REQ).fetchall()
+    for row in rows:
+        (seq_id, name) = (row[0], row[1])
+        ret[seq_id] = name
+    conn.close()
+    return ret
+
+
+def get_book_seqs(book_id):
+    ret = {}
+    REQ = """
+    SELECT sequences.id as id, sequences.name as name
+    FROM seq_books, sequences
+    WHERE
+        seq_books.seq_id = sequences.id AND
+        seq_books.book_id = '%s'
+    """ % book_id
     conn = get_db_connection()
     rows = conn.execute(REQ).fetchall()
     for row in rows:

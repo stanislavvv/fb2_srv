@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from .opds_internals import get_db_connection, get_dtiso, get_authors, get_genres_names
+from .opds_internals import get_db_connection, get_dtiso, get_authors, get_genres_names, get_book_authors
 from .opds_internals import get_auth_seqs, get_seqs, sizeof_fmt, url_str, unurl, any2alphabet
 from flask import current_app
 

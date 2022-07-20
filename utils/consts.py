@@ -21,7 +21,6 @@ CREATE_REQ = [
         PRIMARY KEY('book_id')
     );
     """,
-        # PRIMARY KEY('zipfile','filename','author_ids','seq_ids')
     """
     CREATE TABLE `books_descr` (
         'book_id'    TEXT NOT NULL,
@@ -30,7 +29,6 @@ CREATE_REQ = [
         FOREIGN KEY(book_id) REFERENCES books(book_id)
     )
     """,
-        # PRIMARY KEY('book_id')
     """
     CREATE TABLE 'authors' (
         'id'    TEXT UNIQUE,
@@ -56,14 +54,6 @@ CREATE_REQ = [
     );
     """,
     """
-    CREATE TABLE `books_seqs` (
-        'book_id'              TEXT NOT NULL,
-        'seq_id'               TEXT,
-        FOREIGN KEY(book_id)   REFERENCES books(book_id)
-        FOREIGN KEY(seq_id) REFERENCES sequences(id)
-    );
-    """,
-    """
     CREATE TABLE 'genres_meta' (
         'meta_id'    INTEGER,
         'description'	TEXT,
@@ -82,12 +72,11 @@ CREATE_REQ = [
     """
     CREATE TABLE 'seq_books' (
         'seq_id'	TEXT NOT NULL,
-        'zipfile'	TEXT NOT NULL,
-        'filename'	TEXT NOT NULL,
+        'book_id'	TEXT NOT NULL,
         'seq_num'	INTEGER,
-        PRIMARY KEY('seq_id', 'zipfile', 'filename')
+        PRIMARY KEY('seq_id', 'book_id')
         FOREIGN KEY(seq_id) REFERENCES sequences(id)
-        FOREIGN KEY(zipfile, filename) REFERENCES books(zipfile, filename)
+        FOREIGN KEY(book_id) REFERENCES books(book_id)
     );
     """
 ]
