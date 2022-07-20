@@ -14,7 +14,7 @@ from .data import get_genre, get_authors, get_author_ids
 from .data import get_sequence, get_sequence_names, get_sequence_ids, get_lang
 from .data import get_struct_by_key, make_id, get_replace_list, replace_book
 from .data import get_title
-from .db import author2db, genres2db, seq2db, unicode_nocase_collation, bookinfo2db
+from .db import author2db, genres2db, seq2db, unicode_nocase_collation, bookinfo2db, auth_ref2db
 from .inpx import get_inpx_meta
 import __main__
 
@@ -139,13 +139,11 @@ def iterate_list(blist, dbfile):
         authors_list = blist + ".authors"  # debug
         au = open(authors_list, 'w')  # debug
     books = json.load(data)
-    for book in books:
+    for book in books:  # ToDo: create book2db()
         insdata = [
             book["zipfile"],
             book["filename"],
             book["genres"],
-            book["author_ids"],
-            book["seq_ids"],
             book["book_id"],
             book["lang"],
             book["date_time"],
@@ -154,11 +152,12 @@ def iterate_list(blist, dbfile):
 
         insdata[2] = genres_replace(insdata[2])
         check_genres([book["zipfile"], book["filename"], insdata[2]])
+        cur.execute("INSERT INTO books VALUES (?, ?, ?, ?, ?, ?, ?)", (insdata))
         genres2db(cur, insdata[2])
         author2db(cur, book["authors"])
+        auth_ref2db(cur, book["authors"], book["book_id"])
         bookinfo2db(cur, book["book_id"], book["book_title"], book["annotation"])
         seq2db(cur, book["sequences"], insdata[0], insdata[1])
-        cur.execute("INSERT INTO books VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", (insdata))
         if DEBUG:
             for author in book["authors"].split("|"):  # debug
                 au.write(author + "|" + book["zipfile"] + "/" + book["filename"] + "\n")  # debug

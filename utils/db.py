@@ -16,7 +16,6 @@ def unicode_nocase_collation(a: str, b: str):
 
 
 def author2db(cur, authors):
-    global genres
     for author in authors.split("|"):
         if author is not None and author != "":
             author = author
@@ -28,6 +27,27 @@ def author2db(cur, authors):
             if cnt == 0:
                 author_data = [author_id, author, ""]
                 cur.execute("INSERT INTO authors VALUES (?, ?, ?)", (author_data))
+
+
+def auth_ref2db(cur, authors, book_id):
+    if book_id is not None and book_id != "":
+        for author in authors.split("|"):
+            if author is not None and author != "":
+                author = author
+                author_id = make_id(author)
+                REQ = '''
+                SELECT count(*)
+                FROM books_authors
+                WHERE
+                    author_id = "%s" AND
+                    book_id = "%s"
+                ''' % (author_id, book_id)
+                cur.execute(REQ)
+                rows = cur.fetchall()
+                cnt = rows[0][0]
+                if cnt == 0:
+                    ref_data = [book_id, author_id]
+                    cur.execute("INSERT INTO books_authors(book_id, author_id) VALUES (?, ?)", (ref_data))
 
 
 def seq2db(cur, seqs, zip_file, filename):
@@ -61,6 +81,27 @@ def seq2db(cur, seqs, zip_file, filename):
                 cur.execute("INSERT INTO seq_books VALUES (?, ?, ?, ?)", (seq_data))
         else:
             logging.error("Bad seq info in: %s/%s, seq info: %s" % (zip_file, filename, str(seq)))
+
+
+def seq_ref2db(cur, seq_ids, book_id):
+    if book_id is not None and book_id != "":
+        for author in authors.split("|"):
+            if author is not None and author != "":
+                author = author
+                author_id = make_id(author)
+                REQ = '''
+                SELECT count(*)
+                FROM books_authors
+                WHERE
+                    author_id = "%s" AND
+                    book_id = "%s"
+                ''' % (author_id, book_id)
+                cur.execute(REQ)
+                rows = cur.fetchall()
+                cnt = rows[0][0]
+                if cnt == 0:
+                    ref_data = [book_id, author_id]
+                    cur.execute("INSERT INTO books_authors(book_id, author_id) VALUES (?, ?)", (ref_data))
 
 
 def genres2db(cur, genrs):
