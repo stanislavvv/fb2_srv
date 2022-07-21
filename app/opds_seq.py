@@ -4,7 +4,7 @@ import urllib.parse
 from flask import current_app
 
 from .opds_internals import get_db_connection, get_dtiso, any2alphabet, get_authors, get_genres_names, sizeof_fmt
-from .opds_internals import get_seqs
+from .opds_internals import get_seqs, get_book_authors, get_book_seqs
 
 
 def main_opds():
@@ -271,8 +271,6 @@ def get_books_in_seq(seq_id):
         books.zipfile as zipfile,
         books.filename as filename,
         books.genres as genres,
-        books.author_ids as author_ids,
-        books.seq_ids as sequence_ids,
         books.book_id as book_id,
         book_title,
         lang,
@@ -283,24 +281,18 @@ def get_books_in_seq(seq_id):
     FROM books, books_descr, seq_books
     WHERE
         seq_books.seq_id = '%s'
-        AND books.zipfile = seq_books.zipfile
-        AND books.filename = seq_books.filename
+        AND books.book_id = seq_books.book_id
         AND books_descr.book_id = books.book_id
-        AND (sequence_ids = "%s"
-            OR sequence_ids like '%%|%s'
-            OR sequence_ids like '%s|%%'
-            OR sequence_ids like '%%|%s|%%'
-        )
         ORDER BY s_num, book_title;
-    ''' % (seq_id, seq_id, seq_id, seq_id, seq_id)
+    ''' % (seq_id)
     conn = get_db_connection()
     rows = conn.execute(REQ).fetchall()
     for row in rows:
         zipfile = row["zipfile"]
         filename = row["filename"]
         genres = row["genres"]
-        author_ids = row["author_ids"]
-        seq_ids = row["sequence_ids"]
+        #author_ids = row["author_ids"]
+        #seq_ids = row["sequence_ids"]
         book_title = row["book_title"]
         book_id = row["book_id"]
         lang = row["lang"]
@@ -311,7 +303,7 @@ def get_books_in_seq(seq_id):
 
         authors = []
         links = []
-        authors_data = get_authors(author_ids)
+        authors_data = get_book_authors(book_id)
         for k, v in authors_data.items():
             authors.append(
                 {
@@ -328,7 +320,7 @@ def get_books_in_seq(seq_id):
                 }
             )
 
-        seq_data = get_seqs(seq_ids)
+        seq_data = get_book_seqs(book_id)
         for k, v in seq_data.items():
             links.append(
                 {

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from .opds_internals import get_db_connection, get_dtiso, get_authors, get_genres_names, get_seqs
+from .opds_internals import get_db_connection, get_dtiso, get_book_authors, get_genres_names, get_book_seqs
 from .opds_internals import get_auth_seqs, get_zips_sorted, sizeof_fmt
 from flask import current_app
 
@@ -179,8 +179,6 @@ def get_zip_sequence(zip_name, seq_id):
         books.zipfile as zipfile,
         books.filename as filename,
         genres,
-        author_ids,
-        seq_ids as sequence_ids,
         books.book_id as book_id,
         books_descr.book_title as book_title,
         lang,
@@ -190,24 +188,16 @@ def get_zip_sequence(zip_name, seq_id):
         seq_books.seq_num as s_num
     FROM books, books_descr, seq_books
     WHERE
-        books.zipfile = '%s' AND
-        seq_books.zipfile = books.zipfile
-        AND seq_books.filename = books.filename
+        books.zipfile = '%s'
+        AND seq_books.book_id = books.book_id
         AND books_descr.book_id = books.book_id
-        AND (sequence_ids = '%s'
-            OR sequence_ids LIKE '%s|%%'
-            OR sequence_ids LIKE '%%|%s'
-            OR sequence_ids LIKE '%%|%s|%%'
-        )
         AND seq_books.seq_id = '%s' ORDER BY s_num, book_title;
-    """ % (zip_name, seq_id, seq_id, seq_id, seq_id, seq_id)
+    """ % (zip_name, seq_id)
     rows = conn.execute(REQ).fetchall()
     for row in rows:
         zipfile = row["zipfile"]
         filename = row["filename"]
         genres = row["genres"]
-        author_ids = row["author_ids"]
-        seq_ids = row["sequence_ids"]
         book_title = row["book_title"]
         book_id = row["book_id"]
         lang = row["lang"]
@@ -218,7 +208,7 @@ def get_zip_sequence(zip_name, seq_id):
 
         authors = []
         links = []
-        authors_data = get_authors(author_ids)
+        authors_data = get_book_authors(book_id)
         for k, v in authors_data.items():
             authors.append(
                 {
@@ -234,7 +224,7 @@ def get_zip_sequence(zip_name, seq_id):
                     "@type": "application/atom+xml"
                 }
             )
-        seq_data = get_seqs(seq_ids)
+        seq_data = get_book_seqs(book_id)
         for k, v in seq_data.items():
             links.append(
                 {
@@ -342,9 +332,8 @@ def get_zip_sequenceless(zip_name, page):
         zipfile,
         filename,
         genres,
-        author_ids,
-        books.book_id as book_id,
         book_title,
+        books.book_id as book_id,
         lang,
         size,
         date_time,
@@ -352,7 +341,6 @@ def get_zip_sequenceless(zip_name, page):
     FROM books, books_descr
     WHERE
         zipfile = '%s'
-        AND seq_ids = ''
         AND books.book_id = books_descr.book_id
         ORDER BY book_title
     LIMIT "%s"
@@ -376,16 +364,18 @@ def get_zip_sequenceless(zip_name, page):
         zipfile = row["zipfile"]
         filename = row["filename"]
         genres = row["genres"]
-        author_ids = row["author_ids"]
         book_title = row["book_title"]
         book_id = row["book_id"]
         lang = row["lang"]
         size = row["size"]
         date_time = row["date_time"]
         annotation = row["annotation"]
+        seqs = get_book_seqs(book_id)
+        if len(seqs) > 0:
+            continue
 
         authors = []
-        authors_data = get_authors(author_ids)
+        authors_data = get_book_authors(book_id)
         for k, v in authors_data.items():
             authors.append(
                 {
@@ -488,8 +478,6 @@ def get_zip_by_alphabet(zip_name, page):
         zipfile,
         filename,
         genres,
-        author_ids,
-        seq_ids as sequence_ids,
         books.book_id as book_id,
         book_title,
         lang,
@@ -522,17 +510,15 @@ def get_zip_by_alphabet(zip_name, page):
         zipfile = row["zipfile"]
         filename = row["filename"]
         genres = row["genres"]
-        author_ids = row["author_ids"]
         book_title = row["book_title"]
         book_id = row["book_id"]
         lang = row["lang"]
         size = row["size"]
         date_time = row["date_time"]
-        seq_ids = row["sequence_ids"]
         annotation = row["annotation"]
 
         authors = []
-        authors_data = get_authors(author_ids)
+        authors_data = get_book_authors(book_id)
         for k, v in authors_data.items():
             authors.append(
                 {
@@ -540,7 +526,7 @@ def get_zip_by_alphabet(zip_name, page):
                     "name": v
                 }
             )
-        seq_data = get_seqs(seq_ids)
+        seq_data = get_book_seqs(book_id)
         links = []
         for k, v in seq_data.items():
             links.append(

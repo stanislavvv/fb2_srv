@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 
-from .opds_internals import get_db_connection, get_dtiso, get_authors, get_genres_names
+from .opds_internals import get_db_connection, get_dtiso, get_authors, get_genres_names, get_book_authors
 from .opds_internals import get_auth_seqs, get_seqs, sizeof_fmt, url_str, unurl, any2alphabet
+from .opds_internals import get_book_seqs
 from flask import current_app
 
 
@@ -313,8 +314,6 @@ def get_author_sequence(auth_id, seq_id):
         books.zipfile as zipfile,
         books.filename as filename,
         genres,
-        author_ids,
-        seq_ids as sequence_ids,
         books.book_id as book_id,
         books_descr.book_title as book_title,
         lang,
@@ -322,30 +321,19 @@ def get_author_sequence(auth_id, seq_id):
         date_time,
         books_descr.annotation as annotation,
         seq_books.seq_num as s_num
-    FROM books, books_descr, seq_books
+    FROM books, books_descr, books_authors, seq_books
     WHERE
-        seq_books.zipfile = books.zipfile
-        AND seq_books.filename = books.filename
+        seq_books.book_id = books.book_id
+        AND books_authors.book_id = books.book_id
         AND books_descr.book_id = books.book_id
-        AND (author_ids = '%s'
-            OR author_ids LIKE '%s|%%'
-            OR author_ids LIKE '%%|%s'
-            OR author_ids LIKE '%%|%s|%%'
-        )
-        AND (sequence_ids = '%s'
-            OR sequence_ids LIKE '%s|%%'
-            OR sequence_ids LIKE '%%|%s'
-            OR sequence_ids LIKE '%%|%s|%%'
-        )
+        AND books_authors.author_id = '%s'
         AND seq_books.seq_id = '%s' ORDER BY s_num, book_title;
-    """ % (auth_id, auth_id, auth_id, auth_id, seq_id, seq_id, seq_id, seq_id, seq_id)
+    """ % (auth_id, seq_id)
     rows = conn.execute(REQ).fetchall()
     for row in rows:
         zipfile = row["zipfile"]
         filename = row["filename"]
         genres = row["genres"]
-        author_ids = row["author_ids"]
-        seq_ids = row["sequence_ids"]
         book_title = row["book_title"]
         book_id = row["book_id"]
         lang = row["lang"]
@@ -356,7 +344,7 @@ def get_author_sequence(auth_id, seq_id):
 
         authors = []
         links = []
-        authors_data = get_authors(author_ids)
+        authors_data = get_book_authors(book_id)
         for k, v in authors_data.items():
             authors.append(
                 {
@@ -372,7 +360,7 @@ def get_author_sequence(auth_id, seq_id):
                     "@type": "application/atom+xml"
                 }
             )
-        seq_data = get_seqs(seq_ids)
+        seq_data = get_book_seqs(book_id)
         for k, v in seq_data.items():
             links.append(
                 {
@@ -453,38 +441,36 @@ def get_author_sequenceless(auth_id):
         zipfile,
         filename,
         genres,
-        author_ids,
         books.book_id as book_id,
         book_title,
         lang,
         size,
         date_time,
         annotation
-    FROM books, books_descr
+    FROM books, books_descr, books_authors
     WHERE
-        seq_ids = ''
-        AND books.book_id = books_descr.book_id
-        AND (author_ids = '%s'
-            OR author_ids LIKE '%s|%%'
-            OR author_ids LIKE '%%|%s'
-            OR author_ids LIKE '%%|%s|%%'
-        ) ORDER BY book_title;
-    """ % (auth_id, auth_id, auth_id, auth_id)
+        books.book_id = books_descr.book_id
+        AND books_authors.book_id = books.book_id
+        AND books_authors.author_id = '%s'
+    ORDER BY book_title;
+    """ % auth_id
     rows = conn.execute(REQ).fetchall()
     for row in rows:
         zipfile = row["zipfile"]
         filename = row["filename"]
         genres = row["genres"]
-        author_ids = row["author_ids"]
         book_title = row["book_title"]
         book_id = row["book_id"]
         lang = row["lang"]
         size = row["size"]
         date_time = row["date_time"]
         annotation = row["annotation"]
+        seqs = get_book_seqs(book_id)
+        if len(seqs) > 0:
+            continue
 
         authors = []
-        authors_data = get_authors(author_ids)
+        authors_data = get_book_authors(book_id)
         for k, v in authors_data.items():
             authors.append(
                 {
@@ -561,40 +547,33 @@ def get_author_by_alphabet(auth_id):
         zipfile,
         filename,
         genres,
-        author_ids,
-        seq_ids as sequence_ids,
         books.book_id as book_id,
         book_title,
         lang,
         size,
         date_time,
         annotation
-    FROM books, books_descr
+    FROM books, books_descr, books_authors
     WHERE
         books.book_id = books_descr.book_id
-        AND (author_ids = '%s'
-            OR author_ids LIKE '%s|%%'
-            OR author_ids LIKE '%%|%s'
-            OR author_ids LIKE '%%|%s|%%'
-        )
+        AND books_authors.book_id = books.book_id
+        AND books_authors.author_id = '%s'
         ORDER BY book_title;
-    """ % (auth_id, auth_id, auth_id, auth_id)
+    """ % auth_id
     rows = conn.execute(REQ).fetchall()
     for row in rows:
         zipfile = row["zipfile"]
         filename = row["filename"]
         genres = row["genres"]
-        author_ids = row["author_ids"]
         book_title = row["book_title"]
         book_id = row["book_id"]
         lang = row["lang"]
         size = row["size"]
         date_time = row["date_time"]
-        seq_ids = row["sequence_ids"]
         annotation = row["annotation"]
 
         authors = []
-        authors_data = get_authors(author_ids)
+        authors_data = get_book_authors(book_id)
         for k, v in authors_data.items():
             authors.append(
                 {
@@ -602,7 +581,7 @@ def get_author_by_alphabet(auth_id):
                     "name": v
                 }
             )
-        seq_data = get_seqs(seq_ids)
+        seq_data = get_book_seqs(book_id)
         links = []
         for k, v in seq_data.items():
             links.append(
@@ -690,40 +669,33 @@ def get_author_by_time(auth_id):
         zipfile,
         filename,
         genres,
-        author_ids,
-        seq_ids as sequence_ids,
         books_descr.book_id as book_id,
         book_title,
         lang,
         size,
         date_time,
         annotation
-    FROM books, books_descr
+    FROM books, books_descr, books_authors
     WHERE
         books.book_id = books_descr.book_id
-        AND (author_ids = '%s'
-            OR author_ids LIKE '%s|%%'
-            OR author_ids LIKE '%%|%s'
-            OR author_ids LIKE '%%|%s|%%'
-        )
+        AND books_authors.book_id = books.book_id
+        AND books_authors.author_id = '%s'
         ORDER BY date_time;
-    """ % (auth_id, auth_id, auth_id, auth_id)
+    """ % auth_id
     rows = conn.execute(REQ).fetchall()
     for row in rows:
         zipfile = row["zipfile"]
         filename = row["filename"]
         genres = row["genres"]
-        author_ids = row["author_ids"]
         book_title = row["book_title"]
         book_id = row["book_id"]
         lang = row["lang"]
         size = row["size"]
         date_time = row["date_time"]
-        seq_ids = row["sequence_ids"]
         annotation = row["annotation"]
 
         authors = []
-        authors_data = get_authors(author_ids)
+        authors_data = get_book_authors(book_id)
         for k, v in authors_data.items():
             authors.append(
                 {
@@ -731,7 +703,7 @@ def get_author_by_time(auth_id):
                     "name": v
                 }
             )
-        seq_data = get_seqs(seq_ids)
+        seq_data = get_book_seqs(book_id)
         links = []
         for k, v in seq_data.items():
             links.append(
