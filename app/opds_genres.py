@@ -6,7 +6,7 @@
 # import hashlib
 from flask import current_app
 from .opds_internals import get_db_connection, get_dtiso, sizeof_fmt
-from .opds_internals import get_authors, get_genres_names, get_seqs
+from .opds_internals import get_book_authors, get_genres_names, get_book_seqs
 
 
 def ret_hdr_genre():
@@ -159,8 +159,6 @@ def get_genre_books(gen_id, page=0):
         zipfile,
         filename,
         genres,
-        author_ids,
-        seq_ids as sequence_ids,
         books.book_id as book_id,
         book_title,
         lang,
@@ -197,17 +195,15 @@ def get_genre_books(gen_id, page=0):
         zipfile = row["zipfile"]
         filename = row["filename"]
         genres = row["genres"]
-        author_ids = row["author_ids"]
         book_title = row["book_title"]
         book_id = row["book_id"]
         lang = row["lang"]
         size = row["size"]
         date_time = row["date_time"]
-        seq_ids = row["sequence_ids"]
         annotation = row["annotation"]
 
         authors = []
-        authors_data = get_authors(author_ids)
+        authors_data = get_book_authors(book_id)
         for k, v in authors_data.items():
             authors.append(
                 {
@@ -215,7 +211,7 @@ def get_genre_books(gen_id, page=0):
                     "name": v
                 }
             )
-        seq_data = get_seqs(seq_ids)
+        seq_data = get_book_seqs(book_id)
         links = []
         for k, v in seq_data.items():
             links.append(

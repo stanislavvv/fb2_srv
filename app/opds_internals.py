@@ -72,82 +72,59 @@ def get_auth_seqs(auth_id=None, zip_file=None):
     seq_cnt = {}
     if auth_id is not None and zip_file is None:
         REQ = """
-        SELECT
-            book_id,
-            seq_ids as sequence_ids
-        FROM books
-        WHERE
-            sequence_ids != '' AND
-            length(sequence_ids) > 0 AND
-            (
-                author_ids = '%s' OR
-                author_ids LIKE '%s|%%' OR
-                author_ids LIKE '%%|%s' OR
-                author_ids LIKE '%%|%s|%%'
-            )
-        """ % (auth_id, auth_id, auth_id, auth_id)
+            SELECT count(*) as cnt, seq_books.seq_id as seq_id, sequences.name as name
+            FROM books, books_authors, seq_books, sequences
+            WHERE
+            books_authors.author_id = '%s' AND
+            books.book_id = books_authors.book_id AND
+            books.book_id = seq_books.book_id AND
+            seq_books.seq_id = sequences.id
+            GROUP BY seq_id
+        """ % auth_id
     elif auth_id is not None and zip_file is not None:
         REQ = """
-        SELECT
-            book_id,
-            seq_ids as sequence_ids
-        FROM books
-        WHERE
-            zipfile = %s AND
-            sequence_ids != '' AND
-            length(sequence_ids) > 0 AND
-            (
-                author_ids = '%s' OR
-                author_ids LIKE '%s|%%' OR
-                author_ids LIKE '%%|%s' OR
-                author_ids LIKE '%%|%s|%%'
-            )
-        """ % (zip_file, auth_id, auth_id, auth_id, auth_id)
+            SELECT count(*) as cnt, seq_books.seq_id as seq_id, sequences.name as name
+            FROM books, books_authors, seq_books, sequences
+            WHERE
+            books.zipfile = '%s' AND
+            books_authors.author_id = '%s' AND
+            books.book_id = books_authors.book_id AND
+            books.book_id = seq_books.book_id AND
+            seq_books.seq_id = sequences.id
+            GROUP BY seq_id
+        """ % (zip_file, auth_id)
     elif auth_id is None and zip_file is not None:
         REQ = """
-        SELECT
-            book_id,
-            seq_ids as sequence_ids
-        FROM books
-        WHERE
-            zipfile = '%s' AND
-            sequence_ids != '' AND
-            length(sequence_ids) > 0
+            SELECT count(*) as cnt, seq_books.seq_id as seq_id, sequences.name as name
+            FROM books, books_authors, seq_books, sequences
+            WHERE
+            books.zipfile = '%s' AND
+            books.book_id = books_authors.book_id AND
+            books.book_id = seq_books.book_id AND
+            seq_books.seq_id = sequences.id
+            GROUP BY seq_id
         """ % zip_file
     else:
-        # return none
+        # return none, as none zipfile
         REQ = """
-        SELECT
-            book_id,
-            seq_ids as sequence_ids
-        FROM books
-        WHERE
-            zipfile = '' AND
-            sequence_ids != '' AND
-            length(sequence_ids) < 0
-        """ % zip_file
+            SELECT count(*) as cnt, seq_books.seq_id as seq_id, sequences.name as name
+            FROM books, books_authors, seq_books, sequences
+            WHERE
+            books.zipfile = '' AND
+            books.book_id = books_authors.book_id AND
+            books.book_id = seq_books.book_id AND
+            seq_books.seq_id = sequences.id
+            GROUP BY seq_id
+        """
+    print(REQ)
     conn = get_db_connection()
     rows = conn.execute(REQ).fetchall()
     if len(rows) != 0:
         for row in rows:
-            # book_id = row["book_id"]
-            seq_ids = row["sequence_ids"]
-            for seq in seq_ids.split("|"):
-                if seq is not None and seq != "":
-                    if seq not in seq_cnt:
-                        seq_cnt[seq] = 1
-                    else:
-                        seq_cnt[seq] = 1 + seq_cnt[seq]
-        selector = []
-        for k, v in seq_cnt.items():
-            selector.append('"' + k + '"')
-        REQ = 'SELECT id, name FROM sequences WHERE id IN (' + ",".join(selector) + ') ORDER BY U_UPPER(name);'
-        rows = conn.execute(REQ).fetchall()
-        for row in rows:
-            seq_id = row["id"]
-            seq_name = row["name"]
-            if seq_id in seq_cnt:
-                ret.append({"name": seq_name, "id": seq_id, "count": seq_cnt[seq_id]})
+            name = row["name"]
+            seq_id = row["seq_id"]
+            count = row["cnt"]
+            ret.append({"name": name, "id": seq_id, "count": count})
     conn.close()
     return ret
 
@@ -215,7 +192,6 @@ def get_book_authors(book_id):
         AND authors.id = books_authors.author_id
     ORDER BY name
     """ % book_id
-    print(REQ)
     conn = get_db_connection()
     rows = conn.execute(REQ).fetchall()
     for row in rows:
