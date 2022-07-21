@@ -48,7 +48,7 @@ def auth_ref2db(cur, authors, book_id):
                     cur.execute("INSERT INTO books_authors(book_id, author_id) VALUES (?, ?)", (ref_data))
 
 
-def seq2db(cur, seqs, book_id):
+def seq2db(cur, seqs, book_id, zip_file, filename):
     if seqs is None:
         return
     for seq in seqs:
@@ -78,26 +78,6 @@ def seq2db(cur, seqs, book_id):
                 cur.execute("INSERT INTO seq_books VALUES (?, ?, ?)", (seq_data))
         else:
             logging.error("Bad seq info in: %s/%s, seq info: %s" % (zip_file, filename, str(seq)))
-
-
-def seq_ref2db(cur, sequences, book_id):
-    if book_id is not None and book_id != "":
-        for seq in sequences.split("|"):
-            if seq is not None and seq != "":
-                author_id = make_id(author)
-                REQ = '''
-                SELECT count(*)
-                FROM books_authors
-                WHERE
-                    author_id = "%s" AND
-                    book_id = "%s"
-                ''' % (author_id, book_id)
-                cur.execute(REQ)
-                rows = cur.fetchall()
-                cnt = rows[0][0]
-                if cnt == 0:
-                    ref_data = [book_id, author_id]
-                    cur.execute("INSERT INTO books_authors(book_id, author_id) VALUES (?, ?)", (ref_data))
 
 
 def genres2db(cur, genrs):

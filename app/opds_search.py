@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from .opds_internals import get_db_connection, get_dtiso, get_authors, get_genres_names
-from .opds_internals import get_seqs, sizeof_fmt, url_str, param_to_search, unicode_upper
+from .opds_internals import get_db_connection, get_dtiso, get_book_authors, get_genres_names
+from .opds_internals import get_book_seqs, sizeof_fmt, url_str, param_to_search, unicode_upper
 from flask import current_app
 
 
@@ -141,8 +141,6 @@ def get_search_books(s_term):
         zipfile,
         filename,
         genres,
-        author_ids,
-        seq_ids as sequence_ids,
         books.book_id as book_id,
         book_title,
         lang,
@@ -161,17 +159,15 @@ def get_search_books(s_term):
         zipfile = row["zipfile"]
         filename = row["filename"]
         genres = row["genres"]
-        author_ids = row["author_ids"]
         book_title = row["book_title"]
         book_id = row["book_id"]
         lang = row["lang"]
         size = row["size"]
         date_time = row["date_time"]
-        seq_ids = row["sequence_ids"]
         annotation = row["annotation"]
 
         authors = []
-        authors_data = get_authors(author_ids)
+        authors_data = get_book_authors(book_id)
         for k, v in authors_data.items():
             authors.append(
                 {
@@ -179,7 +175,7 @@ def get_search_books(s_term):
                     "name": v
                 }
             )
-        seq_data = get_seqs(seq_ids)
+        seq_data = get_book_seqs(book_id)
         links = []
         for k, v in seq_data.items():
             links.append(

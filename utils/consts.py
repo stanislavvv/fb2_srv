@@ -22,12 +22,17 @@ CREATE_REQ = [
     );
     """,
     """
+    CREATE INDEX books_zipfile ON books(zipfile)
+    """,
+    """
     CREATE TABLE `books_descr` (
-        'book_id'    TEXT NOT NULL,
+        'book_id'    TEXT REFERENCES books(book_id) ON DELETE CASCADE,
         'book_title' TEXT,
-        'annotation' TEXT,
-        FOREIGN KEY(book_id) REFERENCES books(book_id)
+        'annotation' TEXT
     )
+    """,
+    """
+    CREATE INDEX books_descr_title ON books_descr(book_title);
     """,
     """
     CREATE TABLE 'authors' (
@@ -38,11 +43,12 @@ CREATE_REQ = [
     );
     """,
     """
+    CREATE INDEX authors_name ON authors(name);
+    """,
+    """
     CREATE TABLE `books_authors` (
-        'book_id'               TEXT NOT NULL,
-        'author_id'             TEXT,
-        FOREIGN KEY(book_id)    REFERENCES books(book_id)
-        FOREIGN KEY(author_id)  REFERENCES authors(id)
+        'book_id'               TEXT REFERENCES books(book_id) ON DELETE CASCADE,
+        'author_id'             TEXT REFERENCES authors(id) ON DELETE CASCADE
     );
     """,
     """
@@ -54,6 +60,9 @@ CREATE_REQ = [
     );
     """,
     """
+    CREATE INDEX sequences_name ON sequences(name);
+    """,
+    """
     CREATE TABLE 'genres_meta' (
         'meta_id'    INTEGER,
         'description'	TEXT,
@@ -63,20 +72,16 @@ CREATE_REQ = [
     """
     CREATE TABLE 'genres' (
         'id'	TEXT UNIQUE,
-        'meta_id'    INTEGER,
+        'meta_id'    INTEGER REFERENCES genres_meta(meta_id) ON DELETE SET NULL,
         'description'	TEXT,
         PRIMARY KEY('id')
-        FOREIGN KEY(meta_id) REFERENCES genres_meta(meta_id)
     );
     """,
     """
     CREATE TABLE 'seq_books' (
-        'seq_id'	TEXT NOT NULL,
-        'book_id'	TEXT NOT NULL,
-        'seq_num'	INTEGER,
-        PRIMARY KEY('seq_id', 'book_id')
-        FOREIGN KEY(seq_id) REFERENCES sequences(id)
-        FOREIGN KEY(book_id) REFERENCES books(book_id)
+        'seq_id'	TEXT REFERENCES sequences(id) ON DELETE CASCADE,
+        'book_id'	TEXT REFERENCES books(book_id) ON DELETE CASCADE,
+        'seq_num'	INTEGER
     );
     """
 ]
