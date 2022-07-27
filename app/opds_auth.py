@@ -2,7 +2,7 @@
 
 from .opds_internals import get_db_connection, get_dtiso, get_genres_names, get_book_authors
 from .opds_internals import get_auth_seqs, sizeof_fmt, url_str, unurl, any2alphabet
-from .opds_internals import get_book_seqs
+from .opds_internals import get_book_seqs, get_books_info
 from flask import current_app
 
 

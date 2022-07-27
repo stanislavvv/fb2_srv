@@ -4,7 +4,7 @@ import urllib.parse
 from flask import current_app
 
 from .opds_internals import get_db_connection, get_dtiso, any2alphabet, get_genres_names, sizeof_fmt
-from .opds_internals import get_book_authors, get_book_seqs
+from .opds_internals import get_book_authors, get_book_seqs, get_seq_books, get_books_info
 
 
 def main_opds():
@@ -266,38 +266,62 @@ def get_books_in_seq(seq_id):
             "entry": []
         }
     }
+    books = get_seq_books(seq_id)
+    book_ids = []
+    books_seq_num = {}
+    for book in books:
+        book_ids.append(book["book_id"])
+        books_seq_num[book["book_id"]] = book["seq_num"]
+    books_info = get_books_info(book_ids)
+    book_titles = {}
+    book_anno = {}
+    for book in books_info:
+        book_titles[book["book_id"]] = book["book_title"]
+        book_anno[book["book_id"]] = book["annotation"]
     REQ = '''
     SELECT
         books.zipfile as zipfile,
         books.filename as filename,
         books.genres as genres,
         books.book_id as book_id,
-        book_title,
         lang,
         size,
-        date_time,
-        annotation,
-        seq_books.seq_num as s_num
-    FROM books, books_descr, seq_books
+        date_time
+    FROM books
     WHERE
-        seq_books.seq_id = '%s'
-        AND books.book_id = seq_books.book_id
-        AND books_descr.book_id = books.book_id
-        ORDER BY s_num, book_title;
-    ''' % (seq_id)
+        book_id IN ("%s")
+    ''' % '","'.join(book_ids)
     conn = get_db_connection()
     rows = conn.execute(REQ).fetchall()
+    data = []
     for row in rows:
-        zipfile = row["zipfile"]
-        filename = row["filename"]
-        genres = row["genres"]
-        book_title = row["book_title"]
         book_id = row["book_id"]
-        lang = row["lang"]
-        size = row["size"]
-        date_time = row["date_time"]
-        annotation = row["annotation"]
-        seq_num = row["s_num"]
+        data.append(
+            {
+                "zipfile": row["zipfile"],
+                "filename": row["filename"],
+                "genres": row["genres"],
+                "book_id": row["book_id"],
+                "lang": row["lang"],
+                "size": row["size"],
+                "date_time": row["date_time"],
+                "book_title": book_titles[book_id],
+                "annotation": book_anno[book_id],
+                "seq_num": books_seq_num[book_id],
+            }
+        )
+
+    for d in sorted(data, key=lambda s: s['seq_num']):
+        book_id = d["book_id"]
+        zipfile = d["zipfile"]
+        filename = d["filename"]
+        genres = d["genres"]
+        lang = d["lang"]
+        size = d["size"]
+        date_time = d["date_time"]
+        book_title = d["book_title"]
+        annotation = d["annotation"]
+        seq_num = d["seq_num"]
 
         authors = []
         links = []
@@ -355,10 +379,14 @@ def get_books_in_seq(seq_id):
                     "@term": k
                 }
             )
+        if seq_num is None:
+            s_num = ""
+        else:
+            s_num = str(seq_num)
         annotext = """
         <p class=\"book\"> %s </p>\n<br/>Format: fb2<br/>
         Size: %s<br/>Sequence: %s, Number: %s<br/>
-        """ % (annotation, sizeof_fmt(size), seq, str(seq_num))
+        """ % (annotation, sizeof_fmt(size), seq, s_num)
         ret["feed"]["entry"].append(
             {
                 "updated": date_time,

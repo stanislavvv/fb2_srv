@@ -66,20 +66,56 @@ def get_dtiso():
     return datetime.datetime.now().astimezone().replace(microsecond=0).isoformat()
 
 
+def get_seq_names(seq_ids):
+    ret = {}
+    REQ="""
+    SELECT id, name FROM sequences
+    WHERE id in ('%s')
+    """ % "','".join(seq_ids)
+    conn = get_db_connection()
+    rows = conn.execute(REQ).fetchall()
+    for row in rows:
+        ret[row[0]] = row[1]
+    return ret
+
 # return [ { "name": seq_name, "id": seq_id, "count": books_count }, ...]
 def get_auth_seqs(auth_id=None, zip_file=None):
     ret = []
     if auth_id is not None and zip_file is None:
-        REQ = """
-            SELECT count(*) as cnt, seq_books.seq_id as seq_id, sequences.name as name
-            FROM books, books_authors, seq_books, sequences
-            WHERE
-            books_authors.author_id = '%s' AND
-            books.book_id = books_authors.book_id AND
-            books.book_id = seq_books.book_id AND
-            seq_books.seq_id = sequences.id
-            GROUP BY seq_id
+        REQ_BOOKS = """
+            SELECT book_id, author_id
+            FROM books_authors
+            WHERE author_id = '%s'
         """ % auth_id
+        book_ids = []
+        conn = get_db_connection()
+        rows = conn.execute(REQ_BOOKS).fetchall()
+        for row in rows:
+            book_ids.append(row[0])
+        REQ_SEQS = """
+            SELECT seq_id, book_id FROM seq_books
+            WHERE book_id IN ('%s')
+        """ % "','".join(book_ids)
+        rows = conn.execute(REQ_SEQS).fetchall()
+        seq_nums = {}
+        seq_ids = []
+        for row in rows:
+            seq_id = row[0]
+            book_id = row[1]
+            if seq_id in seq_nums:
+                seq_nums[seq_id] = 1 + seq_nums[seq_id]
+            else:
+                seq_nums[seq_id] = 1
+        seq_names = get_seq_names(seq_nums.keys())
+        for seq_id in seq_nums.keys():
+            ret.append(
+                {
+                    "name": seq_names[seq_id],
+                    "id": seq_id,
+                    "count": seq_nums[seq_id]
+                }
+            )
+        conn.close()
     elif auth_id is not None and zip_file is not None:
         REQ = """
             SELECT count(*) as cnt, seq_books.seq_id as seq_id, sequences.name as name
@@ -92,6 +128,15 @@ def get_auth_seqs(auth_id=None, zip_file=None):
             seq_books.seq_id = sequences.id
             GROUP BY seq_id
         """ % (zip_file, auth_id)
+        conn = get_db_connection()
+        rows = conn.execute(REQ).fetchall()
+        if len(rows) != 0:
+            for row in rows:
+                name = row["name"]
+                seq_id = row["seq_id"]
+                count = row["cnt"]
+                ret.append({"name": name, "id": seq_id, "count": count})
+        conn.close()
     elif auth_id is None and zip_file is not None:
         REQ = """
             SELECT count(*) as cnt, seq_books.seq_id as seq_id, sequences.name as name
@@ -103,6 +148,15 @@ def get_auth_seqs(auth_id=None, zip_file=None):
             seq_books.seq_id = sequences.id
             GROUP BY seq_id
         """ % zip_file
+        conn = get_db_connection()
+        rows = conn.execute(REQ).fetchall()
+        if len(rows) != 0:
+            for row in rows:
+                name = row["name"]
+                seq_id = row["seq_id"]
+                count = row["cnt"]
+                ret.append({"name": name, "id": seq_id, "count": count})
+        conn.close()
     else:
         # return none, as none zipfile
         REQ = """
@@ -115,15 +169,15 @@ def get_auth_seqs(auth_id=None, zip_file=None):
             seq_books.seq_id = sequences.id
             GROUP BY seq_id
         """
-    conn = get_db_connection()
-    rows = conn.execute(REQ).fetchall()
-    if len(rows) != 0:
-        for row in rows:
-            name = row["name"]
-            seq_id = row["seq_id"]
-            count = row["cnt"]
-            ret.append({"name": name, "id": seq_id, "count": count})
-    conn.close()
+        conn = get_db_connection()
+        rows = conn.execute(REQ).fetchall()
+        if len(rows) != 0:
+            for row in rows:
+                name = row["name"]
+                seq_id = row["seq_id"]
+                count = row["cnt"]
+                ret.append({"name": name, "id": seq_id, "count": count})
+        conn.close()
     return ret
 
 
@@ -243,6 +297,45 @@ def get_book_seqs(book_id):
         (seq_id, name) = (row[0], row[1])
         ret[seq_id] = name
     conn.close()
+    return ret
+
+
+def get_seq_books(seq_id):
+    ret = []
+    REQ = """
+    SELECT book_id, seq_num FROM seq_books
+    WHERE seq_id = '%s'
+    ORDER BY seq_num
+    """ % seq_id
+    conn = get_db_connection()
+    rows = conn.execute(REQ).fetchall()
+    for row in rows:
+        (book_id, seq_num) = (row[0], row[1])
+        ret.append({"book_id": book_id, "seq_num": seq_num})
+    return ret
+
+
+def get_books_info(book_ids):
+    ret = []
+    selector = []
+    for book_id in book_ids:
+        selector.append("\"%s\"" % book_id)
+    REQ = """
+    SELECT book_id, book_title, annotation
+    FROM books_descr
+    WHERE book_id IN (%s)
+    """ % ",".join(selector)
+    conn = get_db_connection()
+    rows = conn.execute(REQ).fetchall()
+    for row in rows:
+        (book_id, book_title, annotation) = (row[0], row[1], row[2])
+        ret.append(
+            {
+                "book_id": book_id,
+                "book_title": book_title,
+                "annotation": annotation
+            }
+        )
     return ret
 
 
