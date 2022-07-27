@@ -2,7 +2,7 @@
 
 from .opds_internals import get_db_connection, get_dtiso, get_genres_names, get_book_authors
 from .opds_internals import get_auth_seqs, sizeof_fmt, url_str, unurl, any2alphabet
-from .opds_internals import get_book_seqs, get_books_info
+from .opds_internals import get_book_seqs, get_books_info, get_author_books, get_seq_books
 from flask import current_app
 
 
@@ -310,37 +310,67 @@ def get_author_sequence(auth_id, seq_id):
         }
     )
 
-    REQ = """SELECT
-        books.zipfile as zipfile,
-        books.filename as filename,
+    book_ids_author = get_author_books(auth_id)
+    book_ids_seq = get_seq_books(seq_id)
+    book_ids = []
+    book_seq_nums = {}
+    for book in book_ids_seq:
+        book_id = book["book_id"]
+        book_seq_num = book["seq_num"]
+        if book_id in book_ids_author:
+            book_ids.append(book_id)
+            book_seq_nums[book_id] = book_seq_num
+
+    books_info = get_books_info(book_ids)
+    book_titles = {}
+    book_anno = {}
+    for book in books_info:
+        book_titles[book["book_id"]] = book["book_title"]
+        book_anno[book["book_id"]] = book["annotation"]
+
+    REQ = """
+    SELECT
+        zipfile,
+        filename,
         genres,
         books.book_id as book_id,
-        books_descr.book_title as book_title,
         lang,
         size,
-        date_time,
-        books_descr.annotation as annotation,
-        seq_books.seq_num as s_num
-    FROM books, books_descr, books_authors, seq_books
+        date_time
+    FROM books
     WHERE
-        seq_books.book_id = books.book_id
-        AND books_authors.book_id = books.book_id
-        AND books_descr.book_id = books.book_id
-        AND books_authors.author_id = '%s'
-        AND seq_books.seq_id = '%s' ORDER BY s_num, book_title;
-    """ % (auth_id, seq_id)
+        books.book_id IN ('%s')
+    """ % "','".join(book_ids)
     rows = conn.execute(REQ).fetchall()
+    data = []
     for row in rows:
-        zipfile = row["zipfile"]
-        filename = row["filename"]
-        genres = row["genres"]
-        book_title = row["book_title"]
         book_id = row["book_id"]
-        lang = row["lang"]
-        size = row["size"]
-        date_time = row["date_time"]
-        annotation = row["annotation"]
-        seq_num = row["s_num"]
+        data.append(
+            {
+                "zipfile": row["zipfile"],
+                "filename": row["filename"],
+                "genres": row["genres"],
+                "book_id": row["book_id"],
+                "lang": row["lang"],
+                "size": row["size"],
+                "date_time": row["date_time"],
+                "book_title": book_titles[book_id],
+                "annotation": book_anno[book_id],
+                "seq_num": book_seq_nums[book_id]
+            }
+        )
+
+    for d in sorted(data, key=lambda s: s['seq_num']):
+        book_id = d["book_id"]
+        zipfile = d["zipfile"]
+        filename = d["filename"]
+        genres = d["genres"]
+        lang = d["lang"]
+        size = d["size"]
+        date_time = d["date_time"]
+        book_title = d["book_title"]
+        annotation = d["annotation"]
+        seq_num = d["seq_num"]
 
         authors = []
         links = []
@@ -436,38 +466,65 @@ def get_author_sequenceless(auth_id):
     ret["feed"]["title"] = "Books of author: " + auth_name
     ret["feed"]["updated"] = dtiso
 
+    book_ids = get_author_books(auth_id)
+
+    # filter books in any seq
+    REQ_BOOK_INSEQ = """
+    SELECT book_id FROM seq_books
+    WHERE book_id IN ('%s')
+    """ % "','".join(book_ids)
+    rows = conn.execute(REQ_BOOK_INSEQ).fetchall()
+    for row in rows:
+        book_ids.remove(row[0])
+
+    books_info = get_books_info(book_ids)
+    book_titles = {}
+    book_anno = {}
+    for book in books_info:
+        book_titles[book["book_id"]] = book["book_title"]
+        book_anno[book["book_id"]] = book["annotation"]
+
     REQ = """
     SELECT
         zipfile,
         filename,
         genres,
         books.book_id as book_id,
-        book_title,
         lang,
         size,
-        date_time,
-        annotation
-    FROM books, books_descr, books_authors
+        date_time
+    FROM books
     WHERE
-        books.book_id = books_descr.book_id
-        AND books_authors.book_id = books.book_id
-        AND books_authors.author_id = '%s'
-    ORDER BY book_title;
-    """ % auth_id
+        books.book_id IN ('%s')
+    """ % "','".join(book_ids)
     rows = conn.execute(REQ).fetchall()
+    data = []
     for row in rows:
-        zipfile = row["zipfile"]
-        filename = row["filename"]
-        genres = row["genres"]
-        book_title = row["book_title"]
         book_id = row["book_id"]
-        lang = row["lang"]
-        size = row["size"]
-        date_time = row["date_time"]
-        annotation = row["annotation"]
-        seqs = get_book_seqs(book_id)
-        if len(seqs) > 0:
-            continue
+        data.append(
+            {
+                "zipfile": row["zipfile"],
+                "filename": row["filename"],
+                "genres": row["genres"],
+                "book_id": row["book_id"],
+                "lang": row["lang"],
+                "size": row["size"],
+                "date_time": row["date_time"],
+                "book_title": book_titles[book_id],
+                "annotation": book_anno[book_id],
+            }
+        )
+
+    for d in sorted(data, key=lambda s: s['book_title']):
+        book_id = d["book_id"]
+        zipfile = d["zipfile"]
+        filename = d["filename"]
+        genres = d["genres"]
+        lang = d["lang"]
+        size = d["size"]
+        date_time = d["date_time"]
+        book_title = d["book_title"]
+        annotation = d["annotation"]
 
         authors = []
         authors_data = get_book_authors(book_id)
@@ -542,35 +599,56 @@ def get_author_by_alphabet(auth_id):
     ret["feed"]["title"] = "Books of author: " + auth_name + " by aplhabet"
     ret["feed"]["updated"] = dtiso
 
+    book_ids = get_author_books(auth_id)
+
+    books_info = get_books_info(book_ids)
+    book_titles = {}
+    book_anno = {}
+    for book in books_info:
+        book_titles[book["book_id"]] = book["book_title"]
+        book_anno[book["book_id"]] = book["annotation"]
+
     REQ = """
     SELECT
         zipfile,
         filename,
         genres,
         books.book_id as book_id,
-        book_title,
         lang,
         size,
-        date_time,
-        annotation
-    FROM books, books_descr, books_authors
+        date_time
+    FROM books
     WHERE
-        books.book_id = books_descr.book_id
-        AND books_authors.book_id = books.book_id
-        AND books_authors.author_id = '%s'
-        ORDER BY book_title;
-    """ % auth_id
+        books.book_id IN ('%s')
+    """ % "','".join(book_ids)
     rows = conn.execute(REQ).fetchall()
+    data = []
     for row in rows:
-        zipfile = row["zipfile"]
-        filename = row["filename"]
-        genres = row["genres"]
-        book_title = row["book_title"]
         book_id = row["book_id"]
-        lang = row["lang"]
-        size = row["size"]
-        date_time = row["date_time"]
-        annotation = row["annotation"]
+        data.append(
+            {
+                "zipfile": row["zipfile"],
+                "filename": row["filename"],
+                "genres": row["genres"],
+                "book_id": row["book_id"],
+                "lang": row["lang"],
+                "size": row["size"],
+                "date_time": row["date_time"],
+                "book_title": book_titles[book_id],
+                "annotation": book_anno[book_id],
+            }
+        )
+
+    for d in sorted(data, key=lambda s: s['book_title']):
+        book_id = d["book_id"]
+        zipfile = d["zipfile"]
+        filename = d["filename"]
+        genres = d["genres"]
+        lang = d["lang"]
+        size = d["size"]
+        date_time = d["date_time"]
+        book_title = d["book_title"]
+        annotation = d["annotation"]
 
         authors = []
         authors_data = get_book_authors(book_id)
@@ -664,35 +742,56 @@ def get_author_by_time(auth_id):
         }
     )
 
+    book_ids = get_author_books(auth_id)
+
+    books_info = get_books_info(book_ids)
+    book_titles = {}
+    book_anno = {}
+    for book in books_info:
+        book_titles[book["book_id"]] = book["book_title"]
+        book_anno[book["book_id"]] = book["annotation"]
+
     REQ = """
     SELECT
         zipfile,
         filename,
         genres,
-        books_descr.book_id as book_id,
-        book_title,
+        books.book_id as book_id,
         lang,
         size,
-        date_time,
-        annotation
-    FROM books, books_descr, books_authors
+        date_time
+    FROM books
     WHERE
-        books.book_id = books_descr.book_id
-        AND books_authors.book_id = books.book_id
-        AND books_authors.author_id = '%s'
-        ORDER BY date_time;
-    """ % auth_id
+        books.book_id IN ('%s')
+    """ % "','".join(book_ids)
     rows = conn.execute(REQ).fetchall()
+    data = []
     for row in rows:
-        zipfile = row["zipfile"]
-        filename = row["filename"]
-        genres = row["genres"]
-        book_title = row["book_title"]
         book_id = row["book_id"]
-        lang = row["lang"]
-        size = row["size"]
-        date_time = row["date_time"]
-        annotation = row["annotation"]
+        data.append(
+            {
+                "zipfile": row["zipfile"],
+                "filename": row["filename"],
+                "genres": row["genres"],
+                "book_id": row["book_id"],
+                "lang": row["lang"],
+                "size": row["size"],
+                "date_time": row["date_time"],
+                "book_title": book_titles[book_id],
+                "annotation": book_anno[book_id],
+            }
+        )
+
+    for d in sorted(data, key=lambda s: s['date_time']):
+        book_id = d["book_id"]
+        zipfile = d["zipfile"]
+        filename = d["filename"]
+        genres = d["genres"]
+        lang = d["lang"]
+        size = d["size"]
+        date_time = d["date_time"]
+        book_title = d["book_title"]
+        annotation = d["annotation"]
 
         authors = []
         authors_data = get_book_authors(book_id)

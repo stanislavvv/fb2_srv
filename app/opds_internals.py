@@ -68,7 +68,7 @@ def get_dtiso():
 
 def get_seq_names(seq_ids):
     ret = {}
-    REQ="""
+    REQ = """
     SELECT id, name FROM sequences
     WHERE id in ('%s')
     """ % "','".join(seq_ids)
@@ -77,6 +77,7 @@ def get_seq_names(seq_ids):
     for row in rows:
         ret[row[0]] = row[1]
     return ret
+
 
 # return [ { "name": seq_name, "id": seq_id, "count": books_count }, ...]
 def get_auth_seqs(auth_id=None, zip_file=None):
@@ -101,10 +102,8 @@ def get_auth_seqs(auth_id=None, zip_file=None):
         """ % "','".join(book_ids)
         rows = conn.execute(REQ_SEQS).fetchall()
         seq_nums = {}
-        seq_ids = []
         for row in rows:  # count books (ToDo: compare time with SELECT count(*))
             seq_id = row[0]
-            book_id = row[1]
             if seq_id in seq_nums:
                 seq_nums[seq_id] = 1 + seq_nums[seq_id]
             else:
@@ -151,10 +150,8 @@ def get_auth_seqs(auth_id=None, zip_file=None):
         """ % "','".join(book_ids)
         rows = conn.execute(REQ_SEQS).fetchall()
         seq_nums = {}
-        seq_ids = []
         for row in rows:  # count books (ToDo: compare time with SELECT count(*))
             seq_id = row[0]
-            book_id = row[1]
             if seq_id in seq_nums:
                 seq_nums[seq_id] = 1 + seq_nums[seq_id]
             else:
@@ -189,10 +186,8 @@ def get_auth_seqs(auth_id=None, zip_file=None):
         """ % "','".join(book_ids)
         rows = conn.execute(REQ_SEQS).fetchall()
         seq_nums = {}
-        seq_ids = []
         for row in rows:  # count books (ToDo: compare time with SELECT count(*))
             seq_id = row[0]
-            book_id = row[1]
             if seq_id in seq_nums:
                 seq_nums[seq_id] = 1 + seq_nums[seq_id]
             else:
@@ -362,6 +357,20 @@ def get_seq_books(seq_id):
     for row in rows:
         (book_id, seq_num) = (row[0], row[1])
         ret.append({"book_id": book_id, "seq_num": seq_num})
+    return ret
+
+
+def get_author_books(auth_id):
+    ret = []
+    REQ = """
+    SELECT book_id, author_id FROM books_authors
+    WHERE author_id = '%s'
+    """ % auth_id
+    conn = get_db_connection()
+    rows = conn.execute(REQ).fetchall()
+    for row in rows:
+        book_id = row[0]
+        ret.append(book_id)
     return ret
 
 
