@@ -109,12 +109,12 @@ def get_genres_replace():
 
 
 # print unknown genres
-def check_genres(g):
+def check_genres(zipfile, filename, genrs):
     global genres
-    gg = g[2].split('|')
+    gg = genrs.split('|')
     for i in gg:
         if i not in genres and i != "":
-            logging.warning("unknown genres: " + g[0] + "|" + g[1] + "|" + i)  # ToDo: write to file
+            logging.warning("unknown genre in " + zipfile + "/" + filename + " :" + i)  # ToDo: write to file
 
 
 def genres_replace(genrs):

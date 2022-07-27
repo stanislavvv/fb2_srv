@@ -85,3 +85,26 @@ CREATE_REQ = [
     );
     """
 ]
+
+INSERT_REQ = {
+    "books": """
+        INSERT OR REPLACE INTO
+            books(zipfile, filename, genres, book_id, lang, date_time, size)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+    """,
+    "authors": """
+        INSERT OR REPLACE INTO authors(id, name, info) VALUES (?, ?, ?)
+    """,
+    "sequences": """
+        INSERT OR REPLACE INTO sequences(id, name, info) VALUES (?, ?, ?)
+    """,
+    "bookinfo": """
+        INSERT OR REPLACE INTO books_descr(book_id, book_title, annotation) VALUES (?, ?, ?)
+    """,
+    "auth_ref": """
+        INSERT OR REPLACE INTO books_authors(book_id, author_id) VALUES (?, ?)
+    """,
+    "seq_books": """
+        INSERT OR REPLACE INTO seq_books(seq_id, book_id, seq_num) VALUES (?, ?, ?)
+    """
+}

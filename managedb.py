@@ -87,7 +87,7 @@ def fillall():
         create_booklist(inpx_data, zip_file)
         booklist = zip_file + ".list"
         if os.path.exists(booklist):
-            booklist2db(booklist, dbfile)
+            booklist2db(booklist, dbfile, DEBUG)
 
 
 def fillnew():
@@ -100,7 +100,7 @@ def fillnew():
         logging.info("[" + str(i) + "] ")
         booklist = zip_file + ".list"
         if update_booklist(inpx_data, zip_file):
-            booklist2db(booklist, dbfile)
+            booklist2db(booklist, dbfile, DEBUG)
 
 
 def fill_lists():
@@ -110,7 +110,7 @@ def fill_lists():
     for booklist in glob.glob(zipdir + '/*.zip.list'):
         i += 1
         logging.info("[" + str(i) + "] ")
-        booklist2db(booklist, dbfile)
+        booklist2db(booklist, dbfile, DEBUG)
 
 
 def renew_lists():

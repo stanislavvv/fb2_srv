@@ -1,6 +1,6 @@
 # BUGS:
 
-  * too slow search, sometimes 500 with search in book title -- need testing
+  * exists
 
 # ToDo:
 

@@ -15,7 +15,21 @@ def unicode_nocase_collation(a: str, b: str):
     return 1
 
 
-def author2db(cur, authors):
+# def author2db(cur, authors):
+    # for author in authors.split("|"):
+        # if author is not None and author != "":
+            # author_id = make_id(author)
+            # REQ = 'SELECT count(*) FROM authors WHERE id = "%s"' % author_id
+            # cur.execute(REQ)
+            # rows = cur.fetchall()
+            # cnt = rows[0][0]
+            # if cnt == 0:
+                # author_data = [author_id, author, ""]
+                # cur.execute("INSERT INTO authors VALUES (?, ?, ?)", (author_data))
+
+
+def author4db(cur, authors):
+    ret = []
     for author in authors.split("|"):
         if author is not None and author != "":
             author_id = make_id(author)
@@ -24,11 +38,32 @@ def author2db(cur, authors):
             rows = cur.fetchall()
             cnt = rows[0][0]
             if cnt == 0:
-                author_data = [author_id, author, ""]
-                cur.execute("INSERT INTO authors VALUES (?, ?, ?)", (author_data))
+                ret.append((author_id, author, ""))
+    return ret
 
 
-def auth_ref2db(cur, authors, book_id):
+# def auth_ref2db(cur, authors, book_id):
+    # if book_id is not None and book_id != "":
+        # for author in authors.split("|"):
+            # if author is not None and author != "":
+                # author_id = make_id(author)
+                # REQ = '''
+                # SELECT count(*)
+                # FROM books_authors
+                # WHERE
+                    # author_id = "%s" AND
+                    # book_id = "%s"
+                # ''' % (author_id, book_id)
+                # cur.execute(REQ)
+                # rows = cur.fetchall()
+                # cnt = rows[0][0]
+                # if cnt == 0:
+                    # ref_data = [book_id, author_id]
+                    # cur.execute("INSERT INTO books_authors(book_id, author_id) VALUES (?, ?)", (ref_data))
+
+
+def auth_ref4db(cur, authors, book_id):
+    ret = []
     if book_id is not None and book_id != "":
         for author in authors.split("|"):
             if author is not None and author != "":
@@ -44,13 +79,64 @@ def auth_ref2db(cur, authors, book_id):
                 rows = cur.fetchall()
                 cnt = rows[0][0]
                 if cnt == 0:
-                    ref_data = [book_id, author_id]
-                    cur.execute("INSERT INTO books_authors(book_id, author_id) VALUES (?, ?)", (ref_data))
+                    ret.append((book_id, author_id))
+    return ret
+
+# def seq2db(cur, seqs, book_id, zip_file, filename):
+    # if seqs is None:
+        # return
+    # for seq in seqs:
+        # if seq is not None and seq != "" and "id" in seq and "name" in seq:
+            # seq_id = seq["id"]
+            # seq_name = seq["name"]
+            # seq_num = None
+            # if "num" in seq:
+                # seq_num = seq["num"]
+            # REQ = 'SELECT count(*) FROM sequences WHERE id = "%s"' % seq_id
+            # cur.execute(REQ)
+            # rows = cur.fetchall()
+            # cnt = rows[0][0]
+            # if cnt == 0:
+                # seq_data = [seq_id, seq_name, ""]
+                # cur.execute("INSERT INTO sequences VALUES (?, ?, ?)", (seq_data))
+            # REQ = 'SELECT count(*) FROM seq_books WHERE '
+            # REQ = REQ + 'seq_id = "%s" AND book_id = "%s";' % (
+                # seq_id,
+                # book_id
+            # )
+            # cur.execute(REQ)
+            # rows = cur.fetchall()
+            # cnt = rows[0][0]
+            # if cnt == 0:
+                # seq_data = [seq_id, book_id, seq_num]
+                # cur.execute("INSERT INTO seq_books VALUES (?, ?, ?)", (seq_data))
+        # else:
+            # logging.error("Bad seq info in: %s/%s, seq info: %s" % (zip_file, filename, str(seq)))
 
 
-def seq2db(cur, seqs, book_id, zip_file, filename):
+def seqs4db(cur, seqs, book_id, zip_file, filename):
+    ret = []
     if seqs is None:
-        return
+        return ret
+    for seq in seqs:
+        if seq is not None and seq != "" and "id" in seq and "name" in seq:
+            seq_id = seq["id"]
+            seq_name = seq["name"]
+            REQ = 'SELECT count(*) FROM sequences WHERE id = "%s"' % seq_id
+            cur.execute(REQ)
+            rows = cur.fetchall()
+            cnt = rows[0][0]
+            if cnt == 0:
+                ret.append((seq_id, seq_name, ""))
+        else:
+            logging.error("Bad seq info in: %s/%s, seq info: %s" % (zip_file, filename, str(seq)))
+    return ret
+
+
+def seq_ref4db(cur, seqs, book_id, zip_file, filename):
+    ret = []
+    if seqs is None:
+        return ret
     for seq in seqs:
         if seq is not None and seq != "" and "id" in seq and "name" in seq:
             seq_id = seq["id"]
@@ -58,13 +144,6 @@ def seq2db(cur, seqs, book_id, zip_file, filename):
             seq_num = None
             if "num" in seq:
                 seq_num = seq["num"]
-            REQ = 'SELECT count(*) FROM sequences WHERE id = "%s"' % seq_id
-            cur.execute(REQ)
-            rows = cur.fetchall()
-            cnt = rows[0][0]
-            if cnt == 0:
-                seq_data = [seq_id, seq_name, ""]
-                cur.execute("INSERT INTO sequences VALUES (?, ?, ?)", (seq_data))
             REQ = 'SELECT count(*) FROM seq_books WHERE '
             REQ = REQ + 'seq_id = "%s" AND book_id = "%s";' % (
                 seq_id,
@@ -74,10 +153,10 @@ def seq2db(cur, seqs, book_id, zip_file, filename):
             rows = cur.fetchall()
             cnt = rows[0][0]
             if cnt == 0:
-                seq_data = [seq_id, book_id, seq_num]
-                cur.execute("INSERT INTO seq_books VALUES (?, ?, ?)", (seq_data))
+                ret.append((seq_id, book_id, seq_num))
         else:
             logging.error("Bad seq info in: %s/%s, seq info: %s" % (zip_file, filename, str(seq)))
+    return ret
 
 
 def genres2db(cur, genrs):
@@ -102,7 +181,59 @@ def genres2db(cur, genrs):
                     cur.execute("INSERT INTO genres_meta VALUES (?, ?)", (meta_data))
 
 
-def bookinfo2db(cur, book_id, book_title, annotation):
+def genres4db(cur, genrs):
+    ret = []
+    for genre_id in genrs.split("|"):
+        if genre_id is not None and genre_id != "":
+            genre = get_genre_name(genre_id)
+            genre_meta = get_genre_meta(genre_id)
+            REQ = 'SELECT count(*) FROM genres WHERE id = "%s"' % genre_id
+            cur.execute(REQ)
+            rows = cur.fetchall()
+            cnt = rows[0][0]
+            if cnt == 0:
+                ret.append((genre_id, genre_meta, genre))
+    return ret
+
+
+def genres_meta4db(cur, genrs):
+    ret = []
+    for genre_id in genrs.split("|"):
+        if genre_id is not None and genre_id != "":
+            genre = get_genre_name(genre_id)
+            genre_meta = get_genre_meta(genre_id)
+            REQ = 'SELECT count(*) FROM genres WHERE id = "%s"' % genre_id
+            cur.execute(REQ)
+            rows = cur.fetchall()
+            cnt = rows[0][0]
+            if cnt == 0:
+                REQ = 'SELECT count(*) from genres_meta WHERE meta_id = "%s"' % genre_meta
+                cur.execute(REQ)
+                rows = cur.fetchall()
+                cnt = rows[0][0]
+                if cnt == 0:
+                    meta_name = get_meta_name(genre_meta)
+                    ret.append((genre_meta, meta_name))
+    return ret
+
+# def bookinfo2db(cur, book_id, book_title, annotation):
+    # b_title = ""
+    # if book_title is not None:
+        # b_title = str(book_title)
+    # descr = ""
+    # if annotation is not None:
+        # descr = str(annotation)
+    # if book_id is not None:
+        # book_data = [book_id, b_title, descr]
+        # cur.execute("SELECT * FROM books_descr WHERE book_id = '%s'" % book_id)
+        # rows = cur.fetchall()
+        # if len(rows) > 0:
+            # cur.execute("DELETE FROM books_descr WHERE book_id = '%s'" % book_id)
+        # cur.execute("INSERT INTO books_descr VALUES (?, ?, ?)", (book_data))
+
+
+def bookinfo4db(cur, book_id, book_title, annotation):
+    ret = []
     b_title = ""
     if book_title is not None:
         b_title = str(book_title)
@@ -110,13 +241,8 @@ def bookinfo2db(cur, book_id, book_title, annotation):
     if annotation is not None:
         descr = str(annotation)
     if book_id is not None:
-        book_data = [book_id, b_title, descr]
-        cur.execute("SELECT * FROM books_descr WHERE book_id = '%s'" % book_id)
-        rows = cur.fetchall()
-        if len(rows) > 0:
-            cur.execute("DELETE FROM books_descr WHERE book_id = '%s'" % book_id)
-        cur.execute("INSERT INTO books_descr VALUES (?, ?, ?)", (book_data))
-
+        ret.append((book_id, b_title, descr))
+    return ret
 
 def clean_authors(dbfile, DEBUG):
     import sqlite3

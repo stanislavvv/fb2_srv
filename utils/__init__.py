@@ -9,14 +9,16 @@ import logging
 
 from bs4 import BeautifulSoup
 from datetime import datetime
+from .consts import INSERT_REQ
 from .strings import get_genres, get_genres_meta, get_genres_replace, genres_replace, check_genres, rchop
 from .data import get_genre, get_authors, get_author_ids
 from .data import get_sequence, get_sequence_names, get_sequence_ids, get_lang
 from .data import get_struct_by_key, make_id, get_replace_list, replace_book
 from .data import get_title
-from .db import author2db, genres2db, seq2db, unicode_nocase_collation, bookinfo2db, auth_ref2db
+from .db import unicode_nocase_collation, author4db, auth_ref4db, seqs4db, seq_ref4db, genres2db
+from .db import bookinfo4db
 from .inpx import get_inpx_meta
-import __main__
+# import __main__
 
 READ_SIZE = 20480  # description in 20kb...
 
@@ -125,8 +127,15 @@ def ziplist(inpx_data, zip_file):
 
 
 # iterate over list data, send it to db
-def iterate_list(blist, dbfile):
-    DEBUG = __main__.DEBUG
+def iterate_list(blist, dbfile, DEBUG):
+    ins_books = []
+    ins_authors = []
+    ins_seqs = []
+    ins_auth_ref = []
+    ins_seq_books = []
+    ins_book_info = []
+
+    # DEBUG = __main__.DEBUG
     data = open(blist, 'r')
     zip_file = os.path.basename(rchop(blist, '.list'))
     con = sqlite3.connect(dbfile)
@@ -134,33 +143,84 @@ def iterate_list(blist, dbfile):
         "UNICODE_NOCASE", unicode_nocase_collation
     )
     cur = con.cursor()
+    cur.execute("BEGIN TRANSACTION")
     cur.execute("DELETE FROM books WHERE zipfile = ?", [zip_file])
     if DEBUG:
         authors_list = blist + ".authors"  # debug
         au = open(authors_list, 'w')  # debug
     books = json.load(data)
-    for book in books:  # ToDo: create book2db()
-        insdata = [
-            book["zipfile"],
-            book["filename"],
-            book["genres"],
-            book["book_id"],
-            book["lang"],
-            book["date_time"],
-            book["size"],
-        ]
+    for book in books:
+        zip_file = book["zipfile"]
+        filename = book["filename"]
+        book_id = book["book_id"]
+        book_title = book["book_title"]
+        annotation = book["annotation"]
+        seqs = book["sequences"]
+        authors = book["authors"]
+        date_time = book["date_time"]
+        size = book["size"]
+        lang = book["lang"]
+        genres = genres_replace(book["genres"])
 
-        insdata[2] = genres_replace(insdata[2])
-        check_genres([book["zipfile"], book["filename"], insdata[2]])
-        cur.execute("INSERT INTO books VALUES (?, ?, ?, ?, ?, ?, ?)", (insdata))
-        genres2db(cur, insdata[2])
-        author2db(cur, book["authors"])
-        auth_ref2db(cur, book["authors"], book["book_id"])
-        bookinfo2db(cur, book["book_id"], book["book_title"], book["annotation"])
-        seq2db(cur, book["sequences"], book["book_id"], book["zipfile"], book["filename"])
+        check_genres(zip_file, filename, genres)  # log unknown genres
+        genres2db(cur, genres)
+
+        ins_books.append(
+            (
+                zip_file,
+                filename,
+                genres,
+                book_id,
+                lang,
+                date_time,
+                size
+            )
+        )
+
+        for book in bookinfo4db(cur, book_id, book_title, annotation):
+            ins_book_info.append(book)
+
+        for auth in author4db(cur, authors):
+            ins_authors.append(auth)
+
+        for auth in auth_ref4db(cur, authors, book_id):
+            ins_auth_ref.append(auth)
+
+        for seq in seqs4db(cur, seqs, book_id, zip_file, filename):
+            ins_seqs.append(seq)
+
+        for seq in seq_ref4db(cur, seqs, book_id, zip_file, filename):
+            ins_seq_books.append(seq)
+
+        # insdata = [
+            # book["zipfile"],
+            # book["filename"],
+            # book["genres"],
+            # book["book_id"],
+            # book["lang"],
+            # book["date_time"],
+            # book["size"],
+        # ]
+
+        # insdata[2] = genres_replace(insdata[2])
+        # check_genres([book["zipfile"], book["filename"], insdata[2]])
+        # cur.execute("INSERT INTO books VALUES (?, ?, ?, ?, ?, ?, ?)", (insdata))
+        # genres2db(cur, insdata[2])
+        # author2db(cur, book["authors"])
+        # auth_ref2db(cur, book["authors"], book["book_id"])
+        # bookinfo2db(cur, book["book_id"], book["book_title"], book["annotation"])
+        # seq2db(cur, book["sequences"], book["book_id"], book["zipfile"], book["filename"])
         if DEBUG:
-            for author in book["authors"].split("|"):  # debug
-                au.write(author + "|" + book["zipfile"] + "/" + book["filename"] + "\n")  # debug
+            for author in authors.split("|"):  # debug
+                au.write(author + "|" + zip_file + "/" + filename + "\n")  # debug
+
+    cur.executemany(INSERT_REQ["books"], ins_books)
+    cur.executemany(INSERT_REQ["authors"], ins_authors)
+    cur.executemany(INSERT_REQ["sequences"], ins_seqs)
+    cur.executemany(INSERT_REQ["bookinfo"], ins_book_info)
+    cur.executemany(INSERT_REQ["auth_ref"], ins_auth_ref)
+    cur.executemany(INSERT_REQ["seq_books"], ins_seq_books)
+    cur.execute("COMMIT")
     con.commit()
     con.close()
     if DEBUG:
@@ -169,9 +229,9 @@ def iterate_list(blist, dbfile):
 
 
 # wrapper over iterate_list, get .list, fill some auxiliary structs, pass .list next to iterate_list
-def booklist2db(booklist, dbfile):
+def booklist2db(booklist, dbfile, DEBUG):
     logging.info(booklist)
     get_genres_meta()
     get_genres()  # official genres from genres.list
     get_genres_replace()  # replacement for unofficial genres from genres_replace.list
-    iterate_list(booklist, dbfile)
+    iterate_list(booklist, dbfile, DEBUG)
