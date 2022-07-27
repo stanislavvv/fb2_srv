@@ -356,8 +356,6 @@ def get_seq_books(seq_id):
     rows = conn.execute(REQ).fetchall()
     for row in rows:
         (book_id, seq_num) = (row[0], row[1])
-        if not isinstance(seq_num, int):  # quick and dirty fix for sorting by seq_num
-            seq_num = -1
         ret.append({"book_id": book_id, "seq_num": seq_num})
     return ret
 

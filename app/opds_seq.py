@@ -311,7 +311,7 @@ def get_books_in_seq(seq_id):
             }
         )
 
-    for d in sorted(data, key=lambda s: s['seq_num']):
+    for d in sorted(data, key=lambda s: s['seq_num'] or -1):
         book_id = d["book_id"]
         zipfile = d["zipfile"]
         filename = d["filename"]
