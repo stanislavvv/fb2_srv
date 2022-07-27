@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from flask import current_app
-from .opds_internals import get_db_connection, get_dtiso, sizeof_fmt
+from .opds_internals import get_db_connection, get_dtiso, sizeof_fmt, get_books_info
 from .opds_internals import get_book_authors, get_genres_names, get_book_seqs
 
 
@@ -156,20 +156,16 @@ def get_genre_books(gen_id, page=0):
         filename,
         genres,
         books.book_id as book_id,
-        book_title,
         lang,
         size,
-        date_time,
-        annotation
-    FROM books, books_descr
+        date_time
+    FROM books
     WHERE
-        books.book_id = books_descr.book_id
-        AND (genres = '%s'
+        (genres = '%s'
             OR genres LIKE '%s|%%'
             OR genres LIKE '%%|%s'
             OR genres LIKE '%%|%s|%%'
         )
-        ORDER BY book_title
         LIMIT "%s"
         OFFSET "%s";
     """ % (
@@ -187,16 +183,45 @@ def get_genre_books(gen_id, page=0):
                 "@type": "application/atom+xml;profile=opds-catalog"
             }
         )
+    d1 = []  # tmp data without titles
+    book_ids = []
     for row in rows:
-        zipfile = row["zipfile"]
-        filename = row["filename"]
-        genres = row["genres"]
-        book_title = row["book_title"]
         book_id = row["book_id"]
-        lang = row["lang"]
-        size = row["size"]
-        date_time = row["date_time"]
-        annotation = row["annotation"]
+        d1.append(
+            {
+                "zipfile": row["zipfile"],
+                "filename": row["filename"],
+                "genres": row["genres"],
+                "book_id": row["book_id"],
+                "lang": row["lang"],
+                "size": row["size"],
+                "date_time": row["date_time"],
+            }
+        )
+        book_ids.append(book_id)
+    books_info = get_books_info(book_ids)
+    book_titles = {}
+    book_anno = {}
+    for book in books_info:
+        book_titles[book["book_id"]] = book["book_title"]
+        book_anno[book["book_id"]] = book["annotation"]
+
+    # prepare main data
+    data = []
+    for d in d1:
+        d["book_title"] = book_titles[d["book_id"]]
+        data.append(d)
+
+    for d in sorted(data, key=lambda s: s['book_title']):
+        book_id = d["book_id"]
+        zipfile = d["zipfile"]
+        filename = d["filename"]
+        genres = d["genres"]
+        lang = d["lang"]
+        size = d["size"]
+        date_time = d["date_time"]
+        book_title = d["book_title"]
+        annotation = book_anno[book_id]
 
         authors = []
         authors_data = get_book_authors(book_id)

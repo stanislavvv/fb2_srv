@@ -635,7 +635,7 @@ def get_author_by_alphabet(auth_id):
                 "size": row["size"],
                 "date_time": row["date_time"],
                 "book_title": book_titles[book_id],
-                "annotation": book_anno[book_id],
+                "annotation": book_anno[book_id]
             }
         )
 
