@@ -3,8 +3,8 @@
 import urllib.parse
 from flask import current_app
 
-from .opds_internals import get_db_connection, get_dtiso, any2alphabet, get_authors, get_genres_names, sizeof_fmt
-from .opds_internals import get_seqs, get_book_authors, get_book_seqs
+from .opds_internals import get_db_connection, get_dtiso, any2alphabet, get_genres_names, sizeof_fmt
+from .opds_internals import get_book_authors, get_book_seqs
 
 
 def main_opds():
@@ -291,8 +291,6 @@ def get_books_in_seq(seq_id):
         zipfile = row["zipfile"]
         filename = row["filename"]
         genres = row["genres"]
-        #author_ids = row["author_ids"]
-        #seq_ids = row["sequence_ids"]
         book_title = row["book_title"]
         book_id = row["book_id"]
         lang = row["lang"]

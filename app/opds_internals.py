@@ -69,7 +69,6 @@ def get_dtiso():
 # return [ { "name": seq_name, "id": seq_id, "count": books_count }, ...]
 def get_auth_seqs(auth_id=None, zip_file=None):
     ret = []
-    seq_cnt = {}
     if auth_id is not None and zip_file is None:
         REQ = """
             SELECT count(*) as cnt, seq_books.seq_id as seq_id, sequences.name as name
@@ -116,7 +115,6 @@ def get_auth_seqs(auth_id=None, zip_file=None):
             seq_books.seq_id = sequences.id
             GROUP BY seq_id
         """
-    print(REQ)
     conn = get_db_connection()
     rows = conn.execute(REQ).fetchall()
     if len(rows) != 0:
@@ -183,7 +181,6 @@ def get_authors(ids):
 
 def get_book_authors(book_id):
     ret = {}
-    selector = []
     REQ = """
     SELECT authors.id as id, authors.name as name
     FROM authors, books_authors

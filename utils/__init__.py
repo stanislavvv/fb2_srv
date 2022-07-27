@@ -18,7 +18,6 @@ from .data import get_title
 from .db import unicode_nocase_collation, author4db, auth_ref4db, seqs4db, seq_ref4db, genres2db
 from .db import bookinfo4db
 from .inpx import get_inpx_meta
-# import __main__
 
 READ_SIZE = 20480  # description in 20kb...
 
@@ -192,24 +191,6 @@ def iterate_list(blist, dbfile, DEBUG):
         for seq in seq_ref4db(cur, seqs, book_id, zip_file, filename):
             ins_seq_books.append(seq)
 
-        # insdata = [
-            # book["zipfile"],
-            # book["filename"],
-            # book["genres"],
-            # book["book_id"],
-            # book["lang"],
-            # book["date_time"],
-            # book["size"],
-        # ]
-
-        # insdata[2] = genres_replace(insdata[2])
-        # check_genres([book["zipfile"], book["filename"], insdata[2]])
-        # cur.execute("INSERT INTO books VALUES (?, ?, ?, ?, ?, ?, ?)", (insdata))
-        # genres2db(cur, insdata[2])
-        # author2db(cur, book["authors"])
-        # auth_ref2db(cur, book["authors"], book["book_id"])
-        # bookinfo2db(cur, book["book_id"], book["book_title"], book["annotation"])
-        # seq2db(cur, book["sequences"], book["book_id"], book["zipfile"], book["filename"])
         if DEBUG:
             for author in authors.split("|"):  # debug
                 au.write(author + "|" + zip_file + "/" + filename + "\n")  # debug

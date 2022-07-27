@@ -1,9 +1,5 @@
 # -*- coding: utf-8 -*-
 
-# import xmltodict
-# import sqlite3
-# import urllib.parse
-# import hashlib
 from flask import current_app
 from .opds_internals import get_db_connection, get_dtiso, sizeof_fmt
 from .opds_internals import get_book_authors, get_genres_names, get_book_seqs
