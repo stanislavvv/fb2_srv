@@ -1,7 +1,8 @@
 # BUGS:
 
-  * exists
+  * exists, many
   * cyrillic letters 'ё' and 'е' must be treat as same
+  * non-alphabet sorting in /sequencebooks request
 
 # ToDo:
 
