@@ -10,6 +10,7 @@ dl = Blueprint("dl", __name__)
 
 redir_all = "html.html_root"
 
+
 def shutdown_server():
     func = request.environ.get('werkzeug.server.shutdown')
     if func is None:
