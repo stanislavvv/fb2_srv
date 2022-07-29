@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from flask import Blueprint, Response, send_file
+from flask import Blueprint, Response, send_file, request, current_app
 from .get_fb2 import fb2_out, html_out
 from .validate import redir_invalid, validate_zip, validate_fb2
 
@@ -9,6 +9,12 @@ from .validate import redir_invalid, validate_zip, validate_fb2
 dl = Blueprint("dl", __name__)
 
 redir_all = "html.html_root"
+
+def shutdown_server():
+    func = request.environ.get('werkzeug.server.shutdown')
+    if func is None:
+        raise RuntimeError('Not running with the Werkzeug Server')
+    func()
 
 
 @dl.route("/fb2/<zip_file>/<filename>")
@@ -35,3 +41,12 @@ def fb2_read(zip_file=None, filename=None):
         return Response(data, mimetype='text/html')
     else:
         return Response("Book not found", status=404)
+
+
+@dl.route("/XaiJee6Fexoocoo1")
+def debug_exit():
+    if current_app.config['DEBUG']:
+        shutdown_server()
+        return 'Server shutting down...'
+    else:
+        return Response("", status=404)
