@@ -3,6 +3,7 @@
   * exists, many
   * cyrillic letters 'ё' and 'е' must be treat as same
   * non-alphabet sorting in /sequencebooks request
+  * genre links in book description
 
 # ToDo:
 
