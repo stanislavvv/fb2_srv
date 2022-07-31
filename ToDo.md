@@ -2,7 +2,7 @@
 
   * exists, many
   * cyrillic letters 'ё' and 'е' must be treat as same
-  * non-alphabet sorting in /sequencebooks request
+  * non-alphabet sorting in many books and sequences lists
   * genre links in book description
 
 # ToDo:
