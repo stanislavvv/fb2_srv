@@ -2,6 +2,7 @@
 
   * exists, many
   * cyrillic letters 'ё' and 'е' must be treat as same in ids generation
+  * in html bottom links group search must be form, not link
 
 # ToDo:
 
