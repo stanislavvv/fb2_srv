@@ -62,7 +62,7 @@ def html_by_seq(seq=None):
     if seq is None:
         return redir_invalid(redir_all)
     data = get_sequences(seq)
-    if data is None or len(data) < 10:
+    if data is None or len(data) < 1:
         return redir_invalid(redir_all)
     title = data['feed']['title']
     updated = data['feed']['updated']
@@ -78,7 +78,7 @@ def html_books_in_seq(seq=None):
     if seq is None:
         return redir_invalid(redir_all)
     data = get_books_in_seq(seq)
-    if data is None or len(data) < 10:
+    if data is None or len(data) < 1:
         return redir_invalid(redir_all)
     title = data['feed']['title']
     updated = data['feed']['updated']
@@ -107,7 +107,7 @@ def html_by_authors(auth=None):
     if auth is None:
         return redir_invalid(redir_all)
     data = get_authors_list(auth)
-    if data is None or len(data) < 10:
+    if data is None or len(data) < 1:
         return redir_invalid(redir_all)
     title = data['feed']['title']
     updated = data['feed']['updated']
@@ -123,7 +123,7 @@ def html_by_author(auth=None):
     if auth is None:
         return redir_invalid(redir_all)
     data = get_author_list(auth)
-    if data is None or len(data) < 10:
+    if data is None or len(data) < 1:
         return redir_invalid(redir_all)
     title = data['feed']['title']
     updated = data['feed']['updated']
@@ -139,7 +139,7 @@ def html_author_sequences(auth=None):
     if auth is None:
         return redir_invalid(redir_all)
     data = get_author_sequences(auth)
-    if data is None or len(data) < 10:
+    if data is None or len(data) < 1:
         return redir_invalid(redir_all)
     title = data['feed']['title']
     updated = data['feed']['updated']
@@ -158,7 +158,7 @@ def html_author_sequence(auth=None, seq=None):
     if seq is None:
         return redir_invalid(redir_all)
     data = get_author_sequence(auth, seq)
-    if data is None or len(data) < 10:
+    if data is None or len(data) < 1:
         return redir_invalid(redir_all)
     title = data['feed']['title']
     updated = data['feed']['updated']
@@ -174,7 +174,7 @@ def html_author_sequenceless(auth=None):
     if auth is None:
         return redir_invalid(redir_all)
     data = get_author_sequenceless(auth)
-    if data is None or len(data) < 10:
+    if data is None or len(data) < 1:
         return redir_invalid(redir_all)
     title = data['feed']['title']
     updated = data['feed']['updated']
@@ -190,7 +190,7 @@ def html_author_alphabet(auth=None):
     if auth is None:
         return redir_invalid(redir_all)
     data = get_author_by_alphabet(auth)
-    if data is None or len(data) < 10:
+    if data is None or len(data) < 1:
         return redir_invalid(redir_all)
     title = data['feed']['title']
     updated = data['feed']['updated']
@@ -226,11 +226,11 @@ def html_genres_root():
     return Response(page, mimetype='text/html')
 
 
-@html.route("/html/genres/<meta_id>")
+@html.route("/html/genres/<int:meta_id>")
 def html_genres_meta(meta_id=None):
-    meta_id = validate_genre_meta(meta_id)
+    meta_id = validate_genre_meta(str(meta_id))
     data = get_genres_list(meta_id)
-    if data is None or len(data) < 10:
+    if data is None or len(data) < 1:
         return redir_invalid(redir_all)
     title = data['feed']['title']
     updated = data['feed']['updated']
@@ -260,7 +260,7 @@ def html_genres_book_page(gen_id=None, page=0):
     if gen_id is None:
         return redir_invalid(redir_all)
     data = get_genre_books(gen_id, page)
-    if data is None or len(data) < 10:
+    if data is None or len(data) < 1:
         return redir_invalid(redir_all)
     title = data['feed']['title']
     updated = data['feed']['updated']
@@ -273,8 +273,6 @@ def html_genres_book_page(gen_id=None, page=0):
 @html.route("/html/zips", methods=['GET'])
 def html_by_zips_root():
     data = get_zips_list()
-    if data is None or len(data) < 10:
-        return redir_invalid(redir_all)
     title = data['feed']['title']
     updated = data['feed']['updated']
     entry = data['feed']['entry']
@@ -289,7 +287,7 @@ def html_by_zip(zip_name=None):
     if zip_name is None:
         return redir_invalid(redir_all)
     data = get_zip_list(zip_name)
-    if data is None or len(data) < 10:
+    if data is None or len(data) < 1:
         return redir_invalid(redir_all)
     title = data['feed']['title']
     updated = data['feed']['updated']
@@ -322,7 +320,7 @@ def html_zip_sequence(zip_name=None, seq=None):
     if seq is None:
         return redir_invalid(redir_all)
     data = get_zip_sequence(zip_name, seq)
-    if data is None or len(data) < 10:
+    if data is None or len(data) < 1:
         return redir_invalid(redir_all)
     title = data['feed']['title']
     updated = data['feed']['updated']
@@ -339,6 +337,8 @@ def html_zip_sequenceless(zip_name=None, page=0):
     if zip_name is None:
         return redir_invalid(redir_all)
     data = get_zip_sequenceless(zip_name, page)
+    if data is None or len(data) < 1:
+        return redir_invalid(redir_all)
     title = data['feed']['title']
     updated = data['feed']['updated']
     entry = data['feed']['entry']
@@ -354,7 +354,7 @@ def html_zip_alphabet(zip_name=None, page=0):
     if zip_name is None:
         return redir_invalid(redir_all)
     data = get_zip_by_alphabet(zip_name, page)
-    if data is None or len(data) < 10:
+    if data is None or len(data) < 1:
         return redir_invalid(redir_all)
     title = data['feed']['title']
     updated = data['feed']['updated']
@@ -382,7 +382,7 @@ def html_search_authors():
     s_term = request.args.get('searchTerm')
     s_term = validate_search(s_term)
     data = get_search_authors(s_term)
-    if data is None or len(data) < 10:
+    if data is None or len(data) < 1:
         return redir_invalid(redir_all)
     title = data['feed']['title']
     updated = data['feed']['updated']
@@ -397,7 +397,7 @@ def html_search_books():
     s_term = request.args.get('searchTerm')
     s_term = validate_search(s_term)
     data = get_search_books(s_term)
-    if data is None or len(data) < 10:
+    if data is None or len(data) < 1:
         return redir_invalid(redir_all)
     title = data['feed']['title']
     updated = data['feed']['updated']

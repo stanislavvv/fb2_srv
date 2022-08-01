@@ -446,3 +446,51 @@ def param_to_search(field: str, s: str):
             ret.append('"%%%s%%"' % w)
     f = " AND %s LIKE " % field
     return f.join(ret)
+
+
+def get_seq_link(approot, seq_id, seq_name):
+    ret = {
+        "@href": approot + "/opds/sequencebooks/" + seq_id,
+        "@rel": "related",
+        "@title": "Серия '" + seq_name + "'",
+        "@type": "application/atom+xml"
+    }
+    return ret
+
+
+# ctype == 'dl' for download
+def get_book_link(approot, zipfile, filename, ctype):
+    title = "Читать онлайн"
+    book_ctype = "text/html"
+    rel = "alternate"
+    href = approot + "/read/" + zipfile + "/" + filename
+    if ctype == 'dl':
+        title = "Скачать"
+        book_ctype = "application/fb2+zip"
+        rel = "http://opds-spec.org/acquisition/open-access"
+        href = approot + "/fb2/" + zipfile + "/" + filename
+    ret = {
+        "@href": href,
+        "@rel": rel,
+        "@title": title,
+        "@type": book_ctype
+    }
+    return ret
+
+
+def get_book_entry(date_time, book_id, book_title, authors, links, category, lang, annotext):
+    ret = {
+        "updated": date_time,
+        "id": "tag:book:" + book_id,
+        "title": book_title,
+        "author": authors,
+        "link": links,
+        "category": category,
+        "dc:language": lang,
+        "dc:format": "fb2",
+        "content": {
+            "@type": "text/html",
+            "#text": annotext
+        }
+    }
+    return ret

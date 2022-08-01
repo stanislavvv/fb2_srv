@@ -19,7 +19,7 @@
         {% for l in link %}
           {% if l['@rel'] == "search" %}
             <form action={{l['@href']|replace('/opds', '/html', 1)|replace('?searchTerm={searchTerms}', '', 1)}} method="get">
-                <input type="text" name="searchTerm"><input type="submit" value="Search"></form>
+                <input type="text" name="searchTerm"><input type="submit" value="Искать"></form>
           {% else %}
             <a href={{l['@href']|replace('/opds', '/html', 1)}}>{{l['@rel']|replace('/opds', '/html', 1)}}</a>
           {% endif %}
@@ -43,7 +43,7 @@
             <p>
             Genres: 
             {% for c in i.category %}
-                <a href="{{ config.APPLICATION_ROOT }}/html/genres/{{c['@term']}}">{{c['@label']}}</a> 
+                <a href="{{ config.APPLICATION_ROOT }}/html/genre/{{c['@term']}}">{{c['@label']}}</a> 
             {% endfor %}
             </p>
             <p>
@@ -51,8 +51,8 @@
                 <p>{{i.content['#text']|safe}}</p>
             {% endif -%}
             </p>
-            <p>Language: {{i['dc:language']}}</p>
-            <p>Updated: {{i.updated}}</p>
+            <p>Язык: {{i['dc:language']}}</p>
+            <p>Добавлено: {{i.updated}}</p>
             <hr>
         </div>
         {% endfor %}

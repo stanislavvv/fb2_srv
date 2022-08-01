@@ -2,6 +2,7 @@
 
 from .opds_internals import get_db_connection, get_dtiso, get_book_authors, get_genres_names, get_book_seqs
 from .opds_internals import get_auth_seqs, get_zips_sorted, sizeof_fmt
+from .opds_internals import get_seq_link, get_book_link, get_book_entry
 from flask import current_app
 
 
@@ -14,7 +15,7 @@ def ret_hdr_zip():  # python does not have constants
             "@xmlns:opds": "http://opds-spec.org/2010/catalog",
             "id": "tag:root:zips",
             "updated": "0000-00-00_00:00",
-            "title": "Books by zips",
+            "title": "Книжные zip'ы",
             "icon": "/favicon.ico",
             "link": [
                 # {
@@ -43,6 +44,7 @@ def get_zips_list():
     approot = current_app.config['APPLICATION_ROOT']
     ret = ret_hdr_zip()
     ret["feed"]["updated"] = dtiso
+    ret["feed"]["title"] = "Архивы с книгами"
     ret["feed"]["link"].append(
         {
             "@href": approot + "/opds/",
@@ -75,7 +77,7 @@ def get_zip_list(zip_name):
     approot = current_app.config['APPLICATION_ROOT']
     ret = ret_hdr_zip()
     ret["feed"]["id"] = "tag:zip:" + zip_name
-    ret["feed"]["title"] = "Books in archive: " + zip_name + ""
+    ret["feed"]["title"] = "Книги из архива '" + zip_name + "'"
     ret["feed"]["updated"] = dtiso
     ret["feed"]["link"].append(
         {
@@ -120,8 +122,8 @@ def get_zip_sequences(zip_name):
     dtiso = get_dtiso()
     approot = current_app.config['APPLICATION_ROOT']
     ret = ret_hdr_zip()
-    ret["feed"]["id"] = "tag:zip:" + zip_name + ":sequcenses"
-    ret["feed"]["title"] = "Books in archive: " + zip_name + " by sequence"
+    ret["feed"]["id"] = "tag:zip:" + zip_name + ":sequenses"
+    ret["feed"]["title"] = "Книги из архива '" + zip_name + "' по сериям"
     ret["feed"]["updated"] = dtiso
     ret["feed"]["link"].append(
         {
@@ -165,7 +167,7 @@ def get_zip_sequence(zip_name, seq_id):
     seq_name = rows[0][1]
     ret = ret_hdr_zip()
     ret["feed"]["id"] = "tag:zip:" + zip_name + ":sequence:" + seq_id
-    ret["feed"]["title"] = "Books of zip: " + zip_name + " by sequence '" + seq_name + "'"
+    ret["feed"]["title"] = "Книги из архива '" + zip_name + "' в серии '" + seq_name + "'"
     ret["feed"]["updated"] = dtiso
     ret["feed"]["link"].append(
         {
@@ -226,31 +228,10 @@ def get_zip_sequence(zip_name, seq_id):
             )
         seq_data = get_book_seqs(book_id)
         for k, v in seq_data.items():
-            links.append(
-                {
-                    "@href": approot + "/opds/sequencebooks/" + k,
-                    "@rel": "related",
-                    "@title": "All books in sequence '" + v + "'",
-                    "@type": "application/atom+xml"
-                }
-            )
+            links.append(get_seq_link(approot, k, v))
 
-        links.append(
-            {
-                "@href": approot + "/fb2/" + zipfile + "/" + filename,
-                "@rel": "http://opds-spec.org/acquisition/open-access",
-                "@title": "Download",
-                "@type": "application/fb2+zip"
-            },
-        )
-        links.append(
-            {
-                "@href": approot + "/read/" + zipfile + "/" + filename,
-                "@rel": "alternate",
-                "@title": "Read in browser",
-                "@type": "text/html"
-            }
-        )
+        links.append(get_book_link(approot, zipfile, filename, 'dl'))
+        links.append(get_book_link(approot, zipfile, filename, 'read'))
 
         category = []
         category_data = get_genres_names(genres)
@@ -262,25 +243,11 @@ def get_zip_sequence(zip_name, seq_id):
                 }
             )
         annotext = """
-        <p class=\"book\"> %s </p>\n<br/>Format: fb2<br/>
-        Size: %s<br/>Sequence: %s, Number: %s<br/>
+        <p class=\"book\"> %s </p>\n<br/>формат: fb2<br/>
+        размер: %s<br/>Серия: %s, номер: %s<br/>
         """ % (annotation, sizeof_fmt(size), seq_name, str(seq_num))
         ret["feed"]["entry"].append(
-            {
-                "updated": date_time,
-                "id": "tag:book:" + book_id,
-                "title": book_title,
-                "author": authors,
-                "link": links,
-                "category": category,
-                "dc:language": lang,
-                "dc:format": "fb2",
-                "content": {
-                    "@type": "text/html",
-                    "#text": annotext
-                },
-
-            }
+            get_book_entry(date_time, book_id, book_title, authors, links, category, lang, annotext)
         )
     conn.close()
     return ret
@@ -291,7 +258,7 @@ def get_zip_sequenceless(zip_name, page):
     approot = current_app.config['APPLICATION_ROOT']
     ret = ret_hdr_zip()
     ret["feed"]["id"] = "tag:zip:" + zip_name + ":sequenceless:"
-    ret["feed"]["title"] = "Books in archive: " + zip_name + ' without sequence'
+    ret["feed"]["title"] = "Книги из архива '" + zip_name + "' вне серий"
     ret["feed"]["updated"] = dtiso
     conn = get_db_connection()
     if page == 0:
@@ -384,20 +351,9 @@ def get_zip_sequenceless(zip_name, page):
                 }
             )
 
-        links = [
-                    {
-                        "@href": approot + "/fb2/" + zipfile + "/" + filename,
-                        "@rel": "http://opds-spec.org/acquisition/open-access",
-                        "@title": "Download",
-                        "@type": "application/fb2+zip"
-                    },
-                    {
-                        "@href": approot + "/read/" + zipfile + "/" + filename,
-                        "@rel": "alternate",
-                        "@title": "Read in browser",
-                        "@type": "text/html"
-                    }
-        ]
+        links = []
+        links.append(get_book_link(approot, zipfile, filename, 'dl'))
+        links.append(get_book_link(approot, zipfile, filename, 'read'))
 
         category = []
         category_data = get_genres_names(genres)
@@ -409,24 +365,11 @@ def get_zip_sequenceless(zip_name, page):
                 }
             )
         annotext = """
-        <p class=\"book\"> %s </p>\n<br/>Format: fb2<br/>
-        Size: %s<br/>Sequence: %s<br/>
-        """ % (annotation, sizeof_fmt(size), "")
+        <p class=\"book\"> %s </p>\n<br/>формат: fb2<br/>
+        размер: %s<br/>
+        """ % (annotation, sizeof_fmt(size))
         ret["feed"]["entry"].append(
-            {
-                "updated": date_time,
-                "id": "tag:book:" + book_id,
-                "title": book_title,
-                "author": authors,
-                "link": links,
-                "category": category,
-                "dc:language": lang,
-                "dc:format": "fb2",
-                "content": {
-                    "@type": "text/html",
-                    "#text": annotext
-                }
-            }
+            get_book_entry(date_time, book_id, book_title, authors, links, category, lang, annotext)
         )
     conn.close()
     return ret
@@ -437,7 +380,7 @@ def get_zip_by_alphabet(zip_name, page):
     approot = current_app.config['APPLICATION_ROOT']
     ret = ret_hdr_zip()
     ret["feed"]["id"] = "tag:zip:" + zip_name + ":books:alphabet:"
-    ret["feed"]["title"] = "Books in archive: " + zip_name + " by aplhabet"
+    ret["feed"]["title"] = "Книги из архива '" + zip_name + "' по алфавиту"
     ret["feed"]["updated"] = dtiso
     conn = get_db_connection()
     if page == 0:
@@ -529,31 +472,10 @@ def get_zip_by_alphabet(zip_name, page):
         seq_data = get_book_seqs(book_id)
         links = []
         for k, v in seq_data.items():
-            links.append(
-                {
-                    "@href": approot + "/opds/sequencebooks/" + k,
-                    "@rel": "related",
-                    "@title": "All books in sequence '" + v + "'",
-                    "@type": "application/atom+xml"
-                }
-            )
+            links.append(get_seq_link(approot, k, v))
 
-        links.append(
-            {
-                "@href": approot + "/fb2/" + zipfile + "/" + filename,
-                "@rel": "http://opds-spec.org/acquisition/open-access",
-                "@title": "Download",
-                "@type": "application/fb2+zip"
-            }
-        )
-        links.append(
-            {
-                "@href": approot + "/read/" + zipfile + "/" + filename,
-                "@rel": "alternate",
-                "@title": "Read in browser",
-                "@type": "text/html"
-            }
-        )
+        links.append(get_book_link(approot, zipfile, filename, 'dl'))
+        links.append(get_book_link(approot, zipfile, filename, 'read'))
 
         category = []
         category_data = get_genres_names(genres)
@@ -565,24 +487,11 @@ def get_zip_by_alphabet(zip_name, page):
                 }
             )
         annotext = """
-        <p class=\"book\"> %s </p>\n<br/>Format: fb2<br/>
-        Size: %s<br/>Sequence: %s<br/>
-        """ % (annotation, sizeof_fmt(size), "")
+        <p class=\"book\"> %s </p>\n<br/>формат: fb2<br/>
+        размер: %s<br/>
+        """ % (annotation, sizeof_fmt(size))
         ret["feed"]["entry"].append(
-            {
-                "updated": date_time,
-                "id": "tag:book:" + book_id,
-                "title": book_title,
-                "author": authors,
-                "link": links,
-                "category": category,
-                "dc:language": lang,
-                "dc:format": "fb2",
-                "content": {
-                    "@type": "text/html",
-                    "#text": annotext
-                },
-            }
+            get_book_entry(date_time, book_id, book_title, authors, links, category, lang, annotext)
         )
     conn.close()
     return ret

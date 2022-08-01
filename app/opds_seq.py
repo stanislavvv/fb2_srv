@@ -5,6 +5,7 @@ from flask import current_app
 
 from .opds_internals import get_db_connection, get_dtiso, any2alphabet, get_genres_names, sizeof_fmt
 from .opds_internals import get_book_authors, get_book_seqs, get_seq_books, get_books_info
+from .opds_internals import get_seq_link, get_book_link, get_book_entry
 
 
 def main_opds():
@@ -49,7 +50,7 @@ def main_opds():
                     "title": "По авторам",
                     "content": {
                         "@type": "text",
-                        "#text": "Поиск книг по авторам"
+                        "#text": "По авторам"
                     },
                     "link": {
                         "@href": approot + "/opds/authorsindex",
@@ -62,7 +63,7 @@ def main_opds():
                     "title": "По сериям",
                     "content": {
                         "@type": "text",
-                        "#text": "Поиск книг по сериям"
+                        "#text": "По сериям"
                     },
                     "link": {
                         "@href": approot + "/opds/sequencesindex",
@@ -75,7 +76,7 @@ def main_opds():
                     "title": "По жанрам",
                     "content": {
                         "@type": "text",
-                        "#text": "Поиск книг по жанрам"
+                        "#text": "По жанрам"
                     },
                     "link": {
                         "@href": approot + "/opds/genres",
@@ -88,7 +89,7 @@ def main_opds():
                     "title": "По архивам",
                     "content": {
                         "@type": "text",
-                        "#text": "Поиск книг по архивам"
+                        "#text": "По архивам"
                     },
                     "link": {
                         "@href": approot + "/opds/zips",
@@ -113,7 +114,7 @@ def get_sequences(seq_root):
             "@xmlns:os": "http://a9.com/-/spec/opensearch/1.1/",
             "@xmlns:opds": "http://opds-spec.org/2010/catalog",
             "id": "tag:root:sequences",
-            "title": "Books by series",
+            "title": "Серии книг",
             "updated": dtiso,  # 2022-04-06T23:54:23+02:00
             "icon": "/favicon.ico",
             "link": [
@@ -153,7 +154,7 @@ def get_sequences(seq_root):
                     "title": ch,
                     "content": {
                         "@type": "text",
-                        "#text": "книги на '" + ch + "'"
+                        "#text": "Серии на '" + ch + "'"
                     },
                     "link": {
                         "@href": approot + "/opds/sequences/" + urllib.parse.quote(ch),
@@ -175,6 +176,7 @@ def get_sequences(seq_root):
         conn = get_db_connection()
         rows = conn.execute(REQ).fetchall()
         ret["feed"]["id"] = "tag:root:sequences:" + urllib.parse.quote(seq_root, encoding='utf-8')
+        ret["feed"]["title"] = "Серии книг на '" + seq_root + "'"
         for ch in any2alphabet("seq", rows, 3):
             ret["feed"]["entry"].append(
                 {
@@ -203,6 +205,7 @@ def get_sequences(seq_root):
         ORDER BY U_UPPER(name);
         ''' % (seq_root, seq_root)
         ret["feed"]["id"] = "tag:root:sequences:" + urllib.parse.quote(seq_root, encoding='utf-8')
+        ret["feed"]["title"] = "Серии книг на '" + seq_root + "'"
         conn = get_db_connection()
         rows = conn.execute(REQ).fetchall()
         for row in rows:
@@ -344,31 +347,10 @@ def get_books_in_seq(seq_id):
 
         seq_data = get_book_seqs(book_id)
         for k, v in seq_data.items():
-            links.append(
-                {
-                    "@href": approot + "/opds/sequencebooks/" + k,
-                    "@rel": "related",
-                    "@title": "All books in sequence '" + v + "'",
-                    "@type": "application/atom+xml"
-                }
-            )
+            links.append(get_seq_link(approot, k, v))
 
-        links.append(
-            {
-                "@href": approot + "/fb2/" + zipfile + "/" + filename,
-                "@rel": "http://opds-spec.org/acquisition/open-access",
-                "@title": "Download",
-                "@type": "application/fb2+zip"
-            }
-        )
-        links.append(
-            {
-                "@href": approot + "/read/" + zipfile + "/" + filename,
-                "@rel": "alternate",
-                "@title": "Read in browser",
-                "@type": "text/html"
-            }
-        )
+        links.append(get_book_link(approot, zipfile, filename, 'dl'))
+        links.append(get_book_link(approot, zipfile, filename, 'read'))
 
         category = []
         category_data = get_genres_names(genres)
@@ -384,25 +366,11 @@ def get_books_in_seq(seq_id):
         else:
             s_num = str(seq_num)
         annotext = """
-        <p class=\"book\"> %s </p>\n<br/>Format: fb2<br/>
-        Size: %s<br/>Sequence: %s, Number: %s<br/>
+        <p class=\"book\"> %s </p>\n<br/>формат: fb2<br/>
+        размер: %s<br/>Серия: %s, номер: %s<br/>
         """ % (annotation, sizeof_fmt(size), seq, s_num)
         ret["feed"]["entry"].append(
-            {
-                "updated": date_time,
-                "id": "tag:book:" + book_id,
-                "title": book_title,
-                "author": authors,
-                "link": links,
-                "category": category,
-                "dc:language": lang,
-                "dc:format": "fb2",
-                "content": {
-                    "@type": "text/html",
-                    "#text": annotext
-                },
-
-            }
+            get_book_entry(date_time, book_id, book_title, authors, links, category, lang, annotext)
         )
     conn.close()
     return ret

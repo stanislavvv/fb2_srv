@@ -2,6 +2,7 @@
 
 from .opds_internals import get_db_connection, get_dtiso, get_book_authors, get_genres_names
 from .opds_internals import get_book_seqs, sizeof_fmt, url_str, param_to_search, unicode_upper
+from .opds_internals import get_seq_link, get_book_link, get_book_entry
 from flask import current_app
 
 
@@ -14,7 +15,7 @@ def ret_hdr_search():  # python does not have constants
             "@xmlns:opds": "http://opds-spec.org/2010/catalog",
             "id": "tag:root:authors",
             "updated": "0000-00-00_00:00",
-            "title": "Books search",
+            "title": "Поиск по книгам",
             "icon": "/favicon.ico",
             "link": [
                 # {
@@ -58,10 +59,10 @@ def get_search_main(s_term):
           {
             "updated": dtiso,
             "id": "tag:search:authors::",
-            "title": "Search in authors names",
+            "title": "Поиск в именах авторов",
             "content": {
               "@type": "text",
-              "#text": "Search in authors names"
+              "#text": "Поиск в именах авторов"
             },
             "link": {
               "@href": approot + "/opds/search-authors?searchTerm=%s" % url_str(s_term),
@@ -73,10 +74,10 @@ def get_search_main(s_term):
           {
             "updated": "2022-05-25T07:26:50+02:00",
             "id": "tag:search:title",
-            "title": "Search in book titles",
+            "title": "Поиск в названиях книг",
             "content": {
               "@type": "text",
-              "#text": "Поиск книг по названию"
+              "#text": "Поиск в названиях книг"
             },
             "link": {
               "@href": approot + "/opds/search-books?searchTerm=%s" % url_str(s_term),
@@ -93,7 +94,7 @@ def get_search_authors(s_term):
     ret = ret_hdr_search()
     ret["feed"]["updated"] = dtiso
     ret["feed"]["id"] = "tag:search::%s" % s_term
-    ret["feed"]["title"] = "Search in authors names by '%s'" % s_term
+    ret["feed"]["title"] = "Поиск в именах авторов по '%s'" % s_term
     s_term = param_to_search("U_UPPER(name)", s_term)
 
     REQ = '''
@@ -114,7 +115,7 @@ def get_search_authors(s_term):
                 "title": auth_name,
                 "content": {
                     "@type": "text",
-                    "#text": "Books of author: " + auth_name
+                    "#text": "Книги автора: " + auth_name
                 },
                 "link": {
                     "@href": approot + "/opds/author/" + auth_id,
@@ -132,7 +133,7 @@ def get_search_books(s_term):
     approot = current_app.config['APPLICATION_ROOT']
     ret = ret_hdr_search()
     ret["feed"]["id"] = "tag:search:books::"
-    ret["feed"]["title"] = "Search in books titles by: '%s'" % s_term
+    ret["feed"]["title"] = "Поиск в названиях книг по: '%s'" % s_term
     ret["feed"]["updated"] = dtiso
     s_term = param_to_search("U_UPPER(book_title)", s_term)
 
@@ -178,31 +179,10 @@ def get_search_books(s_term):
         seq_data = get_book_seqs(book_id)
         links = []
         for k, v in seq_data.items():
-            links.append(
-                {
-                    "@href": approot + "/opds/sequencebooks/" + k,
-                    "@rel": "related",
-                    "@title": "All books in sequence '" + v + "'",
-                    "@type": "application/atom+xml"
-                }
-            )
+            links.append(get_seq_link(approot, k, v))
 
-        links.append(
-            {
-                "@href": approot + "/fb2/" + zipfile + "/" + filename,
-                "@rel": "http://opds-spec.org/acquisition/open-access",
-                "@title": "Download",
-                "@type": "application/fb2+zip"
-            }
-        )
-        links.append(
-            {
-                "@href": approot + "/read/" + zipfile + "/" + filename,
-                "@rel": "alternate",
-                "@title": "Read in browser",
-                "@type": "text/html"
-            }
-        )
+        links.append(get_book_link(approot, zipfile, filename, 'dl'))
+        links.append(get_book_link(approot, zipfile, filename, 'read'))
 
         category = []
         category_data = get_genres_names(genres)
@@ -218,20 +198,7 @@ def get_search_books(s_term):
         Size: %s<br/>
         """ % (annotation, sizeof_fmt(size))
         ret["feed"]["entry"].append(
-            {
-                "updated": date_time,
-                "id": "tag:book:" + book_id,
-                "title": book_title,
-                "author": authors,
-                "link": links,
-                "category": category,
-                "dc:language": lang,
-                "dc:format": "fb2",
-                "content": {
-                    "@type": "text/html",
-                    "#text": annotext
-                },
-            }
+            get_book_entry(date_time, book_id, book_title, authors, links, category, lang, annotext)
         )
     conn.close()
     return ret

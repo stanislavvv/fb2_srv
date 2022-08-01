@@ -3,6 +3,7 @@
 from flask import current_app
 from .opds_internals import get_db_connection, get_dtiso, sizeof_fmt, get_books_info
 from .opds_internals import get_book_authors, get_genres_names, get_book_seqs
+from .opds_internals import get_seq_link, get_book_link, get_book_entry
 
 
 def ret_hdr_genre():
@@ -45,6 +46,8 @@ def get_genres_list(meta_id=None):
     approot = current_app.config['APPLICATION_ROOT']
 
     if meta_id is None:
+        ret["feed"]["id"] = "tag:root:genre"
+        ret["feed"]["title"] = "Группы жанров"
         REQ = '''
             SELECT meta_id, description
             FROM genres_meta
@@ -73,12 +76,24 @@ def get_genres_list(meta_id=None):
         conn.close()
     else:
         REQ = '''
+            SELECT description
+            FROM genres_meta
+            WHERE meta_id = "%s"
+        ''' % meta_id
+        conn = get_db_connection()
+        rows = conn.execute(REQ).fetchall()
+        ret["feed"]["id"] = "tag:root:genre:" + meta_id
+        if len(rows) > 0:
+            row = rows[0]
+            meta_name = row["description"]
+            ret["feed"]["title"] = "Жанры группы '" + meta_name + "'"
+        REQ = '''
             SELECT id, description
             FROM genres
             WHERE meta_id = "%s"
             ORDER BY description;
         ''' % meta_id
-        conn = get_db_connection()
+        # conn = get_db_connection()
         rows = conn.execute(REQ).fetchall()
         for row in rows:
             genre = row["description"]
@@ -90,7 +105,7 @@ def get_genres_list(meta_id=None):
                     "title": genre,
                     "content": {
                         "@type": "text",
-                        "#text": "Books in genre '" + genre + "'"
+                        "#text": "Поджанры в '" + genre + "'"
                     },
                     "link": {
                         "@href": approot + "/opds/genre/" + gen_id,
@@ -115,7 +130,7 @@ def get_genre_books(gen_id, page=0):
     genre = rows[0][1]
 
     ret["feed"]["id"] = "tag:root:genre:" + gen_id
-    ret["feed"]["title"] = "Books in genre: " + genre + " by aplhabet"
+    ret["feed"]["title"] = "Книги в жанре: " + genre
     ret["feed"]["updated"] = dtiso
     if page == 0:
         ret["feed"]["link"].append(
@@ -166,8 +181,9 @@ def get_genre_books(gen_id, page=0):
             OR genres LIKE '%%|%s'
             OR genres LIKE '%%|%s|%%'
         )
-        LIMIT "%s"
-        OFFSET "%s";
+    ORDER BY zipfile, filename
+    LIMIT "%s"
+    OFFSET "%s"
     """ % (
         gen_id, gen_id, gen_id, gen_id,
         str(current_app.config['PAGE_SIZE']),
@@ -235,31 +251,10 @@ def get_genre_books(gen_id, page=0):
         seq_data = get_book_seqs(book_id)
         links = []
         for k, v in seq_data.items():
-            links.append(
-                {
-                    "@href": approot + "/opds/sequencebooks/" + k,
-                    "@rel": "related",
-                    "@title": "All books in sequence '" + v + "'",
-                    "@type": "application/atom+xml"
-                }
-            )
+            links.append(get_seq_link(approot, k, v))
 
-        links.append(
-            {
-                "@href": approot + "/fb2/" + zipfile + "/" + filename,
-                "@rel": "http://opds-spec.org/acquisition/open-access",
-                "@title": "Download",
-                "@type": "application/fb2+zip"
-            }
-        )
-        links.append(
-            {
-                "@href": approot + "/read/" + zipfile + "/" + filename,
-                "@rel": "alternate",
-                "@title": "Read in browser",
-                "@type": "text/html"
-            }
-        )
+        links.append(get_book_link(approot, zipfile, filename, 'dl'))
+        links.append(get_book_link(approot, zipfile, filename, 'read'))
 
         category = []
         category_data = get_genres_names(genres)
@@ -271,24 +266,11 @@ def get_genre_books(gen_id, page=0):
                 }
             )
         annotext = """
-        <p class=\"book\"> %s </p>\n<br/>Format: fb2<br/>
-        Size: %s<br/>
+        <p class=\"book\"> %s </p>\n<br/>формат: fb2<br/>
+        размер: %s<br/>
         """ % (annotation, sizeof_fmt(size))
         ret["feed"]["entry"].append(
-            {
-                "updated": date_time,
-                "id": "tag:book:" + book_id,
-                "title": book_title,
-                "author": authors,
-                "link": links,
-                "category": category,
-                "dc:language": lang,
-                "dc:format": "fb2",
-                "content": {
-                    "@type": "text/html",
-                    "#text": annotext
-                },
-            }
+            get_book_entry(date_time, book_id, book_title, authors, links, category, lang, annotext)
         )
     conn.close()
     return ret

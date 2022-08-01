@@ -3,6 +3,7 @@
 from .opds_internals import get_db_connection, get_dtiso, get_genres_names, get_book_authors
 from .opds_internals import get_auth_seqs, sizeof_fmt, url_str, unurl, any2alphabet
 from .opds_internals import get_book_seqs, get_books_info, get_author_books, get_seq_books
+from .opds_internals import get_seq_link, get_book_link, get_book_entry
 from flask import current_app
 
 
@@ -46,6 +47,7 @@ def get_authors_list(auth_root):
     if a_root is None or a_root == "" or a_root == "/" or not isinstance(a_root, str):
         ret = ret_hdr_author()
         ret["feed"]["updated"] = dtiso
+        ret["feed"]["title"] = "Авторы"
         ret["feed"]["link"].append(
             {
                 "@href": approot + "/opds/",
@@ -93,6 +95,7 @@ def get_authors_list(auth_root):
         GROUP BY nm ORDER BY nm;''' % a_root
         conn = get_db_connection()
         rows = conn.execute(REQ).fetchall()
+        ret["feed"]["title"] = "Авторы на '" + a_root + "'"
         ret["feed"]["id"] = "tag:root:authors:" + a_root
         for row in rows:
             ch = row["nm"]
@@ -114,6 +117,7 @@ def get_authors_list(auth_root):
         conn.close()
     else:
         ret = ret_hdr_author()
+        ret["feed"]["title"] = "Авторы на '" + a_root + "'"
         ret["feed"]["link"].append(
             {
                 "@href": approot + "/opds/authorsindex/",
@@ -165,7 +169,7 @@ def get_author_list(auth_id):
     auth_info = rows[0][2]
     ret = ret_hdr_author()
     ret["feed"]["id"] = "tag:author:" + auth_id
-    ret["feed"]["title"] = "Books of author: " + auth_name + ""
+    ret["feed"]["title"] = "Книги автора '" + auth_name + "'"
     ret["feed"]["updated"] = dtiso
     ret["feed"]["link"].append(
         {
@@ -178,7 +182,7 @@ def get_author_list(auth_id):
                 {
                     "updated": dtiso,
                     "id": "tag:author:bio:" + auth_id,
-                    "title": "About author",
+                    "title": "Об авторе",
                     "link": [
                         {
                             "@href": approot + "/opds/author/" + auth_id + "/sequences",
@@ -201,7 +205,7 @@ def get_author_list(auth_id):
                 {
                     "updated": dtiso,
                     "id": "tag:author:" + auth_id + ":sequences",
-                    "title": "Books by sequences",
+                    "title": "По сериям",
                     "link": {
                         "@href": approot + "/opds/author/" + auth_id + "/sequences",
                         "@type": "application/atom+xml;profile=opds-catalog"
@@ -210,7 +214,7 @@ def get_author_list(auth_id):
                 {
                     "updated": dtiso,
                     "id": "tag:author:" + auth_id + ":sequenceless",
-                    "title": "Books outside of sequences",
+                    "title": "Вне серий",
                     "link": {
                         "@href": approot + "/opds/author/" + auth_id + "/sequenceless",
                         "@type": "application/atom+xml;profile=opds-catalog"
@@ -219,7 +223,7 @@ def get_author_list(auth_id):
                 {
                     "updated": dtiso,
                     "id": "tag:author:" + auth_id + ":alphabet",
-                    "title": "Books by alphabet",
+                    "title": "По алфавиту",
                     "link": {
                         "@href": approot + "/opds/author/" + auth_id + "/alphabet",
                         "@type": "application/atom+xml;profile=opds-catalog"
@@ -228,7 +232,7 @@ def get_author_list(auth_id):
                 {
                     "updated": dtiso,
                     "id": "tag:author:" + auth_id + ":time",
-                    "title": "Books by entry date",
+                    "title": "По дате добавления",
                     "link": {
                         "@href": approot + "/opds/author/" + auth_id + "/time",
                         "@type": "application/atom+xml;profile=opds-catalog"
@@ -250,7 +254,7 @@ def get_author_sequences(auth_id):
     auth_name = rows[0][1]
     ret = ret_hdr_author()
     ret["feed"]["id"] = "tag:author:" + auth_id
-    ret["feed"]["title"] = "Books of author: " + auth_name + " by sequence"
+    ret["feed"]["title"] = "Книги автора '" + auth_name + "' по сериям"
     ret["feed"]["updated"] = dtiso
     ret["feed"]["link"].append(
         {
@@ -260,10 +264,16 @@ def get_author_sequences(auth_id):
         }
     )
     seqs = get_auth_seqs(auth_id)
+    data = []
     for seq in seqs:
         seq_name = seq["name"]
         seq_id = seq["id"]
         seq_cnt = seq["count"]
+        data.append({"name": seq_name, "id": seq_id, "count": seq_cnt})
+    for d in sorted(data, key=lambda s: s['name'] or -1):
+        seq_name = d["name"]
+        seq_id = d["id"]
+        seq_cnt = d["count"]
         ret["feed"]["entry"].append(
             {
                 "updated": dtiso,
@@ -271,7 +281,7 @@ def get_author_sequences(auth_id):
                 "title": seq_name,
                 "content": {
                     "@type": "text",
-                    "#text": str(seq_cnt) + " book(s) in sequence"
+                    "#text": str(seq_cnt) + " книг(и) в серии"
                 },
                 "link": {
                     "@href": approot + "/opds/authorsequence/" + auth_id + "/" + seq_id,
@@ -300,7 +310,7 @@ def get_author_sequence(auth_id, seq_id):
     seq_name = rows[0][1]
     ret = ret_hdr_author()
     ret["feed"]["id"] = "tag:author:" + auth_id + ":sequence:" + seq_id
-    ret["feed"]["title"] = "Books of author: " + auth_name + " by sequence '" + seq_name + "'"
+    ret["feed"]["title"] = "Книги автора '" + auth_name + "' из серии '" + seq_name + "'"
     ret["feed"]["updated"] = dtiso
     ret["feed"]["link"].append(
         {
@@ -392,31 +402,10 @@ def get_author_sequence(auth_id, seq_id):
             )
         seq_data = get_book_seqs(book_id)
         for k, v in seq_data.items():
-            links.append(
-                {
-                    "@href": approot + "/opds/sequencebooks/" + k,
-                    "@rel": "related",
-                    "@title": "All books in sequence '" + v + "'",
-                    "@type": "application/atom+xml"
-                }
-            )
+            links.append(get_seq_link(approot, k, v))
 
-        links.append(
-            {
-                "@href": approot + "/fb2/" + zipfile + "/" + filename,
-                "@rel": "http://opds-spec.org/acquisition/open-access",
-                "@title": "Download",
-                "@type": "application/fb2+zip"
-            },
-        )
-        links.append(
-            {
-                "@href": approot + "/read/" + zipfile + "/" + filename,
-                "@rel": "alternate",
-                "@title": "Read in browser",
-                "@type": "text/html"
-            }
-        )
+        links.append(get_book_link(approot, zipfile, filename, 'dl'))
+        links.append(get_book_link(approot, zipfile, filename, 'read'))
 
         category = []
         category_data = get_genres_names(genres)
@@ -428,25 +417,11 @@ def get_author_sequence(auth_id, seq_id):
                 }
             )
         annotext = """
-        <p class=\"book\"> %s </p>\n<br/>Format: fb2<br/>
-        Size: %s<br/>Sequence: %s, Number: %s<br/>
+        <p class=\"book\"> %s </p>\n<br/>формат: fb2<br/>
+        размер: %s<br/>Серия: %s, номер: %s<br/>
         """ % (annotation, sizeof_fmt(size), seq_name, str(seq_num))
         ret["feed"]["entry"].append(
-            {
-                "updated": date_time,
-                "id": "tag:book:" + book_id,
-                "title": book_title,
-                "author": authors,
-                "link": links,
-                "category": category,
-                "dc:language": lang,
-                "dc:format": "fb2",
-                "content": {
-                    "@type": "text/html",
-                    "#text": annotext
-                },
-
-            }
+            get_book_entry(date_time, book_id, book_title, authors, links, category, lang, annotext)
         )
     conn.close()
     return ret
@@ -463,7 +438,7 @@ def get_author_sequenceless(auth_id):
     auth_name = rows[0][1]
     ret = ret_hdr_author()
     ret["feed"]["id"] = "tag:author:" + auth_id + ":sequenceless:"
-    ret["feed"]["title"] = "Books of author: " + auth_name
+    ret["feed"]["title"] = "Книги автора '" + auth_name + "' вне серий"
     ret["feed"]["updated"] = dtiso
 
     book_ids = get_author_books(auth_id)
@@ -535,21 +510,9 @@ def get_author_sequenceless(auth_id):
                     "name": v
                 }
             )
-
-        links = [
-                    {
-                        "@href": approot + "/fb2/" + zipfile + "/" + filename,
-                        "@rel": "http://opds-spec.org/acquisition/open-access",
-                        "@title": "Download",
-                        "@type": "application/fb2+zip"
-                    },
-                    {
-                        "@href": approot + "/read/" + zipfile + "/" + filename,
-                        "@rel": "alternate",
-                        "@title": "Read in browser",
-                        "@type": "text/html"
-                    }
-        ]
+        links = []
+        links.append(get_book_link(approot, zipfile, filename, 'dl'))
+        links.append(get_book_link(approot, zipfile, filename, 'read'))
 
         category = []
         category_data = get_genres_names(genres)
@@ -561,24 +524,11 @@ def get_author_sequenceless(auth_id):
                 }
             )
         annotext = """
-        <p class=\"book\"> %s </p>\n<br/>Format: fb2<br/>
-        Size: %s<br/>Sequence: %s<br/>
-        """ % (annotation, sizeof_fmt(size), "")
+        <p class=\"book\"> %s </p>\n<br/>формат: fb2<br/>
+        размер: %s<br/><br/>
+        """ % (annotation, sizeof_fmt(size))
         ret["feed"]["entry"].append(
-            {
-                "updated": date_time,
-                "id": "tag:book:" + book_id,
-                "title": book_title,
-                "author": authors,
-                "link": links,
-                "category": category,
-                "dc:language": lang,
-                "dc:format": "fb2",
-                "content": {
-                    "@type": "text/html",
-                    "#text": annotext
-                }
-            }
+            get_book_entry(date_time, book_id, book_title, authors, links, category, lang, annotext)
         )
     conn.close()
     return ret
@@ -662,31 +612,10 @@ def get_author_by_alphabet(auth_id):
         seq_data = get_book_seqs(book_id)
         links = []
         for k, v in seq_data.items():
-            links.append(
-                {
-                    "@href": approot + "/opds/sequencebooks/" + k,
-                    "@rel": "related",
-                    "@title": "All books in sequence '" + v + "'",
-                    "@type": "application/atom+xml"
-                }
-            )
+            links.append(get_seq_link(approot, k, v))
 
-        links.append(
-            {
-                "@href": approot + "/fb2/" + zipfile + "/" + filename,
-                "@rel": "http://opds-spec.org/acquisition/open-access",
-                "@title": "Download",
-                "@type": "application/fb2+zip"
-            }
-        )
-        links.append(
-            {
-                "@href": approot + "/read/" + zipfile + "/" + filename,
-                "@rel": "alternate",
-                "@title": "Read in browser",
-                "@type": "text/html"
-            }
-        )
+        links.append(get_book_link(approot, zipfile, filename, 'dl'))
+        links.append(get_book_link(approot, zipfile, filename, 'read'))
 
         category = []
         category_data = get_genres_names(genres)
@@ -698,24 +627,11 @@ def get_author_by_alphabet(auth_id):
                 }
             )
         annotext = """
-        <p class=\"book\"> %s </p>\n<br/>Format: fb2<br/>
-        Size: %s<br/>Sequence: %s<br/>
-        """ % (annotation, sizeof_fmt(size), "")
+        <p class=\"book\"> %s </p>\n<br/>формат: fb2<br/>
+        размер: %s<br/>
+        """ % (annotation, sizeof_fmt(size))
         ret["feed"]["entry"].append(
-            {
-                "updated": date_time,
-                "id": "tag:book:" + book_id,
-                "title": book_title,
-                "author": authors,
-                "link": links,
-                "category": category,
-                "dc:language": lang,
-                "dc:format": "fb2",
-                "content": {
-                    "@type": "text/html",
-                    "#text": annotext
-                },
-            }
+            get_book_entry(date_time, book_id, book_title, authors, links, category, lang, annotext)
         )
     conn.close()
     return ret
@@ -732,7 +648,7 @@ def get_author_by_time(auth_id):
     auth_name = rows[0][1]
     ret = ret_hdr_author()
     ret["feed"]["id"] = "tag:author:" + auth_id + ":books:time:"
-    ret["feed"]["title"] = "Books of author: " + auth_name + " by time"
+    ret["feed"]["title"] = "Книги автора '" + auth_name + "' по дате добавления"
     ret["feed"]["updated"] = dtiso
     ret["feed"]["link"].append(
         {
@@ -805,31 +721,10 @@ def get_author_by_time(auth_id):
         seq_data = get_book_seqs(book_id)
         links = []
         for k, v in seq_data.items():
-            links.append(
-                {
-                    "@href": approot + "/opds/sequencebooks/" + k,
-                    "@rel": "related",
-                    "@title": "All books in sequence '" + v + "'",
-                    "@type": "application/atom+xml"
-                }
-            )
+            links.append(get_seq_link(approot, k, v))
 
-        links.append(
-            {
-                "@href": approot + "/fb2/" + zipfile + "/" + filename,
-                "@rel": "http://opds-spec.org/acquisition/open-access",
-                "@title": "Download",
-                "@type": "application/fb2+zip"
-            }
-        )
-        links.append(
-            {
-                "@href": approot + "/read/" + zipfile + "/" + filename,
-                "@rel": "alternate",
-                "@title": "Read in browser",
-                "@type": "text/html"
-            }
-        )
+        links.append(get_book_link(approot, zipfile, filename, 'dl'))
+        links.append(get_book_link(approot, zipfile, filename, 'read'))
 
         category = []
         category_data = get_genres_names(genres)
@@ -841,24 +736,11 @@ def get_author_by_time(auth_id):
                 }
             )
         annotext = """
-        <p class=\"book\"> %s </p>\n<br/>Format: fb2<br/>
-        Size: %s<br/>Sequence: %s<br/>
-        """ % (annotation, sizeof_fmt(size), "")
+        <p class=\"book\"> %s </p>\n<br/>формат: fb2<br/>
+        размер: %s<br/>
+        """ % (annotation, sizeof_fmt(size))
         ret["feed"]["entry"].append(
-            {
-                "updated": date_time,
-                "id": "tag:book:" + book_id,
-                "title": book_title,
-                "author": authors,
-                "link": links,
-                "category": category,
-                "dc:language": lang,
-                "dc:format": "fb2",
-                "content": {
-                    "@type": "text/html",
-                    "#text": annotext
-                },
-            }
+            get_book_entry(date_time, book_id, book_title, authors, links, category, lang, annotext)
         )
     conn.close()
     return ret
