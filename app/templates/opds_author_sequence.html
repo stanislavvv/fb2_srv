@@ -35,7 +35,12 @@
         <hr>
         <p>
         {% for l in link %}
+          {% if l['@rel'] == "search" %}
+            <form action={{l['@href']|replace('/opds', '/html', 1)|replace('?searchTerm={searchTerms}', '', 1)}} method="get">
+                <input type="text" name="searchTerm"><input type="submit" value="Искать"></form>
+          {% else %}
             <a href={{l['@href']|replace('/opds', '/html', 1)}}>{{l['@rel']|replace('/opds', '/html', 1)}}</a>
+          {% endif %}
         {% endfor %}
         </p>
         {% if updated is defined -%}
