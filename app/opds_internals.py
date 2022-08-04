@@ -412,8 +412,8 @@ def url_str(s):
     tr = {
         '"': '%22',
         "'": '%27',
-        '.': '%2E',
-        '/': '%2F'
+        #'.': '%2E',
+        #'/': '%2F'
     }
     ret = ''
     if s is not None:
@@ -463,12 +463,12 @@ def get_book_link(approot, zipfile, filename, ctype):
     title = "Читать онлайн"
     book_ctype = "text/html"
     rel = "alternate"
-    href = approot + "/read/" + zipfile + "/" + filename
+    href = approot + "/read/" + zipfile + "/" + url_str(filename)
     if ctype == 'dl':
         title = "Скачать"
         book_ctype = "application/fb2+zip"
         rel = "http://opds-spec.org/acquisition/open-access"
-        href = approot + "/fb2/" + zipfile + "/" + filename
+        href = approot + "/fb2/" + zipfile + "/" + url_str(filename)
     ret = {
         "@href": href,
         "@rel": rel,

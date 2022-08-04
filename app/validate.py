@@ -7,7 +7,7 @@ from .opds_internals import get_db_connection, unurl
 id_check = re.compile('([0-9a-f]+)')
 genre_check = re.compile('([0-9a-z_]+)')
 zip_check = re.compile('([0-9a-zA-Z_.-]+.zip)')
-fb2_check = re.compile('([0-9a-zA-Z_.-]+.fb2)')
+fb2_check = re.compile('([ 0-9a-zA-Z_.-]+.fb2)')
 
 
 def redir_invalid(redir_name):
@@ -73,7 +73,7 @@ def validate_zip(s: str):
 
 
 def validate_fb2(s: str):
-    ret = s
+    ret = unurl(s)
     if fb2_check.match(s):
         return ret
     return None

@@ -1,7 +1,6 @@
 # BUGS:
 
   * exists, many
-  * space in filename == wrong url (.../read/f.fb2-396347-399579.zip/Roman ...)
   * cyrillic letters 'ё' and 'е' must be treat as same in ids generation
 
 # ToDo:
