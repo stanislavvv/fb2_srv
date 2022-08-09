@@ -202,3 +202,79 @@ def get_search_books(s_term):
         )
     conn.close()
     return ret
+
+
+def get_random_books():
+    ret = ret_hdr_search()
+    dtiso = get_dtiso()
+    approot = current_app.config['APPLICATION_ROOT']
+    pagesize = current_app.config['PAGE_SIZE']
+    ret = ret_hdr_search()
+    ret["feed"]["id"] = "tag:search:books::"
+    ret["feed"]["title"] = "Поиск случайных книг"
+    ret["feed"]["updated"] = dtiso
+
+    REQ = """
+    SELECT
+        zipfile,
+        filename,
+        genres,
+        books.book_id as book_id,
+        book_title,
+        lang,
+        size,
+        date_time,
+        annotation
+    FROM books, books_descr
+    WHERE
+        books.book_id = books_descr.book_id
+        ORDER BY RANDOM() LIMIT %s;
+    """ % str(pagesize)
+    conn = get_db_connection()
+    rows = conn.execute(REQ).fetchall()
+    for row in rows:
+        zipfile = row["zipfile"]
+        filename = row["filename"]
+        genres = row["genres"]
+        book_title = row["book_title"]
+        book_id = row["book_id"]
+        lang = row["lang"]
+        size = row["size"]
+        date_time = row["date_time"]
+        annotation = row["annotation"]
+
+        authors = []
+        authors_data = get_book_authors(book_id)
+        for k, v in authors_data.items():
+            authors.append(
+                {
+                    "uri": approot + "/opds/author/" + k,
+                    "name": v
+                }
+            )
+        seq_data = get_book_seqs(book_id)
+        links = []
+        for k, v in seq_data.items():
+            links.append(get_seq_link(approot, k, v))
+
+        links.append(get_book_link(approot, zipfile, filename, 'dl'))
+        links.append(get_book_link(approot, zipfile, filename, 'read'))
+
+        category = []
+        category_data = get_genres_names(genres)
+        for k, v in category_data.items():
+            category.append(
+                {
+                    "@label": v,
+                    "@term": k
+                }
+            )
+        annotext = """
+        <p class=\"book\"> %s </p>\n<br/>Format: fb2<br/>
+        Size: %s<br/>
+        """ % (annotation, sizeof_fmt(size))
+        ret["feed"]["entry"].append(
+            get_book_entry(date_time, book_id, book_title, authors, links, category, lang, annotext)
+        )
+    conn.close()
+    return ret

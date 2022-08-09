@@ -8,13 +8,22 @@ import logging
 from .strings import strlist, strip_quotes
 
 
+# will be normalize string for make_id and compare
+def str_normalize(s: str):
+    ret = s
+    return ret
+
+
 # get name, strip quotes from begin/end, return md5
 def make_id(name):
+    n = "--- unknown ---"
     if name is not None and name != "":
-        n = str(name).strip("'").strip('"')
-    else:
-        n = "--- unknown ---"
-    return hashlib.md5(n.encode('utf-8').upper()).hexdigest()
+        if isinstance(name, str):
+            n = str(name).strip("'").strip('"')
+        else:
+            n = str(name, encoding='utf-8').strip("'").strip('"')
+    nn = str_normalize(n)
+    return hashlib.md5(nn.encode('utf-8').upper()).hexdigest()
 
 
 # return pipe-separated string of genres from input struct

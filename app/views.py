@@ -5,7 +5,7 @@ from .opds_seq import main_opds, get_sequences, get_books_in_seq
 from .opds_auth import get_authors_list, get_author_list, get_author_sequences, get_author_sequence
 from .opds_auth import get_author_sequenceless, get_author_by_alphabet, get_author_by_time
 from .opds_genres import get_genres_list, get_genre_books
-from .opds_search import get_search_main, get_search_authors, get_search_books
+from .opds_search import get_search_main, get_search_authors, get_search_books, get_random_books
 from .opds_zips import get_zips_list, get_zip_list, get_zip_sequences, get_zip_sequence
 from .opds_zips import get_zip_sequenceless, get_zip_by_alphabet
 from .validate import redir_invalid, validate_id, validate_genre, validate_prefix
@@ -210,6 +210,13 @@ def opds_zip_alphabet(zip_name=None, page=0):
     if zip_name is None:
         return redir_invalid(redir_all)
     xml = xmltodict.unparse(get_zip_by_alphabet(zip_name, page), pretty=True)
+    return Response(xml, mimetype='text/xml')
+
+
+@opds.route("/opds/random-books")
+@opds.route("/opds/random-books/<int:page>")
+def opds_random(page=0):
+    xml = xmltodict.unparse(get_random_books(), pretty=True)
     return Response(xml, mimetype='text/xml')
 
 

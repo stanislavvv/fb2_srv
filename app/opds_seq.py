@@ -95,6 +95,19 @@ def main_opds():
                         "@href": approot + "/opds/zips",
                         "@type": "application/atom+xml;profile=opds-catalog"
                     }
+                },
+                {
+                    "updated": dtiso,
+                    "id": "tag:root:random:books",
+                    "title": "Случайные книги",
+                    "content": {
+                        "@type": "text",
+                        "#text": "Случайные книги"
+                    },
+                    "link": {
+                        "@href": approot + "/opds/random-books",
+                        "@type": "application/atom+xml;profile=opds-catalog"
+                    }
                 }
             ]
         }
