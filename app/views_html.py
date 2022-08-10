@@ -6,6 +6,7 @@ from .opds_auth import get_authors_list, get_author_list, get_author_sequences, 
 from .opds_auth import get_author_sequenceless, get_author_by_alphabet, get_author_by_time
 from .opds_genres import get_genres_list, get_genre_books
 from .opds_search import get_search_main, get_search_authors, get_search_books, get_random_books
+from .opds_search import get_search_seqs, get_random_seqs
 from .opds_zips import get_zips_list, get_zip_list, get_zip_sequences, get_zip_sequence
 from .opds_zips import get_zip_sequenceless, get_zip_by_alphabet
 from .validate import redir_invalid, validate_id, validate_genre, validate_prefix
@@ -366,7 +367,7 @@ def html_zip_alphabet(zip_name=None, page=0):
 
 @html.route("/html/random-books")
 @html.route("/html/random-books/<int:page>")
-def html_random(zip_name=None, page=0):
+def html_random_books(zip_name=None, page=0):
     data = get_random_books()
     if data is None or len(data) < 1:
         return redir_invalid(redir_all)
@@ -375,6 +376,20 @@ def html_random(zip_name=None, page=0):
     entry = data['feed']['entry']
     link = data['feed']['link']
     page = render_template('opds_sequence.html', title=title, updated=updated, link=link, entry=entry)
+    return Response(page, mimetype='text/html')
+
+
+@html.route("/html/random-sequences")
+@html.route("/html/random-sequences/<int:page>")
+def html_random_seqs(zip_name=None, page=0):
+    data = get_random_seqs()
+    if data is None or len(data) < 1:
+        return redir_invalid(redir_all)
+    title = data['feed']['title']
+    updated = data['feed']['updated']
+    entry = data['feed']['entry']
+    link = data['feed']['link']
+    page = render_template('opds_root.html', title=title, updated=updated, link=link, entry=entry)
     return Response(page, mimetype='text/html')
 
 
@@ -418,4 +433,19 @@ def html_search_books():
     entry = data['feed']['entry']
     link = data['feed']['link']
     page = render_template('opds_sequence.html', title=title, updated=updated, link=link, entry=entry)
+    return Response(page, mimetype='text/html')
+
+
+@html.route("/html/search-sequences", methods=['GET'])
+def html_search_seqs():
+    s_term = request.args.get('searchTerm')
+    s_term = validate_search(s_term)
+    data = get_search_seqs(s_term)
+    if data is None or len(data) < 1:
+        return redir_invalid(redir_all)
+    title = data['feed']['title']
+    updated = data['feed']['updated']
+    entry = data['feed']['entry']
+    link = data['feed']['link']
+    page = render_template('opds_root.html', title=title, updated=updated, link=link, entry=entry)
     return Response(page, mimetype='text/html')

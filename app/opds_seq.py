@@ -108,6 +108,19 @@ def main_opds():
                         "@href": approot + "/opds/random-books",
                         "@type": "application/atom+xml;profile=opds-catalog"
                     }
+                },
+                {
+                    "updated": dtiso,
+                    "id": "tag:root:random:sequences",
+                    "title": "Случайные серии",
+                    "content": {
+                        "@type": "text",
+                        "#text": "Случайные серии"
+                    },
+                    "link": {
+                        "@href": approot + "/opds/random-sequences",
+                        "@type": "application/atom+xml;profile=opds-catalog"
+                    }
                 }
             ]
         }

@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+import urllib.parse
+
 from .opds_internals import get_db_connection, get_dtiso, get_book_authors, get_genres_names
 from .opds_internals import get_book_seqs, sizeof_fmt, url_str, param_to_search, unicode_upper
 from .opds_internals import get_seq_link, get_book_link, get_book_entry
@@ -74,6 +76,21 @@ def get_search_main(s_term):
           {
             "updated": "2022-05-25T07:26:50+02:00",
             "id": "tag:search:title",
+            "title": "Поиск в сериях",
+            "content": {
+              "@type": "text",
+              "#text": "Поиск в сериях"
+            },
+            "link": {
+              "@href": approot + "/opds/search-sequences?searchTerm=%s" % url_str(s_term),
+              "@type": "application/atom+xml;profile=opds-catalog"
+            }
+          }
+        )
+        ret["feed"]["entry"].append(
+          {
+            "updated": "2022-05-25T07:26:50+02:00",
+            "id": "tag:search:title",
             "title": "Поиск в названиях книг",
             "content": {
               "@type": "text",
@@ -93,7 +110,7 @@ def get_search_authors(s_term):
     approot = current_app.config['APPLICATION_ROOT']
     ret = ret_hdr_search()
     ret["feed"]["updated"] = dtiso
-    ret["feed"]["id"] = "tag:search::%s" % s_term
+    ret["feed"]["id"] = "tag:search:authors:%s" % s_term
     ret["feed"]["title"] = "Поиск в именах авторов по '%s'" % s_term
     s_term = param_to_search("U_UPPER(name)", s_term)
 
@@ -119,6 +136,46 @@ def get_search_authors(s_term):
                 },
                 "link": {
                     "@href": approot + "/opds/author/" + auth_id,
+                    "@type": "application/atom+xml;profile=opds-catalog"
+                }
+            }
+        )
+    conn.close()
+    return ret
+
+
+def get_search_seqs(s_term):
+    dtiso = get_dtiso()
+    approot = current_app.config['APPLICATION_ROOT']
+    ret = ret_hdr_search()
+    ret["feed"]["id"] = "tag:search:sequences:" + urllib.parse.quote(s_term, encoding='utf-8')
+    ret["feed"]["title"] = "Серии книг с '" + s_term + "' в названии"
+    s_term = param_to_search("U_UPPER(name)", s_term)
+
+    REQ = '''
+        SELECT id, name
+        FROM sequences
+        WHERE
+            U_UPPER(name) like %s
+        GROUP BY U_UPPER(name)
+        ORDER BY U_UPPER(name);
+    ''' % unicode_upper(s_term.replace("'", "\'"))  # simple quote: ToDo - change to str_normalize()
+    conn = get_db_connection()
+    rows = conn.execute(REQ).fetchall()
+    for row in rows:
+        seq_name = row["name"]
+        seq_id = row["id"]
+        ret["feed"]["entry"].append(
+            {
+                "updated": dtiso,
+                "id": "tag:sequence:" + urllib.parse.quote(seq_name, encoding='utf-8'),
+                "title": seq_name,
+                "content": {
+                    "@type": "text",
+                    "#text": "книги на '" + seq_name + "'"
+                },
+                "link": {
+                    "@href": approot + "/opds/sequencebooks/" + seq_id,
                     "@type": "application/atom+xml;profile=opds-catalog"
                 }
             }
@@ -210,7 +267,7 @@ def get_random_books():
     approot = current_app.config['APPLICATION_ROOT']
     pagesize = current_app.config['PAGE_SIZE']
     ret = ret_hdr_search()
-    ret["feed"]["id"] = "tag:search:books::"
+    ret["feed"]["id"] = "tag:search:books:random:"
     ret["feed"]["title"] = "Поиск случайных книг"
     ret["feed"]["updated"] = dtiso
 
@@ -275,6 +332,43 @@ def get_random_books():
         """ % (annotation, sizeof_fmt(size))
         ret["feed"]["entry"].append(
             get_book_entry(date_time, book_id, book_title, authors, links, category, lang, annotext)
+        )
+    conn.close()
+    return ret
+
+
+def get_random_seqs():
+    dtiso = get_dtiso()
+    approot = current_app.config['APPLICATION_ROOT']
+    pagesize = current_app.config['PAGE_SIZE']
+    ret = ret_hdr_search()
+    ret["feed"]["id"] = "tag:random:sequences:"
+    ret["feed"]["title"] = "Случайние серии"
+
+    REQ = '''
+        SELECT id, name
+        FROM sequences
+        ORDER BY RANDOM() LIMIT %s;
+    ''' % str(pagesize)
+    conn = get_db_connection()
+    rows = conn.execute(REQ).fetchall()
+    for row in rows:
+        seq_name = row["name"]
+        seq_id = row["id"]
+        ret["feed"]["entry"].append(
+            {
+                "updated": dtiso,
+                "id": "tag:sequence:" + urllib.parse.quote(seq_name, encoding='utf-8'),
+                "title": seq_name,
+                "content": {
+                    "@type": "text",
+                    "#text": "книги на '" + seq_name + "'"
+                },
+                "link": {
+                    "@href": approot + "/opds/sequencebooks/" + seq_id,
+                    "@type": "application/atom+xml;profile=opds-catalog"
+                }
+            }
         )
     conn.close()
     return ret
