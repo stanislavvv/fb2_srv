@@ -389,7 +389,7 @@ def html_random_seqs(zip_name=None, page=0):
     updated = data['feed']['updated']
     entry = data['feed']['entry']
     link = data['feed']['link']
-    page = render_template('opds_root.html', title=title, updated=updated, link=link, entry=entry)
+    page = render_template('opds_author_sequence.html', title=title, updated=updated, link=link, entry=entry)
     return Response(page, mimetype='text/html')
 
 

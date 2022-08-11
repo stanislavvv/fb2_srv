@@ -4,7 +4,7 @@ import urllib.parse
 
 from .opds_internals import get_db_connection, get_dtiso, get_book_authors, get_genres_names
 from .opds_internals import get_book_seqs, sizeof_fmt, url_str, param_to_search, unicode_upper
-from .opds_internals import get_seq_link, get_book_link, get_book_entry
+from .opds_internals import get_seq_link, get_book_link, get_book_entry, get_books_info, get_seqs_cnt
 from flask import current_app
 
 
@@ -271,35 +271,48 @@ def get_random_books():
     ret["feed"]["title"] = "Поиск случайных книг"
     ret["feed"]["updated"] = dtiso
 
+    book_ids = []
+    REQ = """
+    SELECT book_id, author_id FROM books_authors
+    ORDER BY RANDOM() LIMIT %s;
+    """ % pagesize
+    conn = get_db_connection()
+    rows = conn.execute(REQ).fetchall()
+    for row in rows:
+        book_id = row[0]
+        book_ids.append(book_id)
+
+    books_info = get_books_info(book_ids)
+    book_titles = {}
+    book_anno = {}
+    for book in books_info:
+        book_titles[book["book_id"]] = book["book_title"]
+        book_anno[book["book_id"]] = book["annotation"]
+
     REQ = """
     SELECT
         zipfile,
         filename,
         genres,
         books.book_id as book_id,
-        book_title,
         lang,
         size,
-        date_time,
-        annotation
-    FROM books, books_descr
+        date_time
+    FROM books
     WHERE
-        books.book_id = books_descr.book_id
-        ORDER BY RANDOM() LIMIT %s;
-    """ % str(pagesize)
-    conn = get_db_connection()
+        books.book_id IN ('%s')
+    """ % "','".join(book_ids)
     rows = conn.execute(REQ).fetchall()
     for row in rows:
         zipfile = row["zipfile"]
         filename = row["filename"]
         genres = row["genres"]
-        book_title = row["book_title"]
         book_id = row["book_id"]
         lang = row["lang"]
         size = row["size"]
         date_time = row["date_time"]
-        annotation = row["annotation"]
-
+        book_title = book_titles[book_id]
+        annotation = book_anno[book_id]
         authors = []
         authors_data = get_book_authors(book_id)
         for k, v in authors_data.items():
@@ -343,7 +356,7 @@ def get_random_seqs():
     pagesize = current_app.config['PAGE_SIZE']
     ret = ret_hdr_search()
     ret["feed"]["id"] = "tag:random:sequences:"
-    ret["feed"]["title"] = "Случайние серии"
+    ret["feed"]["title"] = "Случайные серии"
 
     REQ = '''
         SELECT id, name
@@ -352,9 +365,38 @@ def get_random_seqs():
     ''' % str(pagesize)
     conn = get_db_connection()
     rows = conn.execute(REQ).fetchall()
+    seq_ids = []
+    data = []
     for row in rows:
         seq_name = row["name"]
         seq_id = row["id"]
+        seq_ids.append(seq_id)
+        data.append(
+            {
+                "seq_id": seq_id,
+                "seq_name": seq_name
+            }
+        )
+    seq_cnts = get_seqs_cnt(seq_ids)
+    for d in data:
+        seq_id = d["seq_id"]
+        seq_name = d["seq_name"]
+        seq_cnt = seq_cnts[seq_id]
+        # ret["feed"]["entry"].append(
+            # {
+                # "updated": dtiso,
+                # "id": "tag:sequence:" + urllib.parse.quote(seq_name, encoding='utf-8'),
+                # "title": seq_name,
+                # "content": {
+                    # "@type": "text",
+                    # "#text": "книги на '" + seq_name + "'"
+                # },
+                # "link": {
+                    # "@href": approot + "/opds/sequencebooks/" + seq_id,
+                    # "@type": "application/atom+xml;profile=opds-catalog"
+                # }
+            # }
+        # )
         ret["feed"]["entry"].append(
             {
                 "updated": dtiso,
@@ -362,13 +404,13 @@ def get_random_seqs():
                 "title": seq_name,
                 "content": {
                     "@type": "text",
-                    "#text": "книги на '" + seq_name + "'"
+                    "#text": str(seq_cnt) + " книг(и) в серии"
                 },
                 "link": {
                     "@href": approot + "/opds/sequencebooks/" + seq_id,
                     "@type": "application/atom+xml;profile=opds-catalog"
                 }
-            }
+            },
         )
     conn.close()
     return ret

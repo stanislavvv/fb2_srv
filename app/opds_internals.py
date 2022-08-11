@@ -79,6 +79,22 @@ def get_seq_names(seq_ids):
     return ret
 
 
+# ret [seq_id: books_count, ]
+def get_seqs_cnt(seq_ids):
+    ret = {}
+    REQ = """
+    SELECT seq_id, count(book_id) as cnt
+    FROM seq_books
+    WHERE seq_id in ('%s')
+    GROUP BY seq_id
+    """ % "','".join(seq_ids)
+    conn = get_db_connection()
+    rows = conn.execute(REQ).fetchall()
+    for row in rows:
+        ret[row[0]] = row[1]
+    return ret
+
+
 # return [ { "name": seq_name, "id": seq_id, "count": books_count }, ...]
 def get_auth_seqs(auth_id=None, zip_file=None):
     ret = []
