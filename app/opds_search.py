@@ -112,6 +112,7 @@ def get_search_authors(s_term):
     ret["feed"]["updated"] = dtiso
     ret["feed"]["id"] = "tag:search:authors:%s" % s_term
     ret["feed"]["title"] = "Поиск в именах авторов по '%s'" % s_term
+
     s_term = param_to_search("U_UPPER(name)", s_term)
 
     REQ = '''
@@ -270,6 +271,13 @@ def get_random_books():
     ret["feed"]["id"] = "tag:search:books:random:"
     ret["feed"]["title"] = "Поиск случайных книг"
     ret["feed"]["updated"] = dtiso
+    ret["feed"]["link"].append(
+        {
+            "@href": approot + "/opds/random-books",
+            "@rel": "self",
+            "@type": "application/atom+xml;profile=opds-catalog"
+        }
+    )
 
     book_ids = []
     REQ = """
@@ -357,6 +365,13 @@ def get_random_seqs():
     ret = ret_hdr_search()
     ret["feed"]["id"] = "tag:random:sequences:"
     ret["feed"]["title"] = "Случайные серии"
+    ret["feed"]["link"].append(
+        {
+            "@href": approot + "/opds/random-sequences",
+            "@rel": "self",
+            "@type": "application/atom+xml;profile=opds-catalog"
+        }
+    )
 
     REQ = '''
         SELECT id, name

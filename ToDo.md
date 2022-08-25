@@ -6,7 +6,6 @@
 
 # ToDo:
 
-  * self link in random
   * up speed in /author/.../sequenceless request
   * create/fill new database in new filename and move it in new command './managedb.py commit'
   * refactor it! some functions not in right place, some need to be deleted, may be split some submodules.
