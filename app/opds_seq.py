@@ -2,6 +2,7 @@
 
 import urllib.parse
 from flask import current_app
+# import json
 
 from .opds_internals import get_db_connection, get_dtiso, any2alphabet, get_genres_names, sizeof_fmt
 from .opds_internals import get_book_authors, get_book_seqs, get_seq_books, get_books_info
@@ -125,6 +126,7 @@ def main_opds():
             ]
         }
     }
+    # print(json.dumps(ret, ensure_ascii=False))
     return ret
 
 
